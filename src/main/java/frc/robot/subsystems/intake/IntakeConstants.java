@@ -9,7 +9,6 @@ public final class IntakeConstants
     public static final InvertedValue ROLLER_INVERTED = InvertedValue.Clockwise_Positive;
     public static final double ROLLER_MOI = 0.001;
     public static final double ROLLER_GEAR_RATIO = 1.0;
-    public static final double ROLLER_STALL_VELOCITY = 100 / 60.0;
     public static final double ROLLER_RPS = 5000 / 60.0;
     public static final double ROLLER_RPS_REVERSED = -4500 / 60.0;
     public static final double ROLLER_RPS_SLOW = 4000 / 60.0;
@@ -24,13 +23,8 @@ public final class IntakeConstants
     public static final int PIVOT_STATOR_LIMIT = 80;
     public static final int PIVOT_SUPPLY_LIMIT = 40;
     public static final InvertedValue PIVOT_INVERTED = InvertedValue.CounterClockwise_Positive;
-    public static final double PIVOT_ENCODER_OFFSET = 0.0; // adjust
+    public static final double PIVOT_ENCODER_OFFSET = 0.0;
     public static final double PIVOT_GEAR_RATIO = 75;
-    public static final double PIVOT_CHAIN_GEAR_RATIO = 3;
-    public static final double PIVOT_ROT_TO_DEG = 360 / PIVOT_GEAR_RATIO;
-    public static final double PIVOT_ROT_TO_DEG_ABS = 360 / PIVOT_CHAIN_GEAR_RATIO;
-    public static final double PIVOT_RPM_TO_DEG_PER_SEC = (360.0/60.0) / PIVOT_GEAR_RATIO;
-    public static final double PIVOT_STALL_VELOCITY = 0.5;
     public static final double PIVOT_P = 0.01;
     public static final double PIVOT_I = 0;
     public static final double PIVOT_D = 0;
@@ -38,11 +32,6 @@ public final class IntakeConstants
     public static final double PIVOT_FF_V = 1.0 / 5676.0;
     public static final double PIVOT_FF_COS = 0.25; // gravity feedforward
     public static final double PIVOT_FF_COS_RATIO = PIVOT_GEAR_RATIO / 360;
-
-    // MAXMotion
-    public static final double PIVOT_CRUISE_VELOCITY = 30; // degrees per sec
-    public static final double PIVOT_MAX_ACCEL = 10; // degrees per sec^2 (i think)
-    public static final double ALLOWED_PROFILE_ERROR = 1;
     
     // setpoints, in degrees
     public static final double PIVOT_RAISED_ANGLE = 0;

@@ -12,7 +12,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
 import frc.robot.Constants.CANConstants;
 
 public class FeederIOTalonFX implements FeederIO {
@@ -33,8 +32,8 @@ public class FeederIOTalonFX implements FeederIO {
     private final StatusSignal<AngularVelocity> kickerVelocity;
 
     public FeederIOTalonFX() {
-        spindexer = new TalonFX(CANConstants.spindexer, Constants.SUPERSTRUCTURE_CAN_BUS);
-        kicker = new TalonFX(CANConstants.kicker, Constants.SUPERSTRUCTURE_CAN_BUS);
+        spindexer = new TalonFX(CANConstants.spindexer, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+        kicker = new TalonFX(CANConstants.kicker, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
         spindexerPid = new VelocityVoltage(0);
         kickerPid = new VelocityVoltage(0);

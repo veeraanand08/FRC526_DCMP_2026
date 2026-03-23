@@ -32,10 +32,9 @@ public final class Constants {
     REPLAY
   }
 
-  public static final CANBus DRIVEBASE_CAN_BUS = new CANBus("Drivebase");
-  public static final CANBus SUPERSTRUCTURE_CAN_BUS = new CANBus("Superstructure");
-
   public static final class CANConstants {
+    public static final CANBus SUPERSTRUCTURE_CAN_BUS = new CANBus("Superstructure");
+
     public static final int spindexer = 8;
     public static final int kicker = 1;
 

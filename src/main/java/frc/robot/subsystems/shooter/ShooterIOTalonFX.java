@@ -5,17 +5,15 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.controls.Follower;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
 import frc.robot.Constants.CANConstants;
 
 public class ShooterIOTalonFX implements ShooterIO {
@@ -40,21 +38,21 @@ public class ShooterIOTalonFX implements ShooterIO {
 
 
     public ShooterIOTalonFX() {
-        topLeft = new TalonFX(CANConstants.topLeft, Constants.SUPERSTRUCTURE_CAN_BUS);
-        bottomLeft = new TalonFX(CANConstants.bottomLeft, Constants.SUPERSTRUCTURE_CAN_BUS);
+        topLeft = new TalonFX(CANConstants.topLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+        bottomLeft = new TalonFX(CANConstants.bottomLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
-        topRight = new TalonFX(CANConstants.topRight, Constants.SUPERSTRUCTURE_CAN_BUS);
-        bottomRight = new TalonFX(CANConstants.bottomRight, Constants.SUPERSTRUCTURE_CAN_BUS);
+        topRight = new TalonFX(CANConstants.topRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+        bottomRight = new TalonFX(CANConstants.bottomRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
         
-        hood = new TalonFX(CANConstants.hood, Constants.SUPERSTRUCTURE_CAN_BUS);
+        hood = new TalonFX(CANConstants.hood, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
         shooterPid = new VelocityVoltage(0);
-        hoodPid = new PositionVoltage(0);
+        hoodPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
 
         TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
         TalonFXConfiguration hoodConfig = new TalonFXConfiguration();
 
-        shooterConfig.MotorOutput.Inverted = ShooterConstants.SHOOTER_TOP_RIGHT_INVERTED;
+        shooterConfig.MotorOutput.Inverted = ShooterConstants.SHOOTER_LEFT_INVERTED;
         shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         shooterConfig.CurrentLimits.StatorCurrentLimit = ShooterConstants.SHOOTER_STATOR_LIMIT;
         shooterConfig.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SHOOTER_SUPPLY_LIMIT;
@@ -72,8 +70,6 @@ public class ShooterIOTalonFX implements ShooterIO {
         hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         hoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        hoodConfig.Feedback.SensorToMechanismRatio = 360.0;
-
         hoodConfig.Slot0.kP = ShooterConstants.HOOD_P;
         hoodConfig.Slot0.kI = ShooterConstants.HOOD_I;
         hoodConfig.Slot0.kD = ShooterConstants.HOOD_D;
@@ -88,9 +84,9 @@ public class ShooterIOTalonFX implements ShooterIO {
         topRight.setControl(new Follower(topLeft.getDeviceID(), ShooterConstants.TOP_RIGHT_ALIGNMENT_VALUE));
         bottomRight.setControl(new Follower(topLeft.getDeviceID(), ShooterConstants.BOTTOM_RIGHT_ALIGNMENT_VALUE));
 
-        shooterVoltage = topRight.getMotorVoltage();
-        shooterCurrent =  topRight.getStatorCurrent();
-        shooterVelocity = topRight.getVelocity();
+        shooterVoltage = topLeft.getMotorVoltage();
+        shooterCurrent =  topLeft.getStatorCurrent();
+        shooterVelocity = topLeft.getVelocity();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0,
@@ -107,9 +103,6 @@ public class ShooterIOTalonFX implements ShooterIO {
             hoodVoltage,
             hoodCurrent,
             hoodAngle);
-
-
-        
     }
 
     @Override
@@ -129,8 +122,7 @@ public class ShooterIOTalonFX implements ShooterIO {
         inputs.hoodConnected = hoodStatus.isOK();
         inputs.hoodAppliedVolts = hoodVoltage.getValueAsDouble();
         inputs.hoodCurrentAmps = hoodCurrent.getValueAsDouble();
-        inputs.hoodAngle = hoodAngle.getValueAsDouble();
-        
+        inputs.hoodAngleDeg = Units.rotationsToDegrees(hoodAngle.getValueAsDouble());
     }
 
     @Override
@@ -141,6 +133,11 @@ public class ShooterIOTalonFX implements ShooterIO {
     @Override
     public void setAngle(double angle){
         hood.setControl(hoodPid.withPosition(angle));
+    }
+
+    @Override
+    public void dropHood() {
+        hood.stopMotor();
     }
 
     @Override

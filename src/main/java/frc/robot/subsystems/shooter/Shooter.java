@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.RobotUtil;
-import frc.robot.commands.AutoAlign;
+import frc.robot.commands.autoalign.AutoAlign;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
@@ -50,9 +50,9 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shoot() {
-    io.setRPS(ShooterConstants.SHOOTER_RPS);
     desiredAngle = ShooterConstants.DISTANCE_TO_ANGLE.get(distanceToTarget);
     io.setAngle(desiredAngle);
+    io.setRPS(ShooterConstants.SHOOTER_RPS);
     Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
   }
 
@@ -62,6 +62,7 @@ public class Shooter extends SubsystemBase {
 
   public void stop() {
     io.stop();
+    io.dropHood();
     desiredAngle = 0.0;
     Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
   }

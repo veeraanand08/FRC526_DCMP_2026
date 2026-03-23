@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.RobotUtil;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -105,31 +104,17 @@ public class Intake extends SubsystemBase {
 
   /**
    * Set the pivot motor's setpoint to a given angle.
-   * @param angle Angle (in degrees) to rotate.
+   * @param deg Angle (in degrees) to rotate.
    */
-  public void setPivotAngle(double angle) {
-    io.setPivotDeg(angle);
-    Logger.recordOutput("Intake/Pivot Setpoint", angle);
+  public void setPivotAngle(double deg) {
+    io.setPivotDeg(deg);
+    Logger.recordOutput("Intake/Pivot Setpoint", deg);
   }
 
   /* Set the pivot and roller motor speeds to 0. */
   public void stop() {
     setRoller(false);
     io.stopPivot();
-  }
-
-  public void setPivotBrake(boolean brake) {
-    io.setPivotBrake(brake);
-  }
-
-  public boolean isPivotStalled() {
-    return inputs.pivotCurrentAmps > IntakeConstants.PIVOT_STATOR_LIMIT &&
-            Math.abs(inputs.pivotVelocityDegPerSec) < IntakeConstants.PIVOT_STALL_VELOCITY;
-  }
-
-  public boolean isRollerStalled() {
-    return inputs.rollerCurrentAmps > IntakeConstants.ROLLER_STATOR_LIMIT &&
-            Math.abs(inputs.rollerVelocityRPS) < IntakeConstants.ROLLER_STALL_VELOCITY;
   }
 
   /**
@@ -139,7 +124,7 @@ public class Intake extends SubsystemBase {
    */
   public Command intakeCommand() {
     // Inline construction of command goes here.
-    return startRun(
+    return startEnd(
             () -> {
               if (pivotState == PivotState.LOWERING) {
                 setRoller(true);
@@ -149,15 +134,7 @@ public class Intake extends SubsystemBase {
                 setPivotState(PivotState.LOWERING);
               }
             },
-            () -> {
-//              if (isRollerStalled()) {
-//                RobotUtil.setOperatorRumble(0.7, 0.7);
-//              }
-            })
-            .finallyDo(() -> {
-              RobotUtil.setOperatorRumble(0.0, 0.0);
-              setRoller(false);
-            });
+            () -> setRoller(false));
   }
 
   /**
@@ -169,27 +146,33 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
-        () -> {
-          if (pivotState == PivotState.LOWERING) {
-            toggleRoller();
-          }
-          else {
-            setRoller(true);
-            setPivotState(PivotState.LOWERING);
-          }
-        });
+            () -> {
+              if (pivotState == PivotState.LOWERING) {
+                toggleRoller();
+              }
+              else {
+                setRoller(true);
+                setPivotState(PivotState.LOWERING);
+              }
+            });
   }
-  
+
   /**
    * Reverse the intake roller while held
    *
    * @return a command to reverse the intake
    */
-  public Command reverseIntakeCommand() {
+  public Command reverseIntakeCommand(Command feederReverse) {
     // Inline construction of command goes here.
     return startEnd(
-      () -> setRollerReversed(true), 
-      () -> setRollerReversed(false)
+            () -> {
+              setRollerReversed(true);
+              feederReverse.initialize();
+            },
+            () -> {
+              setRollerReversed(false);
+              feederReverse.end(false);
+            }
     );
   }
 
@@ -220,10 +203,10 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
-        () -> {
-          setRoller(false);
-          setPivotState(PivotState.RAISING);
-        });
+            () -> {
+              setRoller(false);
+              setPivotState(PivotState.RAISING);
+            });
   }
 
   @Override

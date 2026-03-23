@@ -132,7 +132,6 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    SignalLogger.enableAutoLogging(false);
   }
 
   /** This function is called periodically during operator control. */
@@ -147,7 +146,6 @@ public class Robot extends LoggedRobot {
     //m_robotContainer.intakeSubsystem.setPivotBrake(true);
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-    SignalLogger.enableAutoLogging(true);
   }
 
   /** This function is called periodically during test mode. */
