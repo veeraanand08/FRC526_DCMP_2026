@@ -84,20 +84,20 @@ public class Intake extends SubsystemBase {
   }
 
   public void setRoller(boolean enabled) {
-    if (enabled) io.setRollerRPM(IntakeConstants.ROLLER_RPM);
+    if (enabled) io.setRollerRPS(IntakeConstants.ROLLER_RPS);
     else io.stopRoller();
     rollerEnabled = enabled;
     Logger.recordOutput("Intake/Intake Running", rollerEnabled);
   }
 
   public void slowRoller() {
-    io.setRollerRPM(IntakeConstants.ROLLER_RPM_SLOW);
+    io.setRollerRPS(IntakeConstants.ROLLER_RPS_SLOW);
     rollerEnabled = false;
     Logger.recordOutput("Intake/Intake Running", false);
   }
 
   public void setRollerReversed(boolean enabled) {
-    if (enabled) io.setRollerRPM(IntakeConstants.ROLLER_RPM_REVERSED);
+    if (enabled) io.setRollerRPS(IntakeConstants.ROLLER_RPS_REVERSED);
     else io.stopRoller();
     rollerEnabled = false;
     Logger.recordOutput("Intake/Intake Running", false);
@@ -123,13 +123,13 @@ public class Intake extends SubsystemBase {
   }
 
   public boolean isPivotStalled() {
-    return inputs.pivotCurrentAmps > IntakeConstants.PIVOT_CURRENT_LIMIT &&
+    return inputs.pivotCurrentAmps > IntakeConstants.PIVOT_STATOR_LIMIT &&
             Math.abs(inputs.pivotVelocityDegPerSec) < IntakeConstants.PIVOT_STALL_VELOCITY;
   }
 
   public boolean isRollerStalled() {
-    return inputs.rollerCurrentAmps > IntakeConstants.ROLLER_CURRENT_LIMIT &&
-            Math.abs(inputs.rollerCurrentRPM) < IntakeConstants.ROLLER_STALL_VELOCITY;
+    return inputs.rollerCurrentAmps > IntakeConstants.ROLLER_STATOR_LIMIT &&
+            Math.abs(inputs.rollerVelocityRPS) < IntakeConstants.ROLLER_STALL_VELOCITY;
   }
 
   /**

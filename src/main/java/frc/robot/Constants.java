@@ -43,11 +43,11 @@ public final class Constants {
     public static final int encoder = 9;
     public static final int pivot = 7;
 
-    public static final int leftLeader = 2;
-    public static final int rightLeader = 4;
+    public static final int bottomLeft = 2;
+    public static final int bottomRight = 4;
 
-    public static final int leftFollower = 3;
-    public static final int rightFollower = 5;
+    public static final int topLeft = 3;
+    public static final int topRight = 5;
 
     public static final int hood = 6;
   }

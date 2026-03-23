@@ -40,11 +40,11 @@ public class ShooterIOTalonFX implements ShooterIO {
 
 
     public ShooterIOTalonFX() {
-        topLeft = new TalonFX(CANConstants.leftLeader, Constants.SUPERSTRUCTURE_CAN_BUS);
-        bottomLeft = new TalonFX(CANConstants.leftFollower, Constants.SUPERSTRUCTURE_CAN_BUS);
+        topLeft = new TalonFX(CANConstants.topLeft, Constants.SUPERSTRUCTURE_CAN_BUS);
+        bottomLeft = new TalonFX(CANConstants.bottomLeft, Constants.SUPERSTRUCTURE_CAN_BUS);
 
-        topRight = new TalonFX(CANConstants.rightLeader, Constants.SUPERSTRUCTURE_CAN_BUS);
-        bottomRight = new TalonFX(CANConstants.rightFollower, Constants.SUPERSTRUCTURE_CAN_BUS);
+        topRight = new TalonFX(CANConstants.topRight, Constants.SUPERSTRUCTURE_CAN_BUS);
+        bottomRight = new TalonFX(CANConstants.bottomRight, Constants.SUPERSTRUCTURE_CAN_BUS);
         
         hood = new TalonFX(CANConstants.hood, Constants.SUPERSTRUCTURE_CAN_BUS);
 

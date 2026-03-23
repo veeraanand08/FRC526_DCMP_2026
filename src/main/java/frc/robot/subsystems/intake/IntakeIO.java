@@ -16,7 +16,7 @@ public interface IntakeIO {
         public boolean rollerConnected = false;
         public double rollerAppliedVolts = 0.0;
         public double rollerCurrentAmps = 0.0;
-        public double rollerCurrentRPM = 0.0;
+        public double rollerVelocityRPS = 0.0;
     }
 
     public default void updateInputs(IntakeIOInputs inputs) {}
@@ -24,18 +24,13 @@ public interface IntakeIO {
     /** Set the motor's idle mode */
     public default void setPivotBrake(boolean brake) {}
 
-    /** Sets the motor's voltage given a percentage input from -1.0 to 1.0 */
-    public default void setPivot(double speed) {}
-
-    public default void setRoller(double speed) {}
-
     /** Sets the intake pivot's angle given a degree input */
     public default void setPivotSetpoint(double deg) {} // Standard PID
 
     public default void setPivotDeg(double deg) {} // Profiled PID
 
     /** Sets the motor's speed given an RPM input */
-    public default void setRollerRPM(double rpm) {}
+    public default void setRollerRPS(double rpS) {}
 
     /** Stop the motor */
     public default void stopPivot() {}

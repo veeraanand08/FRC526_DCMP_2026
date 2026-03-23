@@ -1,115 +1,151 @@
-// package frc.robot.subsystems.intake;
+package frc.robot.subsystems.intake;
 
-// public class IntakeIOTalonFX implements IntakeIO {
-//     private final SparkMax pivot;
-//     private final SparkMax roller;
-//     private final SparkMaxConfig pivotConfig;
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
-//     private final RelativeEncoder pivotEncoder;
-// //    private final AbsoluteEncoder pivotAbsoluteEncoder;
-//     private final RelativeEncoder rollerEncoder;
-//     private final SparkClosedLoopController pivotPid;
-//     private final SparkClosedLoopController rollerPid;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
+import frc.robot.Constants.CANConstants;
 
-//     public IntakeIOTalonFX() {
-//         pivot = new SparkMax(IntakeConstants.PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
-//         roller = new SparkMax(IntakeConstants.ROLLER_MOTOR, SparkLowLevel.MotorType.kBrushless);
-//         pivotConfig = new SparkMaxConfig();
-//         SparkMaxConfig rollerConfig = new SparkMaxConfig();
+import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
-//         pivotConfig.inverted(IntakeConstants.PIVOT_REVERSED);
-//         pivotConfig.idleMode(SparkBaseConfig.IdleMode.kCoast);
-//         pivotConfig.smartCurrentLimit(IntakeConstants.PIVOT_CURRENT_LIMIT);
-//         pivotConfig.voltageCompensation(12.0);
-//         pivotConfig.encoder
-//                 .positionConversionFactor(IntakeConstants.PIVOT_ROT_TO_DEG)
-//                 .velocityConversionFactor(IntakeConstants.PIVOT_RPM_TO_DEG_PER_SEC);
-//         pivotConfig.absoluteEncoder
-//                 .positionConversionFactor(IntakeConstants.PIVOT_ROT_TO_DEG_ABS)
-//                 .zeroOffset(IntakeConstants.PIVOT_ENCODER_OFFSET);
-//         pivotConfig.closedLoop
-//                 .pid(IntakeConstants.PIVOT_P, IntakeConstants.PIVOT_I, IntakeConstants.PIVOT_D);
-// //                .feedForward.kS(IntakeConstants.PIVOT_FF_S)
-// //                            .kV(IntakeConstants.PIVOT_FF_V);
-// //                            .kCos(IntakeConstants.PIVOT_FF_COS)
-// //                            .kCosRatio(IntakeConstants.PIVOT_FF_COS_RATIO);
-//         pivotConfig.closedLoop.maxMotion
-//                 .cruiseVelocity(IntakeConstants.PIVOT_CRUISE_VELOCITY)
-//                 .maxAcceleration(IntakeConstants.PIVOT_MAX_ACCEL)
-//                 .allowedProfileError(IntakeConstants.ALLOWED_PROFILE_ERROR);
+public class IntakeIOTalonFX implements IntakeIO {
+    private final TalonFX pivot;
+    private final TalonFX roller;
 
-//         rollerConfig.inverted(IntakeConstants.ROLLER_REVERSED);
-//         rollerConfig.idleMode(SparkBaseConfig.IdleMode.kCoast);
-//         rollerConfig.smartCurrentLimit(IntakeConstants.ROLLER_CURRENT_LIMIT);
-//         rollerConfig.voltageCompensation(12.0);
-//         rollerConfig.closedLoop
-//                 .pid(IntakeConstants.ROLLER_P, IntakeConstants.ROLLER_I, IntakeConstants.ROLLER_D)
-//                 .feedForward.kV(IntakeConstants.ROLLER_FF);
+    //private final RelativeEncoder pivotEncoder; figure out what encoder team uses and add that in
 
-//         pivot.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-//         roller.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-//         pivotEncoder = pivot.getEncoder();
-// //        pivotAbsoluteEncoder = pivot.getAbsoluteEncoder();
-//         rollerEncoder = roller.getEncoder();
-//         pivotPid = pivot.getClosedLoopController();
-//         rollerPid = roller.getClosedLoopController();
+    private final PositionVoltage pivotPid;
+    private final VelocityVoltage rollerPid;
 
-//         pivotEncoder.setPosition(0);
-//     }
+    private final StatusSignal<Voltage> pivotVoltage;
+    private final StatusSignal<Current> pivotCurrent;
+    private final StatusSignal<Angle> pivotAngle;
+    private final StatusSignal<AngularVelocity> pivotVelocity;
 
-//     @Override
-//     public void updateInputs(IntakeIOInputs inputs) {
-//         inputs.pivotConnected = !pivot.hasActiveFault();
-//         inputs.pivotAppliedVolts = pivot.getBusVoltage() * pivot.getAppliedOutput();
-//         inputs.pivotCurrentAmps = pivot.getOutputCurrent();
-//         inputs.pivotPositionDeg = pivotEncoder.getPosition();
-//         inputs.pivotVelocityDegPerSec = pivotEncoder.getVelocity();
 
-//         inputs.rollerConnected = !roller.hasActiveFault();
-//         inputs.rollerAppliedVolts =  roller.getBusVoltage() * roller.getAppliedOutput();
-//         inputs.rollerCurrentAmps = roller.getOutputCurrent();
-//         inputs.rollerCurrentRPM = rollerEncoder.getVelocity();
-//     }
+    private final StatusSignal<Voltage> rollerVoltage;
+    private final StatusSignal<Current> rollerCurrent;
+    private final StatusSignal<AngularVelocity> rollerVelocity;
 
-//     @Override
-//     public void setPivotBrake(boolean brake) {
-//         pivotConfig.idleMode(brake ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
-//         pivot.configure(pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-//     }
+    
+    public IntakeIOTalonFX() {
+        roller = new TalonFX(CANConstants.roller, Constants.SUPERSTRUCTURE_CAN_BUS);
+        pivot = new TalonFX(CANConstants.pivot, Constants.SUPERSTRUCTURE_CAN_BUS);
 
-//     @Override
-//     public void setPivot(double speed) {
-//         pivot.set(speed);
-//     }
+        rollerPid = new VelocityVoltage(0);
+        pivotPid = new PositionVoltage(0);
 
-//     @Override
-//     public void setRoller(double speed) {
-//         roller.set(speed);
-//     }
+        TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
+        TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
 
-//     @Override
-//     public void setPivotSetpoint(double deg) {
-//         pivotPid.setSetpoint(deg, SparkBase.ControlType.kPosition);
-//     }
+        rollerConfig.MotorOutput.Inverted = IntakeConstants.ROLLER_INVERTED;
+        rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        rollerConfig.CurrentLimits.StatorCurrentLimit = IntakeConstants.ROLLER_STATOR_LIMIT;
+        rollerConfig.CurrentLimits.SupplyCurrentLimit = IntakeConstants.ROLLER_SUPPLY_LIMIT;
+        rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        rollerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-//     @Override
-//     public void setPivotDeg(double deg) {
-//         pivotPid.setSetpoint(deg, SparkBase.ControlType.kPosition);
-//     }
+        rollerConfig.Slot0.kP = IntakeConstants.ROLLER_P;
+        rollerConfig.Slot0.kI = IntakeConstants.ROLLER_I;
+        rollerConfig.Slot0.kD = IntakeConstants.ROLLER_D;
 
-//     @Override
-//     public void setRollerRPM(double rpm) {
-//         rollerPid.setSetpoint(rpm, SparkBase.ControlType.kVelocity);
-//     }
+        pivotConfig.MotorOutput.Inverted = IntakeConstants.PIVOT_INVERTED;
+        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        pivotConfig.CurrentLimits.StatorCurrentLimit = IntakeConstants.PIVOT_STATOR_LIMIT;
+        pivotConfig.CurrentLimits.SupplyCurrentLimit = IntakeConstants.PIVOT_SUPPLY_LIMIT;
+        pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-//     @Override
-//     public void stopPivot() {
-//         pivot.stopMotor();
-//     }
+        pivotConfig.Feedback.SensorToMechanismRatio = 360.0; //change this later with the gear ratio probably
 
-//     @Override
-//     public void stopRoller() {
-//         roller.stopMotor();
-//     }
-// }
+        pivotConfig.Slot0.kP = IntakeConstants.PIVOT_P;
+        pivotConfig.Slot0.kI = IntakeConstants.PIVOT_I;
+        pivotConfig.Slot0.kD = IntakeConstants.PIVOT_D;
+
+        tryUntilOk(5, () -> pivot.getConfigurator().apply(pivotConfig));
+        tryUntilOk(5, () -> roller.getConfigurator().apply(rollerConfig));
+
+        rollerVoltage = roller.getMotorVoltage();
+        rollerCurrent =  roller.getStatorCurrent();
+        rollerVelocity = roller.getVelocity();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0,
+            rollerVoltage,
+            rollerCurrent,
+            rollerVelocity);
+
+        pivotVoltage = pivot.getMotorVoltage();
+        pivotCurrent =  pivot.getStatorCurrent();
+        pivotAngle = pivot.getPosition();
+        pivotVelocity = pivot.getVelocity();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0,
+            pivotVoltage,
+            pivotCurrent,
+            pivotAngle,
+            pivotVelocity);
+    }
+
+    @Override
+    public void updateInputs(IntakeIOInputs inputs) {
+        var pivotStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
+        var rollerStatus = BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle);
+
+
+        inputs.pivotConnected = pivotStatus.isOK();
+        inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
+        inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
+        inputs.pivotPositionDeg = pivotAngle.getValueAsDouble();
+        inputs.pivotVelocityDegPerSec = pivotVelocity.getValueAsDouble();
+
+        inputs.rollerConnected = rollerStatus.isOK();
+        inputs.rollerAppliedVolts =  rollerVoltage.getValueAsDouble();
+        inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
+        inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
+    }
+
+    @Override
+    public void setPivotBrake(boolean brake) {
+        MotorOutputConfigs config = new MotorOutputConfigs();
+        config.NeutralMode = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+        pivot.getConfigurator().apply(config);
+    }
+
+    @Override
+    public void setPivotSetpoint(double deg) {
+        pivot.setControl(pivotPid.withPosition(deg));
+    }
+
+    @Override
+    public void setPivotDeg(double deg) { //profiled pid not done
+        
+    }
+
+    @Override
+    public void setRollerRPS(double rps) {
+        roller.setControl(rollerPid.withVelocity(rps));
+    }
+
+    @Override
+    public void stopPivot() {
+        pivot.stopMotor();
+    }
+
+    @Override
+    public void stopRoller() {
+        roller.stopMotor();
+    }
+}
