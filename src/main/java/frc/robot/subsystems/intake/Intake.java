@@ -162,17 +162,11 @@ public class Intake extends SubsystemBase {
    *
    * @return a command to reverse the intake
    */
-  public Command reverseIntakeCommand(Command feederReverse) {
+  public Command reverseIntakeCommand() {
     // Inline construction of command goes here.
     return startEnd(
-            () -> {
-              setRollerReversed(true);
-              feederReverse.initialize();
-            },
-            () -> {
-              setRollerReversed(false);
-              feederReverse.end(false);
-            }
+            () -> setRollerReversed(true),
+            () -> setRollerReversed(false)
     );
   }
 

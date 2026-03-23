@@ -1,4 +1,4 @@
-package frc.robot.commands.autoalign;
+package frc.robot.util.autoalign;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 

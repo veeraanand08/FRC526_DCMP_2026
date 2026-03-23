@@ -2,19 +2,15 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.autoalign;
+package frc.robot.util.autoalign;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.RobotUtil;
 
-public class AutoAlign extends Command {
+public class AutoAlign {
   public enum Target {
     HUB,
     BUMP,
@@ -27,51 +23,18 @@ public class AutoAlign extends Command {
     }
   }
 
-  private final Drive swerveSubsystem;
-  private final CommandXboxController driverController;
-  private final Target target;
-  private Rotation2d angleToTarget;
   // used in shooter subsystem to determine if bot is ready to shoot
   private static Target currentTarget = Target.NONE;
   private static Translation2d virtualTarget = Translation2d.kZero;
 
-  /**
-   * Creates a new AutoAlign.
-   *
-   * @param swerveSubsystem The swerve subsystem used by this command.
-   * @param driverController The CommandXboxController object of the driver's controller.
-   * @param target The target that this command aligns to.
-   */
-  public AutoAlign(Drive swerveSubsystem,
-    CommandXboxController driverController, Target target)
+  public static Rotation2d getAngleToTarget(Target target,
+                                            Translation2d robotTranslation, ChassisSpeeds robotSpeeds)
   {
-    this.swerveSubsystem = swerveSubsystem;
-    this.driverController = driverController;
-    this.target = target;
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(swerveSubsystem);
-  }
-
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    if (target != Target.AUTO) currentTarget = target;
-    DriveCommands.joystickDriveAtAngle(
-            swerveSubsystem,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> angleToTarget);
-  }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    Translation2d robotTranslation = swerveSubsystem.getPose().getTranslation();
     Translation2d targetTranslation = getTargetTranslation(target, robotTranslation);
-    virtualTarget = getVirtualTarget(swerveSubsystem.getChassisSpeeds(), robotTranslation, targetTranslation);
+    virtualTarget = getVirtualTarget(robotSpeeds, robotTranslation, targetTranslation);
 
     Translation2d difference = virtualTarget.minus(robotTranslation);
-    angleToTarget = new Rotation2d(difference.getX(), difference.getY());
+    return new Rotation2d(difference.getX(), difference.getY());
   }
 
   public static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance){
@@ -84,7 +47,6 @@ public class AutoAlign extends Command {
 
     return Target.BUMP;
   }
-
 
   public static Translation2d getTargetTranslation(Target target, Translation2d robotTranslation) {
     boolean isRedAlliance = RobotUtil.isRedAlliance();
@@ -143,21 +105,12 @@ public class AutoAlign extends Command {
     return virtualTarget;
   }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-    currentTarget = Target.NONE;
-  }
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    // cancel command if pose estimator may not be accurate
-    return false;
-  }
-
   public static Target getCurrentTarget() {
     return currentTarget;
+  }
+
+  public static void disable() {
+    currentTarget = Target.NONE;
   }
 
   public static boolean isActive() {

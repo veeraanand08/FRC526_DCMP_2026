@@ -1,12 +1,11 @@
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.RobotUtil;
-import frc.robot.commands.autoalign.AutoAlign;
+import frc.robot.util.autoalign.AutoAlign;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;

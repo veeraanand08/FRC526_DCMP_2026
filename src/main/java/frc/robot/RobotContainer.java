@@ -18,6 +18,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.util.RobotUtil;
+import frc.robot.util.autoalign.AutoAlign;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -104,23 +105,34 @@ public class RobotContainer {
     RobotUtil.setOperatorController(operatorController);
 
     // Default command, normal field-relative drive
-    drive.setDefaultCommand(
+    Command defaultDriveCommand =
             DriveCommands.joystickDrive(
                     drive,
                     () -> -driverController.getLeftY(),
                     () -> -driverController.getLeftX(),
-                    () -> -driverController.getRightX()));
-
-    // Switch to X pattern
-    driverController.leftBumper().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
+                    () -> -driverController.getRightX());
     // Reset gyro to 0°
-    driverController.povLeft().onTrue(
-            Commands.runOnce(
-                    () -> drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                            drive)
-                    .ignoringDisable(true));
+    Command zeroGyro = Commands.runOnce(() ->
+            drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+            drive).ignoringDisable(true);
+    Command autoAlign =
+            DriveCommands.joystickDriveAtAngle(
+                    drive,
+                    () -> -driverController.getLeftY(),
+                    () -> -driverController.getLeftX(),
+                    () -> AutoAlign.getAngleToTarget(
+                            AutoAlign.Target.AUTO,
+                            drive.getPose().getTranslation(),
+                            drive.getChassisSpeeds()
+                    )
+            ).finallyDo(AutoAlign::disable);
+
+    // Command dumpCommand = Commands.parallel(reverseIntake, reverseIndexer);
+
+    drive.setDefaultCommand(defaultDriveCommand);
+
+    driverController.leftBumper().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
+    driverController.povLeft().onTrue(zeroGyro);
   }
 
   private void configureAutoCommands() {
