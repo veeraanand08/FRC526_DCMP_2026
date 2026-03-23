@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -15,7 +17,6 @@ import edu.wpi.first.wpilibj.RobotBase;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
@@ -28,5 +29,25 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static final CANBus DRIVEBASE_CAN_BUS = new CANBus("Drivebase");
+  public static final CANBus SUPERSTRUCTURE_CAN_BUS = new CANBus("Superstructure");
+
+  public static final class CANConstants {
+    public static final int spindexer = 8;
+    public static final int kicker = 1;
+
+    public static final int roller = 10;
+    public static final int encoder = 9;
+    public static final int pivot = 7;
+
+    public static final int leftLeader = 2;
+    public static final int rightLeader = 4;
+
+    public static final int leftFollower = 3;
+    public static final int rightFollower = 5;
+
+    public static final int hood = 6;
   }
 }
