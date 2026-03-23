@@ -30,6 +30,7 @@ public class AutoAlign extends Command {
   private final Drive swerveSubsystem;
   private final CommandXboxController driverController;
   private final Target target;
+  private Rotation2d angleToTarget;
   // used in shooter subsystem to determine if bot is ready to shoot
   private static Target currentTarget = Target.NONE;
   private static Translation2d virtualTarget = Translation2d.kZero;
@@ -55,6 +56,11 @@ public class AutoAlign extends Command {
   @Override
   public void initialize() {
     if (target != Target.AUTO) currentTarget = target;
+    DriveCommands.joystickDriveAtAngle(
+            swerveSubsystem,
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> angleToTarget);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -65,13 +71,7 @@ public class AutoAlign extends Command {
     virtualTarget = getVirtualTarget(swerveSubsystem.getChassisSpeeds(), robotTranslation, targetTranslation);
 
     Translation2d difference = virtualTarget.minus(robotTranslation);
-    Rotation2d angleToTarget = new Rotation2d(difference.getX(), difference.getY());
-
-    double leftY = (RobotUtil.isRedAlliance()) ? driverController.getLeftY() : -driverController.getLeftY();
-    double leftX = (RobotUtil.isRedAlliance()) ? driverController.getLeftX() : -driverController.getLeftX();
-
-    DriveCommands.joystickDriveAtAngle(swerveSubsystem, () -> leftY, () -> leftX, () -> angleToTarget);
-    
+    angleToTarget = new Rotation2d(difference.getX(), difference.getY());
   }
 
   public static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance){
