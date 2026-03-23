@@ -10,8 +10,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.RobotUtil;
-import frc.robot.subsystems.SwerveSubsystem;
 
 public class AutoAlign extends Command {
   public enum Target {
@@ -26,7 +27,7 @@ public class AutoAlign extends Command {
     }
   }
 
-  private final SwerveSubsystem swerveSubsystem;
+  private final Drive swerveSubsystem;
   private final CommandXboxController driverController;
   private final Target target;
   // used in shooter subsystem to determine if bot is ready to shoot
@@ -40,7 +41,7 @@ public class AutoAlign extends Command {
    * @param driverController The CommandXboxController object of the driver's controller.
    * @param target The target that this command aligns to.
    */
-  public AutoAlign(SwerveSubsystem swerveSubsystem,
+  public AutoAlign(Drive swerveSubsystem,
     CommandXboxController driverController, Target target)
   {
     this.swerveSubsystem = swerveSubsystem;
@@ -61,7 +62,7 @@ public class AutoAlign extends Command {
   public void execute() {
     Translation2d robotTranslation = swerveSubsystem.getPose().getTranslation();
     Translation2d targetTranslation = getTargetTranslation(target, robotTranslation);
-    virtualTarget = getVirtualTarget(swerveSubsystem.getFieldVelocity(), robotTranslation, targetTranslation);
+    virtualTarget = getVirtualTarget(swerveSubsystem.getChassisSpeeds(), robotTranslation, targetTranslation);
 
     Translation2d difference = virtualTarget.minus(robotTranslation);
     Rotation2d angleToTarget = new Rotation2d(difference.getX(), difference.getY());
@@ -69,11 +70,7 @@ public class AutoAlign extends Command {
     double leftY = (RobotUtil.isRedAlliance()) ? driverController.getLeftY() : -driverController.getLeftY();
     double leftX = (RobotUtil.isRedAlliance()) ? driverController.getLeftX() : -driverController.getLeftX();
 
-    swerveSubsystem.driveFieldOriented(swerveSubsystem.rotateToAngle( 
-        leftY,
-        leftX,
-        angleToTarget
-    ));
+    DriveCommands.joystickDriveAtAngle(swerveSubsystem, () -> leftY, () -> leftX, () -> angleToTarget);
     
   }
 

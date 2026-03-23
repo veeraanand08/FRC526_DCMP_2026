@@ -32,6 +32,11 @@ public final class Constants {
     REPLAY
   }
 
+  public static final class ControllerConstants {
+    public static final int DRIVER_CONTROLLER_PORT = 0;
+    public static final int OPERATOR_CONTROLLER_PORT = 1;
+  }
+
   public static final class CANConstants {
     public static final CANBus SUPERSTRUCTURE_CAN_BUS = new CANBus("Superstructure");
 

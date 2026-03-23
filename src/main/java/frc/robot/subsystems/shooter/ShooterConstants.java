@@ -1,13 +1,11 @@
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
-public class ShooterConstants {
+public final class ShooterConstants {
     public static final double SHOOTER_MOI = 0.001;
     public static final double SHOOTER_GEAR_RATIO = 1.0;
 

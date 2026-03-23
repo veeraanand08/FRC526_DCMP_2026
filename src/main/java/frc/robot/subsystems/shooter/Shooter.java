@@ -56,6 +56,13 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
   }
 
+  public void shoot(double hoodAngle) {
+    desiredAngle = hoodAngle;
+    io.setAngle(desiredAngle);
+    io.setRPS(ShooterConstants.SHOOTER_RPS);
+    Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
+  }
+
   public boolean hasSpunUp() {
     return inputs.shooterVelocityRPS > ShooterConstants.SHOOTER_RPS - 100;
   }
