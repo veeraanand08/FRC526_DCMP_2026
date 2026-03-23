@@ -15,24 +15,20 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
-  private final SlewRateLimiter limit;
-
   private final Supplier<Pose2d> robotPose;
   private final Supplier<ChassisSpeeds> robotVelocity;
 
-  private double desiredRPM;
+  private double desiredAngle;
   private double distanceToTarget;
 
   public Shooter(ShooterIO io, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotVelocity) {
     this.io = io;
 
-    limit = new SlewRateLimiter(5676, -ShooterConstants.NEGATIVE_RATE_LIMIT, 0);
-
     this.robotPose = robotPose;
     this.robotVelocity = robotVelocity;
 
     Logger.recordOutput("Shooter/Shooter Ready", false);
-    Logger.recordOutput("Shooter/Desired Shooter RPM", 0.0);
+    Logger.recordOutput("Shooter/Desired Hood Angle", 0.0);
   }
 
   @Override
@@ -54,23 +50,19 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shoot() {
-    setAngularVelocity(ShooterConstants.DISTANCE_TO_ANGLE.get(distanceToTarget*0.9));
-  }
-
-  public void setAngularVelocity(double rpm) {
-    rpm = limit.calculate(rpm);
-    io.setRPM(rpm);
-    desiredRPM = rpm;
-    Logger.recordOutput("Shooter/Desired Shooter RPM", desiredRPM);
+    io.setRPS(ShooterConstants.SHOOTER_RPS);
+    desiredAngle = ShooterConstants.DISTANCE_TO_ANGLE.get(distanceToTarget);
+    io.setAngle(desiredAngle);
+    Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
   }
 
   public boolean hasSpunUp() {
-    return inputs.leaderCurrentRPM > desiredRPM - 100;
+    return inputs.shooterVelocityRPS > ShooterConstants.SHOOTER_RPS - 100;
   }
 
   public void stop() {
     io.stop();
-    desiredRPM = 0;
-    Logger.recordOutput("Shooter/Desired Shooter RPM", desiredRPM);
+    desiredAngle = 0.0;
+    Logger.recordOutput("Shooter/Desired Shooter RPM", desiredAngle);
   }
 }

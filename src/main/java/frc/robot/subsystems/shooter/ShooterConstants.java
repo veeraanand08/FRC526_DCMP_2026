@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
@@ -13,7 +14,7 @@ public class ShooterConstants {
     public static final int SHOOTER_SUPPLY_LIMIT = 60;
     public static final int SHOOTER_STATOR_LIMIT = 80;
     public static final InvertedValue SHOOTER_LEFT_INVERTED = InvertedValue.Clockwise_Positive;
-    public static final InvertedValue SHOOTER_RIGHT_INVERTED = InvertedValue.Clockwise_Positive;
+    public static final InvertedValue SHOOTER_TOP_RIGHT_INVERTED = InvertedValue.Clockwise_Positive;
     public static final double SHOOTER_P = 0.00004;
     public static final double SHOOTER_I = 0;
     public static final double SHOOTER_D = 0;
@@ -26,9 +27,11 @@ public class ShooterConstants {
     public static final double HOOD_I = 0;
     public static final double HOOD_D = 0;
 
+    public static final MotorAlignmentValue BOTTOM_LEFT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue TOP_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue BOTTOM_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
 
-
-
+    public static final double SHOOTER_RPS = 5000.0;
 
 
     public static final double SHOOTER_FF = 1.0 / 5676.0;

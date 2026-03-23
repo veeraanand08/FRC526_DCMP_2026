@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -49,5 +50,21 @@ public final class Constants {
     public static final int rightFollower = 5;
 
     public static final int hood = 6;
+  }
+
+  public static final class FieldConstants{
+    public static final Translation2d RED_HUB = new Translation2d(11.938, 4.0);
+    public static final Translation2d BLUE_HUB = new Translation2d(4.597, 4.0);
+    public static final Translation2d RED_LEFT_BUMP = new Translation2d(11.928, 2.408);
+    public static final Translation2d RED_RIGHT_BUMP = new Translation2d(11.928, 5.598);
+    public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(4.617, 5.598);
+    public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(4.617, 2.408);
+    public static final Translation2d RED_LEFT_TRENCH = new Translation2d(11.928, 0.586);
+    public static final Translation2d RED_RIGHT_TRENCH = new Translation2d(11.928, 7.423);
+    public static final Translation2d BLUE_LEFT_TRENCH = new Translation2d(4.617, 7.423);
+    public static final Translation2d BLUE_RIGHT_TRENCH = new Translation2d(4.617, 0.586);
+
+    public static final double RED_ALLIANCE_BOUNDARY = RED_LEFT_BUMP.getX();
+    public static final double BLUE_ALLIANCE_BOUNDARY = BLUE_LEFT_BUMP.getX();
   }
 }
