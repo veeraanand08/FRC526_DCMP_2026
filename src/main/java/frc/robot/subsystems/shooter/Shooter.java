@@ -63,6 +63,6 @@ public class Shooter extends SubsystemBase {
   public void stop() {
     io.stop();
     desiredAngle = 0.0;
-    Logger.recordOutput("Shooter/Desired Shooter RPM", desiredAngle);
+    Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
   }
 }
