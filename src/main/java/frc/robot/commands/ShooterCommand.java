@@ -37,9 +37,9 @@ public class ShooterCommand extends Command {
     @Override
     public void execute() {
         shooterSubsystem.shoot();
+        feederSubsystem.enableKicker();
         if (!startShoot && shooterSubsystem.hasSpunUp()) {
             startShoot = true;
-            feederSubsystem.enableKicker();
             feederSubsystem.enableSpindexer();
         }
     }

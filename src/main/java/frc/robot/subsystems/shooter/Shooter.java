@@ -50,9 +50,7 @@ public class Shooter extends SubsystemBase {
 
   public void shoot() {
     desiredAngle = ShooterConstants.DISTANCE_TO_ANGLE.get(distanceToTarget);
-    io.setAngle(desiredAngle);
-    io.setRPS(ShooterConstants.SHOOTER_RPS);
-    Logger.recordOutput("Shooter/Desired Hood Angle", desiredAngle);
+    shoot(desiredAngle);
   }
 
   public void shoot(double hoodAngle) {
