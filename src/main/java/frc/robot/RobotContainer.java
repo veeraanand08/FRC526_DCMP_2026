@@ -109,8 +109,6 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    configureAutoCommands();
-
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Have the autoChooser pull in all PathPlanner autos as options
@@ -173,10 +171,6 @@ public class RobotContainer {
     operatorController.leftBumper().onTrue(toggleIntake);
     operatorController.rightBumper().whileTrue(defaultShoot);
     operatorController.a().onTrue(agitate);
-
-  }
-
-  private void configureAutoCommands() {
 
   }
 

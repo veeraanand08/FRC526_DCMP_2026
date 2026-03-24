@@ -15,16 +15,16 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
 
 public class FeederIOTalonFX implements FeederIO {
-    private final TalonFX spindexer;
+    private final TalonFX indexer;
     private final TalonFX kicker;
 
-    private final VelocityVoltage spindexerPid;
+    private final VelocityVoltage indexerPid;
     private final VelocityVoltage kickerPid;
 
     // inputs from spindexer
-    private final StatusSignal<Voltage> spindexerVoltage;
-    private final StatusSignal<Current> spindexerCurrent;
-    private final StatusSignal<AngularVelocity> spindexerVelocity;
+    private final StatusSignal<Voltage> indexerVoltage;
+    private final StatusSignal<Current> indexerCurrent;
+    private final StatusSignal<AngularVelocity> indexerVelocity;
 
     // inputs from kicker
     private final StatusSignal<Voltage> kickerVoltage;
@@ -32,25 +32,25 @@ public class FeederIOTalonFX implements FeederIO {
     private final StatusSignal<AngularVelocity> kickerVelocity;
 
     public FeederIOTalonFX() {
-        spindexer = new TalonFX(CANConstants.spindexer, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+        indexer = new TalonFX(CANConstants.spindexer, CANConstants.SUPERSTRUCTURE_CAN_BUS);
         kicker = new TalonFX(CANConstants.kicker, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
-        spindexerPid = new VelocityVoltage(0);
+        indexerPid = new VelocityVoltage(0);
         kickerPid = new VelocityVoltage(0);
 
-        TalonFXConfiguration spindexerConfig = new TalonFXConfiguration();
+        TalonFXConfiguration indexerConfig = new TalonFXConfiguration();
         TalonFXConfiguration kickerConfig = new TalonFXConfiguration();
 
-        spindexerConfig.MotorOutput.Inverted = FeederConstants.SPINDEXER_INVERTED;
-        spindexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        spindexerConfig.CurrentLimits.StatorCurrentLimit = FeederConstants.SPINDEXER_STATOR_LIMIT;
-        spindexerConfig.CurrentLimits.SupplyCurrentLimit = FeederConstants.SPINDEXER_SUPPLY_LIMIT;
-        spindexerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        spindexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        indexerConfig.MotorOutput.Inverted = FeederConstants.INDEXER_INVERTED;
+        indexerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        indexerConfig.CurrentLimits.StatorCurrentLimit = FeederConstants.INDEXER_STATOR_LIMIT;
+        indexerConfig.CurrentLimits.SupplyCurrentLimit = FeederConstants.INDEXER_SUPPLY_LIMIT;
+        indexerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        indexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        spindexerConfig.Slot0.kP = FeederConstants.SPINDEXER_P;
-        spindexerConfig.Slot0.kI = FeederConstants.SPINDEXER_I;
-        spindexerConfig.Slot0.kD = FeederConstants.SPINDEXER_D;
+        indexerConfig.Slot0.kP = FeederConstants.INDEXER_P;
+        indexerConfig.Slot0.kI = FeederConstants.INDEXER_I;
+        indexerConfig.Slot0.kD = FeederConstants.INDEXER_D;
 
         kickerConfig.MotorOutput.Inverted = FeederConstants.KICKER_INVERTED;
         kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -63,18 +63,18 @@ public class FeederIOTalonFX implements FeederIO {
         kickerConfig.Slot0.kI = FeederConstants.KICKER_I;
         kickerConfig.Slot0.kD = FeederConstants.KICKER_D;
 
-        tryUntilOk(5, () -> spindexer.getConfigurator().apply(spindexerConfig));
-        tryUntilOk(5, () -> spindexer.getConfigurator().apply(kickerConfig));
+        tryUntilOk(5, () -> indexer.getConfigurator().apply(indexerConfig));
+        tryUntilOk(5, () -> indexer.getConfigurator().apply(kickerConfig));
 
-        spindexerVoltage = spindexer.getMotorVoltage();
-        spindexerCurrent = spindexer.getStatorCurrent();
-        spindexerVelocity = spindexer.getVelocity();
+        indexerVoltage = indexer.getMotorVoltage();
+        indexerCurrent = indexer.getStatorCurrent();
+        indexerVelocity = indexer.getVelocity();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
             50.0,
-            spindexerVoltage,
-            spindexerCurrent,
-            spindexerVelocity);
+                indexerVoltage,
+                indexerCurrent,
+                indexerVelocity);
 
         kickerVoltage = kicker.getMotorVoltage();
         kickerCurrent = kicker.getStatorCurrent();
@@ -89,13 +89,13 @@ public class FeederIOTalonFX implements FeederIO {
 
     @Override
     public void updateInputs(FeederIOInputs inputs) {
-        var spindexerStatus = BaseStatusSignal.refreshAll(spindexerVoltage, spindexerCurrent, spindexerVelocity);
+        var indexerStatus = BaseStatusSignal.refreshAll(indexerVoltage, indexerCurrent, indexerVelocity);
         var kickerStatus = BaseStatusSignal.refreshAll(kickerVoltage, kickerCurrent, kickerVelocity);
 
-        inputs.spindexerConnected = spindexerStatus.isOK();
-        inputs.spindexerAppliedVolts = spindexerVoltage.getValueAsDouble();
-        inputs.spindexerCurrentAmps = spindexerCurrent.getValueAsDouble();
-        inputs.spindexerVelocityRPS = spindexerVelocity.getValueAsDouble();
+        inputs.indexerConnected = indexerStatus.isOK();
+        inputs.indexerAppliedVolts = indexerVoltage.getValueAsDouble();
+        inputs.indexerCurrentAmps = indexerCurrent.getValueAsDouble();
+        inputs.indexerVelocityRPS = indexerVelocity.getValueAsDouble();
 
         inputs.kickerConnected = kickerStatus.isOK();
         inputs.kickerAppliedVolts = kickerVoltage.getValueAsDouble();
@@ -104,8 +104,8 @@ public class FeederIOTalonFX implements FeederIO {
     }
 
     @Override
-    public void setSpindexerRPS(double rps) {
-        spindexer.setControl(spindexerPid.withVelocity(rps));
+    public void setIndexerRPS(double rps) {
+        indexer.setControl(indexerPid.withVelocity(rps));
     }
 
     @Override
@@ -114,8 +114,8 @@ public class FeederIOTalonFX implements FeederIO {
     }
 
     @Override
-    public void stopSpindexer() {
-        spindexer.stopMotor();
+    public void stopIndexer() {
+        indexer.stopMotor();
     }
 
     @Override

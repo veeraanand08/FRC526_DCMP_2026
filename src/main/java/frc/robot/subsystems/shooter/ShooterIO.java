@@ -15,22 +15,12 @@ public interface ShooterIO {
         public boolean bottomLeftConnected = false;
         public boolean topRightConnected = false;
         public boolean bottomRightConnected = false;
-
-        public boolean hoodConnected = false;
-        public double hoodAppliedVolts = 0.0;
-        public double hoodCurrentAmps = 0.0;
-        public double hoodAngleDeg = 0.0;
     }
 
     public default void updateInputs(ShooterIOInputs inputs) {}
 
     /** Sets the motor's speed given an RPS input */
     public default void setRPS(double rps) {}
-
-    public default void setAngle(double angle) {}
-
-    /** Stop the motor */
-    public default void dropHood() {}
 
     public default void stop() {}
 }

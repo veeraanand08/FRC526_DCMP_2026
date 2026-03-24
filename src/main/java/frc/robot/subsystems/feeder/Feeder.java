@@ -21,21 +21,21 @@ public class Feeder extends SubsystemBase {
     Logger.processInputs("Feeder", inputs);
   }
 
-  public void enableSpindexer() {
-    io.setSpindexerRPS(FeederConstants.SPINDEXER_RPS);
+  public void enableIndexer() {
+    io.setIndexerRPS(FeederConstants.INDEXER_RPS);
   }
 
   public void enableKicker() {
     io.setKickerRPS(FeederConstants.KICKER_RPS);
   }
 
-  public boolean kickerHasSpunUp(){
-        return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 100.0 / 60.0;
+  public boolean hasSpunUp(){
+        return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 1.5;
     }
 
 
   public void stop() {
-    io.stopSpindexer();
+    io.stopIndexer();
     io.stopKicker();
   }
 }

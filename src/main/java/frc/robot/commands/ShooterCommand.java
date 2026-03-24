@@ -31,16 +31,16 @@ public class ShooterCommand extends Command {
     @Override
     public void initialize() {
         startShoot = false;
+        feederSubsystem.enableKicker();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
         shooterSubsystem.shoot();
-        feederSubsystem.enableKicker();
-        if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.kickerHasSpunUp()) {
+        if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.hasSpunUp()) {
             startShoot = true;
-            feederSubsystem.enableSpindexer();
+            feederSubsystem.enableIndexer();
         }
     }
 

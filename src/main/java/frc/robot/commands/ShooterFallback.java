@@ -33,16 +33,16 @@ public class ShooterFallback extends Command {
     @Override
     public void initialize() {
         startShoot = false;
-        shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_ANGLE);
+        shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPS);
+        feederSubsystem.enableKicker();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        feederSubsystem.enableKicker();
-        if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.kickerHasSpunUp()) {
+        if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.hasSpunUp()) {
             startShoot = true;
-            feederSubsystem.enableSpindexer();
+            feederSubsystem.enableIndexer();
         }
     }
 
