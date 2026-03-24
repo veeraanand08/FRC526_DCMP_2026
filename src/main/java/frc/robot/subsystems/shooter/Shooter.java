@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean hasSpunUp() {
-    return inputs.shooterVelocityRPS > ShooterConstants.SHOOTER_RPS - 100;
+    return inputs.shooterVelocityRPS > ShooterConstants.SHOOTER_RPS - 100.0 / 60.0;
   }
 
   public void stop() {

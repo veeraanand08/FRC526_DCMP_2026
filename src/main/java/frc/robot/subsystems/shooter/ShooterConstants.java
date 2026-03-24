@@ -37,6 +37,6 @@ public final class ShooterConstants {
       DISTANCE_TO_ANGLE.put(0.0, 0.0);
     }
 
-    public static final double SHOOTER_RPS = 5000.0 / 60.0;
+    public static final double SHOOTER_RPS = 2500.0 / 60.0;
     public static final double SHOOTER_DEFAULT_ANGLE = DISTANCE_TO_ANGLE.get(3.0);
 }

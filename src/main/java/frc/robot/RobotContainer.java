@@ -15,8 +15,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShooterFallback;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.shooter.*;
+import frc.robot.subsystems.feeder.*;
+import frc.robot.subsystems.intake.*;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -31,9 +35,9 @@ public class RobotContainer {
   // subsystems
   private final Drive drive;
 //  private final Vision vision;
-//  private final Shooter shooter;
-//  private final Feeder feeder;
-//  private final Intake intake;
+ private final Shooter shooter;
+ private final Feeder feeder;
+ private final Intake intake;
 
   // controllers
   private final CommandXboxController driverController =
@@ -56,6 +60,13 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
+        shooter = new Shooter(
+                new ShooterIOTalonFX(),
+                drive::getPose,
+                drive::getChassisSpeeds
+                );
+        feeder = new Feeder(new FeederIOTalonFX());
+        intake = new Intake(new IntakeIOTalonFX());
         break;
       case SIM:
         drive =
@@ -65,6 +76,13 @@ public class RobotContainer {
                         new ModuleIOSim(TunerConstants.FrontRight),
                         new ModuleIOSim(TunerConstants.BackLeft),
                         new ModuleIOSim(TunerConstants.BackRight));
+                shooter = new Shooter(
+                new ShooterIOTalonFX(),
+                drive::getPose,
+                drive::getChassisSpeeds
+                );
+                feeder = new Feeder(new FeederIOTalonFX());
+                intake = new Intake(new IntakeIOTalonFX());
         break;
       default:
         // replay
@@ -75,6 +93,17 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {});
+        shooter = new Shooter(
+                new ShooterIO() {},
+                drive::getPose,
+                drive::getChassisSpeeds
+                );
+        feeder = new Feeder(
+                new FeederIO() {}
+        );
+        intake = new Intake(
+                new IntakeIO() {}
+        );
     }
 
     // Configure the trigger bindings
@@ -128,11 +157,23 @@ public class RobotContainer {
             ).finallyDo(AutoAlign::disable);
 
     // Command dumpCommand = Commands.parallel(reverseIntake, reverseIndexer);
+    Command toggleIntake = intake.toggleIntakeCommand();
+    Command defaultShoot = new ShooterFallback(shooter, feeder);
+    Command agitate = intake.agitateCommand();
+
 
     drive.setDefaultCommand(defaultDriveCommand);
 
     driverController.leftBumper().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
     driverController.povLeft().onTrue(zeroGyro);
+
+
+    //operator controller
+
+    operatorController.leftBumper().onTrue(toggleIntake);
+    operatorController.rightBumper().whileTrue(defaultShoot);
+    operatorController.a().onTrue(agitate);
+
   }
 
   private void configureAutoCommands() {

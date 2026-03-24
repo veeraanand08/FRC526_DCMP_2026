@@ -29,6 +29,11 @@ public class Feeder extends SubsystemBase {
     io.setKickerRPS(FeederConstants.KICKER_RPS);
   }
 
+  public boolean kickerHasSpunUp(){
+        return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 100.0 / 60.0;
+    }
+
+
   public void stop() {
     io.stopSpindexer();
     io.stopKicker();

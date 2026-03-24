@@ -39,9 +39,9 @@ public class ShooterFallback extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (!startShoot && shooterSubsystem.hasSpunUp()) {
+        feederSubsystem.enableKicker();
+        if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.kickerHasSpunUp()) {
             startShoot = true;
-            feederSubsystem.enableKicker();
             feederSubsystem.enableSpindexer();
         }
     }
