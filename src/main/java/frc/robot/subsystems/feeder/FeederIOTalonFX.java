@@ -64,7 +64,7 @@ public class FeederIOTalonFX implements FeederIO {
         kickerConfig.Slot0.kD = FeederConstants.KICKER_D;
 
         tryUntilOk(5, () -> indexer.getConfigurator().apply(indexerConfig));
-        tryUntilOk(5, () -> indexer.getConfigurator().apply(kickerConfig));
+        tryUntilOk(5, () -> kicker.getConfigurator().apply(kickerConfig));
 
         indexerVoltage = indexer.getMotorVoltage();
         indexerCurrent = indexer.getStatorCurrent();
