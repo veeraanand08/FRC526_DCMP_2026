@@ -77,12 +77,12 @@ public class RobotContainer {
                         new ModuleIOSim(TunerConstants.BackLeft),
                         new ModuleIOSim(TunerConstants.BackRight));
                 shooter = new Shooter(
-                new ShooterIOTalonFX(),
+                new ShooterIOSim(),
                 drive::getPose,
                 drive::getChassisSpeeds
                 );
-                feeder = new Feeder(new FeederIOTalonFX());
-                intake = new Intake(new IntakeIOTalonFX());
+                feeder = new Feeder(new FeederIOSim());
+                intake = new Intake(new IntakeIOSim());
         break;
       default:
         // replay
