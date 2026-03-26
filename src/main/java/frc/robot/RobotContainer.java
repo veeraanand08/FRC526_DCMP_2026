@@ -164,6 +164,7 @@ public class RobotContainer {
 
     driverController.leftBumper().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
     driverController.povLeft().onTrue(zeroGyro);
+    driverController.a().whileTrue(autoAlign);
 
 
     //operator controller
