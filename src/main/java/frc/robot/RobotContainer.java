@@ -21,8 +21,11 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.feeder.*;
 import frc.robot.subsystems.intake.*;
+import frc.robot.subsystems.vision.*;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -34,10 +37,12 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // subsystems
   private final Drive drive;
-//  private final Vision vision;
- private final Shooter shooter;
- private final Feeder feeder;
- private final Intake intake;
+  private final Vision vision;
+  private final Shooter shooter;
+  private final Feeder feeder;
+  private final Intake intake;
+
+  private SwerveDriveSimulation driveSimulation;
 
   // controllers
   private final CommandXboxController driverController =
@@ -59,30 +64,46 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontLeft),
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
-                        new ModuleIOTalonFX(TunerConstants.BackRight));
+                        new ModuleIOTalonFX(TunerConstants.BackRight),
+                        (pose) -> {});
+        vision = new Vision(
+                drive,
+                new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0),
+                new VisionIOPhotonVision(VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1),
+                new VisionIOPhotonVision(VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2),
+                new VisionIOPhotonVision(VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3)
+        );
         shooter = new Shooter(
                 new ShooterIOTalonFX(),
                 drive::getPose,
-                drive::getChassisSpeeds
-                );
+                drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOTalonFX());
         intake = new Intake(new IntakeIOTalonFX());
         break;
       case SIM:
+        driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
                 new Drive(
-                        new GyroIO() {},
-                        new ModuleIOSim(TunerConstants.FrontLeft),
-                        new ModuleIOSim(TunerConstants.FrontRight),
-                        new ModuleIOSim(TunerConstants.BackLeft),
-                        new ModuleIOSim(TunerConstants.BackRight));
-                shooter = new Shooter(
+                        new GyroIOSim(driveSimulation.getGyroSimulation()) {},
+                        new ModuleIOSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+                        new ModuleIOSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+                        new ModuleIOSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+                        new ModuleIOSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
+                        driveSimulation::setSimulationWorldPose);
+        vision = new Vision(
+                drive,
+                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0, drive::getPose),
+                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1, drive::getPose),
+                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2, drive::getPose),
+                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3, drive::getPose)
+        );
+        shooter = new Shooter(
                 new ShooterIOSim(),
                 drive::getPose,
-                drive::getChassisSpeeds
-                );
-                feeder = new Feeder(new FeederIOSim());
-                intake = new Intake(new IntakeIOSim());
+                drive::getChassisSpeeds);
+        feeder = new Feeder(new FeederIOSim());
+        intake = new Intake(new IntakeIOSim());
         break;
       default:
         // replay
@@ -92,18 +113,21 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {},
-                        new ModuleIO() {});
+                        new ModuleIO() {},
+                        (pose) -> {});
+        vision = new Vision(
+                drive,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {}
+        );
         shooter = new Shooter(
                 new ShooterIO() {},
                 drive::getPose,
-                drive::getChassisSpeeds
-                );
-        feeder = new Feeder(
-                new FeederIO() {}
-        );
-        intake = new Intake(
-                new IntakeIO() {}
-        );
+                drive::getChassisSpeeds);
+        feeder = new Feeder(new FeederIO() {});
+        intake = new Intake(new IntakeIO() {});
     }
 
     // Configure the trigger bindings
