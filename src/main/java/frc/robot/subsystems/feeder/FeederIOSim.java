@@ -1,104 +1,88 @@
-// package frc.robot.subsystems.feeder;
+package frc.robot.subsystems.feeder;
 
-// import edu.wpi.first.math.controller.PIDController;
-// import edu.wpi.first.math.system.plant.DCMotor;
-// import edu.wpi.first.math.system.plant.LinearSystemId;
-// import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-// import frc.robot.Constants.FeederConstants;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
-// public class FeederIOSim implements FeederIO {
-//     private final FlywheelSim leftIndexerSim;
-//     private final FlywheelSim rightIndexerSim;
-//     private final FlywheelSim kickerSim;
+public class FeederIOSim implements FeederIO {
+    private final FlywheelSim indexerSim;
+    private final FlywheelSim kickerSim;
 
-//     private final PIDController kickerPID;
+    private final PIDController kickerPID;
+    private final PIDController indexerPID;
 
-//     private double leftIndexerVolts;
-//     private double rightIndexerVolts;
-//     private double kickerVolts;
-//     private boolean isClosedLoopKicker;
+    private double indexerVolts;
+    private double kickerVolts;
 
-//     public FeederIOSim() {
-//         leftIndexerSim = new FlywheelSim(
-//                 LinearSystemId.createFlywheelSystem(
-//                         DCMotor.getNEO(1),
-//                         FeederConstants.INDEXER_MOI,
-//                         FeederConstants.KICKER_GEAR_RATIO),
-//                 DCMotor.getNEO(1));
+    private boolean isClosedLoopIndexer;
+    private boolean isClosedLoopKicker;
 
-//         rightIndexerSim = new FlywheelSim(
-//                 LinearSystemId.createFlywheelSystem(
-//                         DCMotor.getNEO(1),
-//                         FeederConstants.INDEXER_MOI,
-//                         FeederConstants.KICKER_GEAR_RATIO),
-//                 DCMotor.getNEO(1));
+    public FeederIOSim() {
 
-//         kickerSim = new FlywheelSim(
-//                 LinearSystemId.createFlywheelSystem(
-//                         DCMotor.getNEO(1),
-//                         FeederConstants.KICKER_MOI,
-//                         FeederConstants.KICKER_GEAR_RATIO),
-//                 DCMotor.getNEO(1));
+        indexerSim = new FlywheelSim(
+                LinearSystemId.createFlywheelSystem(
+                        DCMotor.getKrakenX60Foc(1),
+                        FeederConstants.INDEXER_MOI,
+                        FeederConstants.KICKER_GEAR_RATIO),
+                DCMotor.getKrakenX60Foc(1));
 
-//         kickerPID = new PIDController(FeederConstants.KICKER_P * 125.0 , FeederConstants.KICKER_I, FeederConstants.KICKER_D);
-//     }
+        kickerSim = new FlywheelSim(
+                LinearSystemId.createFlywheelSystem(
+                        DCMotor.getKrakenX60Foc(1),
+                        FeederConstants.KICKER_MOI,
+                        FeederConstants.KICKER_GEAR_RATIO),
+                DCMotor.getKrakenX60Foc(1));
 
-//     public void updateInputs(FeederIOInputs inputs) {
-//         if (isClosedLoopKicker) {
-//             kickerVolts = kickerPID.calculate(kickerSim.getAngularVelocityRPM());
-//         }
+        kickerPID = new PIDController(FeederConstants.KICKER_P * 125.0 , FeederConstants.KICKER_I, FeederConstants.KICKER_D);
+        indexerPID = new PIDController(FeederConstants.INDEXER_P * 125.0, FeederConstants.INDEXER_I, FeederConstants.INDEXER_D);
+    }
 
-//         leftIndexerSim.setInput(leftIndexerVolts);
-//         rightIndexerSim.setInput(rightIndexerVolts);
-//         kickerSim.setInput(kickerVolts);
+    public void updateInputs(FeederIOInputs inputs) {
+        if (isClosedLoopKicker) {
+            kickerVolts = kickerPID.calculate(kickerSim.getAngularVelocityRPM());
+        }
+        if (isClosedLoopIndexer) {
+            indexerVolts = indexerPID.calculate(indexerSim.getAngularVelocityRPM());
+        }
+        
+        kickerSim.setInput(kickerVolts);
+        indexerSim.setInput(indexerVolts);
 
-//         leftIndexerSim.update(0.02);
-//         rightIndexerSim.update(0.02);
-//         kickerSim.update(0.02);
+        indexerSim.update(0.02);
+        kickerSim.update(0.02);
 
-//         inputs.indexerRightConnected = true;
-//         inputs.indexerRightAppliedVolts = rightIndexerVolts;
-//         inputs.indexerRightCurrentAmps = rightIndexerSim.getCurrentDrawAmps();
+        inputs.indexerConnected = true;
+        inputs.indexerAppliedVolts = indexerVolts;
+        inputs.indexerCurrentAmps = indexerSim.getCurrentDrawAmps();
+        inputs.indexerVelocityRPS = indexerSim.getAngularVelocityRPM() / 60.0;
 
-//         inputs.indexerLeftConnected = true;
-//         inputs.indexerLeftAppliedVolts = leftIndexerVolts;
-//         inputs.indexerLeftCurrentAmps = leftIndexerSim.getCurrentDrawAmps();
+        inputs.kickerConnected = true;
+        inputs.kickerAppliedVolts = kickerVolts;
+        inputs.kickerCurrentAmps = kickerSim.getCurrentDrawAmps();
+        inputs.kickerVelocityRPS = kickerSim.getAngularVelocityRPM() / 60.0;
+    }
 
-//         inputs.kickerConnected = true;
-//         inputs.kickerAppliedVolts = kickerVolts;
-//         inputs.kickerCurrentAmps = kickerSim.getCurrentDrawAmps();
-//         inputs.kickerCurrentRPM = kickerSim.getAngularVelocityRPM();
-//     }
+    public void setIndexerRPS(double rps) {
+        isClosedLoopIndexer = true;
+        indexerPID.setSetpoint(rps * 60.0);
+    }
 
-//     public void setIndexerLeft(double speed) {
-//         leftIndexerVolts = speed * 12.0;
-//     }
+    @Override
+    public void setKickerRPS(double rps) {
+        isClosedLoopKicker = true;
+        kickerPID.setSetpoint(rps * 60.0);
+    }
 
-//     public void setIndexerRight(double speed) {
-//         rightIndexerVolts = speed * 12.0;
-//     }
+    @Override
+    public void stopIndexer() {
+        isClosedLoopIndexer = false;
+        indexerVolts = 0.0;
+    }
 
-//     public void setKicker(double speed) {
-//         isClosedLoopKicker = false;
-//         kickerVolts = speed * 12.0;
-//     }
-
-//     public void setKickerRPM(double rpm) {
-//         isClosedLoopKicker = true;
-//         kickerPID.setSetpoint(rpm);
-//     }
-
-//     public void stopIndexerLeft() {
-//         leftIndexerVolts = 0.0;
-//     }
-
-//     public void stopIndexerRight() {
-//         rightIndexerVolts = 0.0;
-//     }
-
-//     public void stopKicker() {
-//         setKicker(0);
-//     }
-
-
-// }
+    @Override
+    public void stopKicker() {
+        isClosedLoopKicker = false;
+        kickerVolts = 0.0;
+    }
+}
