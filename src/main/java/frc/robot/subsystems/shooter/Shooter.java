@@ -27,7 +27,7 @@ public class Shooter extends SubsystemBase {
     this.robotVelocity = robotVelocity;
 
     Logger.recordOutput("Shooter/Shooter Ready", false);
-    Logger.recordOutput("Shooter/Desired Hood Angle", 0.0);
+    Logger.recordOutput("Shooter/Desired RPS", 0.0);
   }
 
   @Override

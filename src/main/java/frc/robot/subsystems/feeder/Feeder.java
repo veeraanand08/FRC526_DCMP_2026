@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.feeder;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -29,13 +30,21 @@ public class Feeder extends SubsystemBase {
     io.setKickerRPS(FeederConstants.KICKER_RPS);
   }
 
-  public boolean hasSpunUp(){
-        return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 1.5;
-    }
+  public void reverse() {
+    io.setIndexerRPS(-FeederConstants.INDEXER_RPS);
+    io.setKickerRPS(-FeederConstants.KICKER_RPS);
+  }
 
+  public boolean hasSpunUp() {
+    return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 1.5;
+  }
 
   public void stop() {
     io.stopIndexer();
     io.stopKicker();
+  }
+
+  public Command reverseCommand() {
+    return startEnd(this::reverse, this::stop);
   }
 }

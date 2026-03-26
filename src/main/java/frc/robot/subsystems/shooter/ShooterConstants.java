@@ -4,6 +4,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public final class ShooterConstants {
     public static final double SHOOTER_MOI = 0.001;
@@ -23,12 +24,11 @@ public final class ShooterConstants {
 
     public static final double NEGATIVE_RATE_LIMIT = 2000;
 
-    // adjusting angle
     public static final InterpolatingDoubleTreeMap DISTANCE_TO_RPS = new InterpolatingDoubleTreeMap();
     static {
       // Distance, RPS
       DISTANCE_TO_RPS.put(0.0, 0.0);
     }
 
-    public static final double SHOOTER_DEFAULT_RPS = DISTANCE_TO_RPS.get(3.0);
+    public static final LoggedNetworkNumber SHOOTER_DEFAULT_RPM = new LoggedNetworkNumber("/Tuning/Shooter/RPM", 3500);
 }

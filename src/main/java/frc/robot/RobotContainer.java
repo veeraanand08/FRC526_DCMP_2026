@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.ShooterFallback;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
@@ -177,26 +178,42 @@ public class RobotContainer {
                             drive.getChassisSpeeds()
                     )
             ).finallyDo(AutoAlign::disable);
-
-    // Command dumpCommand = Commands.parallel(reverseIntake, reverseIndexer);
-    Command toggleIntake = intake.toggleIntakeCommand();
-    Command defaultShoot = new ShooterFallback(shooter, feeder);
+    Command holdIntake = intake.intakeCommand();
     Command agitate = intake.agitateCommand();
-
+    Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
+    Command resetIntake = intake.resetIntakeCommand();
+    Command shoot = new ShooterCommand(shooter, feeder);
+    Command shootDefault = new ShooterFallback(shooter, feeder);
 
     drive.setDefaultCommand(defaultDriveCommand);
 
-    driverController.leftBumper().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
-    driverController.povLeft().onTrue(zeroGyro);
-    driverController.a().whileTrue(autoAlign);
+    if (DriverStation.isTest()) {
+      // single controller for testing
+      driverController.a().whileTrue(autoAlign);
+      driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
+      driverController.povLeft().onTrue(zeroGyro);
 
+      driverController.leftBumper().whileTrue(holdIntake);
+      driverController.rightBumper().whileTrue(shoot);
+      driverController.rightTrigger(0.7).whileTrue(shootDefault);
+      driverController.y().onTrue(agitate);
+      driverController.b().whileTrue(dump);
+      driverController.povUp().onTrue(resetIntake);
+    }
+    else {
+      // driver controls
+      driverController.leftBumper().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
+      driverController.povLeft().onTrue(zeroGyro);
+      driverController.a().whileTrue(autoAlign);
 
-    //operator controller
-
-    operatorController.leftBumper().onTrue(toggleIntake);
-    operatorController.rightBumper().whileTrue(defaultShoot);
-    operatorController.a().onTrue(agitate);
-
+      // operator controls
+      operatorController.leftBumper().whileTrue(holdIntake);
+      operatorController.rightBumper().whileTrue(shoot);
+      operatorController.rightTrigger(0.7).whileTrue(shootDefault);
+      operatorController.a().onTrue(agitate);
+      operatorController.b().whileTrue(dump);
+      operatorController.povUp().onTrue(resetIntake);
+    }
   }
 
   /**

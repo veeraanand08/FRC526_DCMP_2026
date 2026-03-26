@@ -33,7 +33,7 @@ public class ShooterFallback extends Command {
     @Override
     public void initialize() {
         startShoot = false;
-        shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPS);
+        shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get()/60.0);
         feederSubsystem.enableKicker();
     }
 

@@ -4,7 +4,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public final class AutoAlignConstants
   {
-    public static final double TOLERANCE_DEG = 5.0;
+    public static final double TOLERANCE_DEG = 2.0;
 
     /* Shoot on the fly */
     public static final int MAX_ITERATIONS = 3;
