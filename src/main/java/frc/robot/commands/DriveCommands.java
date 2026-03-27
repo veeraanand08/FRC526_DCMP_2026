@@ -48,8 +48,8 @@ public class DriveCommands {
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
-    // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
+    // Cube magnitude for more precise control
+    linearMagnitude = Math.pow(linearMagnitude, 3);
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
@@ -89,9 +89,7 @@ public class DriveCommands {
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+                  isFlipped ? drive.getRotation().plus(Rotation2d.kPi) : drive.getRotation()));
         },
         drive);
   }
@@ -140,9 +138,7 @@ public class DriveCommands {
               drive.runVelocity(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       speeds,
-                      isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation()));
+                      isFlipped ? drive.getRotation().plus(Rotation2d.kPi) : drive.getRotation()));
             },
             drive)
 
