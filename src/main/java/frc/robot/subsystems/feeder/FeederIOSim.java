@@ -22,17 +22,17 @@ public class FeederIOSim implements FeederIO {
 
         indexerSim = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(
-                        DCMotor.getKrakenX60Foc(1),
+                        DCMotor.getKrakenX60(1),
                         FeederConstants.INDEXER_MOI,
                         FeederConstants.KICKER_GEAR_RATIO),
-                DCMotor.getKrakenX60Foc(1));
+                DCMotor.getKrakenX60(1));
 
         kickerSim = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(
-                        DCMotor.getKrakenX60Foc(1),
+                        DCMotor.getKrakenX60(1),
                         FeederConstants.KICKER_MOI,
                         FeederConstants.KICKER_GEAR_RATIO),
-                DCMotor.getKrakenX60Foc(1));
+                DCMotor.getKrakenX60(1));
 
         kickerPID = new PIDController(FeederConstants.KICKER_P * 125.0 , FeederConstants.KICKER_I, FeederConstants.KICKER_D);
         indexerPID = new PIDController(FeederConstants.INDEXER_P * 125.0, FeederConstants.INDEXER_I, FeederConstants.INDEXER_D);

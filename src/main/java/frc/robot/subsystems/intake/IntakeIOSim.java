@@ -20,7 +20,7 @@ public class IntakeIOSim implements IntakeIO {
 
 
     public IntakeIOSim() {
-        pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60Foc(1),
+        pivotSim = new SingleJointedArmSim(DCMotor.getKrakenX60(1),
                 IntakeConstants.PIVOT_GEAR_RATIO,
                 SingleJointedArmSim.estimateMOI(0.5, 2),
                 0.5,
@@ -31,10 +31,10 @@ public class IntakeIOSim implements IntakeIO {
 
         rollerSim = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(
-                        DCMotor.getKrakenX60Foc(1),
+                        DCMotor.getKrakenX60(1),
                         IntakeConstants.ROLLER_MOI,
                         IntakeConstants.ROLLER_GEAR_RATIO),
-                DCMotor.getKrakenX60Foc(1));
+                DCMotor.getKrakenX60(1));
 
         pivotPID = new PIDController(IntakeConstants.PIVOT_P * 125.0 , IntakeConstants.PIVOT_I, IntakeConstants.PIVOT_D);
         rollerPID = new PIDController(IntakeConstants.ROLLER_P * 10.0, IntakeConstants.ROLLER_I, IntakeConstants.ROLLER_D);

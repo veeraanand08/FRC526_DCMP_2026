@@ -16,10 +16,10 @@ public class ShooterIOSim implements ShooterIO {
     public ShooterIOSim() {
         shooterSim = new FlywheelSim(
                 LinearSystemId.createFlywheelSystem(
-                        DCMotor.getKrakenX60Foc(4),
+                        DCMotor.getKrakenX60(4),
                         ShooterConstants.SHOOTER_MOI,
                         ShooterConstants.SHOOTER_GEAR_RATIO),
-                DCMotor.getKrakenX60Foc(4));
+                DCMotor.getKrakenX60(4));
 
         shooterPID = new PIDController(
                 ShooterConstants.SHOOTER_P * 125.0,
