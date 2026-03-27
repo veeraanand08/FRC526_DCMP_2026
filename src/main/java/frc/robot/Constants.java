@@ -40,7 +40,7 @@ public final class Constants {
   public static final class CANConstants {
     public static final CANBus SUPERSTRUCTURE_CAN_BUS = new CANBus("Superstructure");
 
-    public static final int spindexer = 8;
+    public static final int indexer = 8;
     public static final int kicker = 1;
 
     public static final int roller = 10;

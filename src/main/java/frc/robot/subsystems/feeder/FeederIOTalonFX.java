@@ -32,7 +32,7 @@ public class FeederIOTalonFX implements FeederIO {
     private final StatusSignal<AngularVelocity> kickerVelocity;
 
     public FeederIOTalonFX() {
-        indexer = new TalonFX(CANConstants.spindexer, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+        indexer = new TalonFX(CANConstants.indexer, CANConstants.SUPERSTRUCTURE_CAN_BUS);
         kicker = new TalonFX(CANConstants.kicker, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
         indexerPid = new VelocityVoltage(0);

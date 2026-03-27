@@ -94,10 +94,11 @@ public class RobotContainer {
                         driveSimulation::setSimulationWorldPose);
         vision = new Vision(
                 drive,
-                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1, drive::getPose),
-                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2, drive::getPose),
-                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3, drive::getPose)
+//                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0, drive::getPose),
+//                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1, drive::getPose),
+//                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2, drive::getPose),
+//                new VisionIOPhotonVisionSim(VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3, drive::getPose)
+                new VisionIO() {}
         );
         shooter = new Shooter(
                 new ShooterIOSim(),
