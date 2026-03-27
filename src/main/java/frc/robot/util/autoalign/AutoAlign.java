@@ -27,9 +27,8 @@ public class AutoAlign {
   private static Target currentTarget = Target.NONE;
   private static Translation2d virtualTarget = Translation2d.kZero;
 
-  public static Rotation2d getAngleToTarget(Target target,
-                                            Translation2d robotTranslation, ChassisSpeeds robotSpeeds)
-  {
+  public static Rotation2d getAngleToTarget(
+      Target target, Translation2d robotTranslation, ChassisSpeeds robotSpeeds) {
     Translation2d targetTranslation = getTargetTranslation(target, robotTranslation);
     virtualTarget = getVirtualTarget(robotSpeeds, robotTranslation, targetTranslation);
 
@@ -37,11 +36,11 @@ public class AutoAlign {
     return new Rotation2d(difference.getX(), difference.getY());
   }
 
-  public static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance){
+  public static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance) {
     double robotX = robotTranslation.getX();
-    if (!isRedAlliance && robotX < FieldConstants.BLUE_ALLIANCE_BOUNDARY){
-        return Target.HUB;
-    } else if (isRedAlliance && robotX > FieldConstants.RED_ALLIANCE_BOUNDARY){
+    if (!isRedAlliance && robotX < FieldConstants.BLUE_ALLIANCE_BOUNDARY) {
+      return Target.HUB;
+    } else if (isRedAlliance && robotX > FieldConstants.RED_ALLIANCE_BOUNDARY) {
       return Target.HUB;
     }
 
@@ -64,19 +63,19 @@ public class AutoAlign {
         Translation2d leftBump, rightBump;
 
         if (isRedAlliance) {
-            leftBump = FieldConstants.RED_LEFT_BUMP;
-            rightBump = FieldConstants.RED_RIGHT_BUMP;
+          leftBump = FieldConstants.RED_LEFT_BUMP;
+          rightBump = FieldConstants.RED_RIGHT_BUMP;
         } else {
-            leftBump = FieldConstants.BLUE_LEFT_BUMP;
-            rightBump = FieldConstants.BLUE_RIGHT_BUMP;
+          leftBump = FieldConstants.BLUE_LEFT_BUMP;
+          rightBump = FieldConstants.BLUE_RIGHT_BUMP;
         }
         double leftBumpDistance = robotTranslation.getDistance(leftBump);
         double rightBumpDistance = robotTranslation.getDistance(rightBump);
 
-        if (leftBumpDistance < rightBumpDistance){
-            targetTranslation = leftBump;
+        if (leftBumpDistance < rightBumpDistance) {
+          targetTranslation = leftBump;
         } else {
-            targetTranslation = rightBump;
+          targetTranslation = rightBump;
         }
         break;
       default:
@@ -85,17 +84,19 @@ public class AutoAlign {
     return targetTranslation;
   }
 
-  public static Translation2d getVirtualTarget(ChassisSpeeds robotSpeed, Translation2d robotTranslation, Translation2d targetTranslation) {
+  public static Translation2d getVirtualTarget(
+      ChassisSpeeds robotSpeed, Translation2d robotTranslation, Translation2d targetTranslation) {
     Translation2d virtualTargetTranslation = targetTranslation;
 
-    for (int i = 0; i < AutoAlignConstants.MAX_ITERATIONS; i++){
+    for (int i = 0; i < AutoAlignConstants.MAX_ITERATIONS; i++) {
       double distanceToTarget = robotTranslation.getDistance(virtualTargetTranslation);
       double shotTime = AutoAlignConstants.DISTANCE_TO_TIME.get(distanceToTarget);
 
       double xTranslation = robotSpeed.vxMetersPerSecond * shotTime;
       double yTranslation = robotSpeed.vyMetersPerSecond * shotTime;
 
-      virtualTargetTranslation = targetTranslation.minus(new Translation2d(xTranslation, yTranslation));
+      virtualTargetTranslation =
+          targetTranslation.minus(new Translation2d(xTranslation, yTranslation));
     }
 
     return virtualTargetTranslation;

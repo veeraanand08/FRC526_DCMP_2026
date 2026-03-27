@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -56,7 +55,7 @@ public final class Constants {
     public static final int hood = 6;
   }
 
-  public static final class FieldConstants{
+  public static final class FieldConstants {
     public static final Translation2d RED_HUB = new Translation2d(11.938, 4.0);
     public static final Translation2d BLUE_HUB = new Translation2d(4.597, 4.0);
     public static final Translation2d RED_LEFT_BUMP = new Translation2d(11.928, 2.408);

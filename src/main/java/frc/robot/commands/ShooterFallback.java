@@ -7,55 +7,53 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.shooter.Shooter;
-
 import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class ShooterFallback extends Command {
-    private final Shooter shooterSubsystem;
-    private final Feeder feederSubsystem;
-    private boolean startShoot;
+  private final Shooter shooterSubsystem;
+  private final Feeder feederSubsystem;
+  private boolean startShoot;
 
-    /**
-     * Creates a new ShooterCommand.
-     *
-     * @param shooterSubsystem The shooter subsystem used by this command.
-     * @param feederSubsystem The feeder subsystem used by this command.
-     */
-    public ShooterFallback(Shooter shooterSubsystem, Feeder feederSubsystem)
-    {
-        this.shooterSubsystem = shooterSubsystem;
-        this.feederSubsystem = feederSubsystem;
-        // Use addRequirements() here to declare subsystem dependencies.
-        addRequirements(shooterSubsystem, feederSubsystem);
-    }
+  /**
+   * Creates a new ShooterCommand.
+   *
+   * @param shooterSubsystem The shooter subsystem used by this command.
+   * @param feederSubsystem The feeder subsystem used by this command.
+   */
+  public ShooterFallback(Shooter shooterSubsystem, Feeder feederSubsystem) {
+    this.shooterSubsystem = shooterSubsystem;
+    this.feederSubsystem = feederSubsystem;
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(shooterSubsystem, feederSubsystem);
+  }
 
-    // Called when the command is initially scheduled.
-    @Override
-    public void initialize() {
-        startShoot = false;
-        shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get()/60.0);
-        feederSubsystem.enableKicker();
-    }
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {
+    startShoot = false;
+    shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get() / 60.0);
+    feederSubsystem.enableKicker();
+  }
 
-    // Called every time the scheduler runs while the command is scheduled.
-    @Override
-    public void execute() {
-        if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.hasSpunUp()) {
-            startShoot = true;
-            feederSubsystem.enableIndexer();
-        }
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute() {
+    if (!startShoot && shooterSubsystem.hasSpunUp() && feederSubsystem.hasSpunUp()) {
+      startShoot = true;
+      feederSubsystem.enableIndexer();
     }
+  }
 
-    // Called once the command ends or is interrupted.
-    @Override
-    public void end(boolean interrupted) {
-        feederSubsystem.stop();
-        shooterSubsystem.stop();
-    }
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    feederSubsystem.stop();
+    shooterSubsystem.stop();
+  }
 
-    // Returns true when the command should end.
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
+  // Returns true when the command should end.
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
 }

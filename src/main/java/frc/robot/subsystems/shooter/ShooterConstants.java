@@ -2,33 +2,35 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public final class ShooterConstants {
-    public static final double SHOOTER_MOI = 0.001;
-    public static final double SHOOTER_GEAR_RATIO = 1.0;
+  public static final double SHOOTER_MOI = 0.001;
+  public static final double SHOOTER_GEAR_RATIO = 1.0;
 
-    public static final int SHOOTER_SUPPLY_LIMIT = 60;
-    public static final int SHOOTER_STATOR_LIMIT = 80;
-    public static final InvertedValue SHOOTER_LEFT_INVERTED = InvertedValue.Clockwise_Positive;
-    public static final double SHOOTER_P = 0.00004;
-    public static final double SHOOTER_I = 0;
-    public static final double SHOOTER_D = 0;
-    public static final double SHOOTER_FF = 1.0 / 5676.0;
+  public static final int SHOOTER_SUPPLY_LIMIT = 60;
+  public static final int SHOOTER_STATOR_LIMIT = 80;
+  public static final InvertedValue SHOOTER_LEFT_INVERTED = InvertedValue.Clockwise_Positive;
+  public static final double SHOOTER_P = 0.00004;
+  public static final double SHOOTER_I = 0;
+  public static final double SHOOTER_D = 0;
+  public static final double SHOOTER_FF = 1.0 / 5676.0;
 
-    public static final MotorAlignmentValue BOTTOM_LEFT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
-    public static final MotorAlignmentValue TOP_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Opposed;
-    public static final MotorAlignmentValue BOTTOM_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Opposed;
+  public static final MotorAlignmentValue BOTTOM_LEFT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
+  public static final MotorAlignmentValue TOP_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Opposed;
+  public static final MotorAlignmentValue BOTTOM_RIGHT_ALIGNMENT_VALUE =
+      MotorAlignmentValue.Opposed;
 
-    public static final double NEGATIVE_RATE_LIMIT = 2000;
+  public static final double NEGATIVE_RATE_LIMIT = 2000;
 
-    public static final InterpolatingDoubleTreeMap DISTANCE_TO_RPS = new InterpolatingDoubleTreeMap();
-    static {
-      // Distance, RPS
-      DISTANCE_TO_RPS.put(0.0, 0.0);
-    }
+  public static final InterpolatingDoubleTreeMap DISTANCE_TO_RPS = new InterpolatingDoubleTreeMap();
 
-    public static final LoggedNetworkNumber SHOOTER_DEFAULT_RPM = new LoggedNetworkNumber("/Tuning/Shooter/RPM", 3500);
+  static {
+    // Distance, RPS
+    DISTANCE_TO_RPS.put(0.0, 0.0);
+  }
+
+  public static final LoggedNetworkNumber SHOOTER_DEFAULT_RPM =
+      new LoggedNetworkNumber("/Tuning/Shooter/RPM", 3500);
 }

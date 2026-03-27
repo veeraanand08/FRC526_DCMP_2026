@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.RobotUtil;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -40,12 +39,12 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
     Logger.recordMetadata(
-           "GitDirty",
-           switch (BuildConstants.DIRTY) {
-             case 0 -> "All changes committed";
-             case 1 -> "Uncommitted changes";
-             default -> "Unknown";
-           });
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
 
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
@@ -69,7 +68,8 @@ public class Robot extends LoggedRobot {
         break;
     }
 
-    Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
+    Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
+    // be added.
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
@@ -122,7 +122,7 @@ public class Robot extends LoggedRobot {
   public void teleopInit() {
     RobotUtil.shiftTimer.start();
 
-    //m_robotContainer.intakeSubsystem.setPivotBrake(true);
+    // m_robotContainer.intakeSubsystem.setPivotBrake(true);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

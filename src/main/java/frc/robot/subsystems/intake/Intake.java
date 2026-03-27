@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -39,19 +38,23 @@ public class Intake extends SubsystemBase {
 
     if (pivotState == PivotState.AGITATING) {
       // safety check
-//      if (isPivotStalled()) setPivotState(PivotState.LOWERING);
+      //      if (isPivotStalled()) setPivotState(PivotState.LOWERING);
 
       double time = agitationTimer.get();
 
       double pos = Math.sin(time * 2 * Math.PI / IntakeConstants.AGITATION_PERIOD) * 0.5 + 0.5;
 
-      double upperAngle = IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
-              -  (IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN) * (time / IntakeConstants.PIVOT_UPPER_AGITATION_DECAY_TIME);
+      double upperAngle =
+          IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
+              - (IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
+                      - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN)
+                  * (time / IntakeConstants.PIVOT_UPPER_AGITATION_DECAY_TIME);
 
       // Clamp so it never goes past the lower angle
       upperAngle = Math.max(upperAngle, IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN);
 
-      double targetAngle = upperAngle + (IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE - upperAngle) * pos;
+      double targetAngle =
+          upperAngle + (IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE - upperAngle) * pos;
 
       io.setPivotSetpoint(targetAngle);
       Logger.recordOutput("Intake/Pivot Setpoint", targetAngle);
@@ -59,7 +62,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void setPivotState(PivotState newState) {
-    switch (newState){
+    switch (newState) {
       case RAISING:
         agitationTimer.stop();
         setPivotAngle(IntakeConstants.PIVOT_RAISED_ANGLE);
@@ -104,6 +107,7 @@ public class Intake extends SubsystemBase {
 
   /**
    * Set the pivot motor's setpoint to a given angle.
+   *
    * @param deg Angle (in degrees) to rotate.
    */
   public void setPivotAngle(double deg) {
@@ -125,16 +129,15 @@ public class Intake extends SubsystemBase {
   public Command intakeCommand() {
     // Inline construction of command goes here.
     return startEnd(
-            () -> {
-              if (pivotState == PivotState.LOWERING) {
-                setRoller(true);
-              }
-              else {
-                setRoller(true);
-                setPivotState(PivotState.LOWERING);
-              }
-            },
-            () -> setRoller(false));
+        () -> {
+          if (pivotState == PivotState.LOWERING) {
+            setRoller(true);
+          } else {
+            setRoller(true);
+            setPivotState(PivotState.LOWERING);
+          }
+        },
+        () -> setRoller(false));
   }
 
   /**
@@ -146,15 +149,14 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
-            () -> {
-              if (pivotState == PivotState.LOWERING) {
-                toggleRoller();
-              }
-              else {
-                setRoller(true);
-                setPivotState(PivotState.LOWERING);
-              }
-            });
+        () -> {
+          if (pivotState == PivotState.LOWERING) {
+            toggleRoller();
+          } else {
+            setRoller(true);
+            setPivotState(PivotState.LOWERING);
+          }
+        });
   }
 
   /**
@@ -164,10 +166,7 @@ public class Intake extends SubsystemBase {
    */
   public Command reverseIntakeCommand() {
     // Inline construction of command goes here.
-    return startEnd(
-            () -> setRollerReversed(true),
-            () -> setRollerReversed(false)
-    );
+    return startEnd(() -> setRollerReversed(true), () -> setRollerReversed(false));
   }
 
   /**
@@ -176,16 +175,16 @@ public class Intake extends SubsystemBase {
    * @return a command to agitate the intake
    */
   public Command agitateCommand() {
-    return runOnce(() -> {
-      if (pivotState == PivotState.AGITATING) {
-        setRoller(false);
-        setPivotState(PivotState.LOWERING);
-      }
-      else {
-        setPivotState(PivotState.AGITATING);
-        slowRoller();
-      }
-    });
+    return runOnce(
+        () -> {
+          if (pivotState == PivotState.AGITATING) {
+            setRoller(false);
+            setPivotState(PivotState.LOWERING);
+          } else {
+            setPivotState(PivotState.AGITATING);
+            slowRoller();
+          }
+        });
   }
 
   /**
@@ -197,10 +196,10 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
-            () -> {
-              setRoller(false);
-              setPivotState(PivotState.RAISING);
-            });
+        () -> {
+          setRoller(false);
+          setPivotState(PivotState.RAISING);
+        });
   }
 
   @Override

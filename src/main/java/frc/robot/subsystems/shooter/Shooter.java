@@ -6,9 +6,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
-import org.littletonrobotics.junction.Logger;
-
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -40,11 +39,16 @@ public class Shooter extends SubsystemBase {
     boolean autoAlignActive = AutoAlign.isActive();
 
     if (autoAlignActive) virtualTarget = AutoAlign.getSavedVirtualTarget();
-    else virtualTarget = AutoAlign.getVirtualTarget(robotVelocity.get(), robotTranslation,
-                                                    AutoAlign.getTargetTranslation(AutoAlign.Target.HUB, robotTranslation));
+    else
+      virtualTarget =
+          AutoAlign.getVirtualTarget(
+              robotVelocity.get(),
+              robotTranslation,
+              AutoAlign.getTargetTranslation(AutoAlign.Target.HUB, robotTranslation));
     distanceToTarget = robotTranslation.getDistance(virtualTarget);
 
-    Logger.recordOutput("Shooter/Shooter Ready", RobotUtil.shiftTimer.isHubActive() && autoAlignActive);
+    Logger.recordOutput(
+        "Shooter/Shooter Ready", RobotUtil.shiftTimer.isHubActive() && autoAlignActive);
     Logger.recordOutput("Shooter/Distance to Target", distanceToTarget);
   }
 

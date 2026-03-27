@@ -8,88 +8,88 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
 
 public class ShooterIOTalonFX implements ShooterIO {
-    private final TalonFX topLeft;
-    private final TalonFX bottomLeft;
+  private final TalonFX topLeft;
+  private final TalonFX bottomLeft;
 
-    private final TalonFX topRight;
-    private final TalonFX bottomRight;
+  private final TalonFX topRight;
+  private final TalonFX bottomRight;
 
-    private final VelocityVoltage shooterPid;
+  private final VelocityVoltage shooterPid;
 
-    private final StatusSignal<Voltage> shooterVoltage;
-    private final StatusSignal<Current> shooterCurrent;
-    private final StatusSignal<AngularVelocity> shooterVelocity;
+  private final StatusSignal<Voltage> shooterVoltage;
+  private final StatusSignal<Current> shooterCurrent;
+  private final StatusSignal<AngularVelocity> shooterVelocity;
 
-    public ShooterIOTalonFX() {
-        topLeft = new TalonFX(CANConstants.topLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-        bottomLeft = new TalonFX(CANConstants.bottomLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+  public ShooterIOTalonFX() {
+    topLeft = new TalonFX(CANConstants.topLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    bottomLeft = new TalonFX(CANConstants.bottomLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
-        topRight = new TalonFX(CANConstants.topRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-        bottomRight = new TalonFX(CANConstants.bottomRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    topRight = new TalonFX(CANConstants.topRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    bottomRight = new TalonFX(CANConstants.bottomRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
-        shooterPid = new VelocityVoltage(0);
+    shooterPid = new VelocityVoltage(0);
 
-        TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
+    TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
 
-        shooterConfig.MotorOutput.Inverted = ShooterConstants.SHOOTER_LEFT_INVERTED;
-        shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        shooterConfig.CurrentLimits.StatorCurrentLimit = ShooterConstants.SHOOTER_STATOR_LIMIT;
-        shooterConfig.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SHOOTER_SUPPLY_LIMIT;
-        shooterConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    shooterConfig.MotorOutput.Inverted = ShooterConstants.SHOOTER_LEFT_INVERTED;
+    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    shooterConfig.CurrentLimits.StatorCurrentLimit = ShooterConstants.SHOOTER_STATOR_LIMIT;
+    shooterConfig.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SHOOTER_SUPPLY_LIMIT;
+    shooterConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        shooterConfig.Slot0.kP = ShooterConstants.SHOOTER_P;
-        shooterConfig.Slot0.kI = ShooterConstants.SHOOTER_I;
-        shooterConfig.Slot0.kD = ShooterConstants.SHOOTER_D;
+    shooterConfig.Slot0.kP = ShooterConstants.SHOOTER_P;
+    shooterConfig.Slot0.kI = ShooterConstants.SHOOTER_I;
+    shooterConfig.Slot0.kD = ShooterConstants.SHOOTER_D;
 
-        tryUntilOk(5, () -> topLeft.getConfigurator().apply(shooterConfig));
-        tryUntilOk(5, () -> bottomLeft.getConfigurator().apply(shooterConfig));
-        tryUntilOk(5, () -> topRight.getConfigurator().apply(shooterConfig));
-        tryUntilOk(5, () -> bottomRight.getConfigurator().apply(shooterConfig));
-        
-        bottomLeft.setControl(new Follower(topLeft.getDeviceID(), ShooterConstants.BOTTOM_LEFT_ALIGNMENT_VALUE));
-        topRight.setControl(new Follower(topLeft.getDeviceID(), ShooterConstants.TOP_RIGHT_ALIGNMENT_VALUE));
-        bottomRight.setControl(new Follower(topLeft.getDeviceID(), ShooterConstants.BOTTOM_RIGHT_ALIGNMENT_VALUE));
+    tryUntilOk(5, () -> topLeft.getConfigurator().apply(shooterConfig));
+    tryUntilOk(5, () -> bottomLeft.getConfigurator().apply(shooterConfig));
+    tryUntilOk(5, () -> topRight.getConfigurator().apply(shooterConfig));
+    tryUntilOk(5, () -> bottomRight.getConfigurator().apply(shooterConfig));
 
-        shooterVoltage = topLeft.getMotorVoltage();
-        shooterCurrent =  topLeft.getStatorCurrent();
-        shooterVelocity = topLeft.getVelocity();
+    bottomLeft.setControl(
+        new Follower(topLeft.getDeviceID(), ShooterConstants.BOTTOM_LEFT_ALIGNMENT_VALUE));
+    topRight.setControl(
+        new Follower(topLeft.getDeviceID(), ShooterConstants.TOP_RIGHT_ALIGNMENT_VALUE));
+    bottomRight.setControl(
+        new Follower(topLeft.getDeviceID(), ShooterConstants.BOTTOM_RIGHT_ALIGNMENT_VALUE));
 
-        BaseStatusSignal.setUpdateFrequencyForAll(
-            50.0,
-            shooterVoltage,
-            shooterCurrent,
-            shooterVelocity);
-    }
+    shooterVoltage = topLeft.getMotorVoltage();
+    shooterCurrent = topLeft.getStatorCurrent();
+    shooterVelocity = topLeft.getVelocity();
 
-    @Override
-    public void updateInputs(ShooterIOInputs inputs) {
-        var shooterStatus = BaseStatusSignal.refreshAll(shooterVoltage, shooterCurrent, shooterVelocity);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, shooterVoltage, shooterCurrent, shooterVelocity);
+  }
 
-        inputs.topLeftConnected = shooterStatus.isOK();
-        inputs.shooterAppliedVolts = shooterVoltage.getValueAsDouble();
-        inputs.shooterCurrentAmps = shooterCurrent.getValueAsDouble();
-        inputs.shooterVelocityRPS = shooterVelocity.getValueAsDouble();
+  @Override
+  public void updateInputs(ShooterIOInputs inputs) {
+    var shooterStatus =
+        BaseStatusSignal.refreshAll(shooterVoltage, shooterCurrent, shooterVelocity);
 
-        inputs.bottomLeftConnected = bottomLeft.isAlive();
-        inputs.topRightConnected = topRight.isAlive();
-        inputs.bottomRightConnected = bottomRight.isAlive();
-    }
+    inputs.topLeftConnected = shooterStatus.isOK();
+    inputs.shooterAppliedVolts = shooterVoltage.getValueAsDouble();
+    inputs.shooterCurrentAmps = shooterCurrent.getValueAsDouble();
+    inputs.shooterVelocityRPS = shooterVelocity.getValueAsDouble();
 
-    @Override
-    public void setRPS(double rps) {
-        topLeft.setControl(shooterPid.withVelocity(rps));
-    }
+    inputs.bottomLeftConnected = bottomLeft.isAlive();
+    inputs.topRightConnected = topRight.isAlive();
+    inputs.bottomRightConnected = bottomRight.isAlive();
+  }
 
-    @Override
-    public void stop() {
-        topLeft.stopMotor();
-    }
+  @Override
+  public void setRPS(double rps) {
+    topLeft.setControl(shooterPid.withVelocity(rps));
+  }
+
+  @Override
+  public void stop() {
+    topLeft.stopMotor();
+  }
 }

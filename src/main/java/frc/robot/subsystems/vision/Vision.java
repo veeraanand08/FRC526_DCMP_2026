@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.commands.AutoAlign;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.util.RobotUtil;
-
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
