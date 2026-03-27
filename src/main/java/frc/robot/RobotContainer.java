@@ -82,6 +82,7 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOTalonFX());
         break;
       case SIM:
+        SimulatedArena.getInstance().resetFieldForAuto();
         driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =

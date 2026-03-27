@@ -126,9 +126,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                   rawGyroRotation,
                   lastModulePositions,
                   new Pose2d(
-                          1,
-                          1,
-                          Rotation2d.kZero
+                          3,
+                          3,
+                          new Rotation2d()
                   ));
 
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
