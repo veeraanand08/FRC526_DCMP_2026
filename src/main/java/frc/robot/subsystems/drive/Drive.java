@@ -51,6 +51,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.RobotUtil;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -125,9 +126,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-  private final SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(
-          kinematics, rawGyroRotation, lastModulePositions, new Pose2d(3, 3, new Rotation2d()));
+  private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
@@ -144,6 +143,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
     modules[3] = new Module(brModuleIO, 3, TunerConstants.BackRight);
+
+    Pose2d startingPose =
+        !RobotUtil.isRedAlliance()
+            ? new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0))
+            : new Pose2d(new Translation2d(Meter.of(16), Meter.of(4)), Rotation2d.fromDegrees(180));
+
+    poseEstimator =
+        new SwerveDrivePoseEstimator(
+            kinematics, rawGyroRotation, lastModulePositions, startingPose);
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -363,6 +371,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   public void setPose(Pose2d pose) {
     resetSimulationPoseCallBack.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  /** Resets the current odometry rotation. */
+  public void zeroGyro(boolean allianceRelative) {
+    if (allianceRelative && RobotUtil.isRedAlliance()) {
+      setPose(new Pose2d(getPose().getTranslation(), Rotation2d.kPi));
+    } else {
+      setPose(new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
+    }
   }
 
   /** Adds a new timestamped vision measurement. */

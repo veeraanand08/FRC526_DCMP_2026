@@ -99,18 +99,22 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive,
-//                                new VisionIOPhotonVisionSim(
-//                                    VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0,
-//                 drive::getPose),
-//                                new VisionIOPhotonVisionSim(
-//                                    VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1,
-//                 drive::getPose),
-//                                new VisionIOPhotonVisionSim(
-//                                    VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2,
-//                 drive::getPose),
-//                                new VisionIOPhotonVisionSim(
-//                                    VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3,
-//                 drive::getPose));
+                //                                new VisionIOPhotonVisionSim(
+                //                                    VisionConstants.CAMERA_0_NAME,
+                // VisionConstants.robotToCamera0,
+                //                 drive::getPose),
+                //                                new VisionIOPhotonVisionSim(
+                //                                    VisionConstants.CAMERA_1_NAME,
+                // VisionConstants.robotToCamera1,
+                //                 drive::getPose),
+                //                                new VisionIOPhotonVisionSim(
+                //                                    VisionConstants.CAMERA_2_NAME,
+                // VisionConstants.robotToCamera2,
+                //                 drive::getPose),
+                //                                new VisionIOPhotonVisionSim(
+                //                                    VisionConstants.CAMERA_3_NAME,
+                // VisionConstants.robotToCamera3,
+                //                 drive::getPose));
                 new VisionIO() {});
         shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOSim());
@@ -182,12 +186,10 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX());
+    // Lock wheels to X pattern
+    Command lockWheels = Commands.runOnce(drive::stopWithX, drive);
     // Reset gyro to 0°
-    Command zeroGyro =
-        Commands.runOnce(
-                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                drive)
-            .ignoringDisable(true);
+    Command zeroGyro = Commands.runOnce(() -> drive.zeroGyro(true), drive).ignoringDisable(true);
     Command autoAlign =
         DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -211,7 +213,7 @@ public class RobotContainer {
     if (DriverStation.isTest()) {
       // single controller for testing
       driverController.a().whileTrue(autoAlign);
-      driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
+      driverController.x().whileTrue(lockWheels);
       driverController.povLeft().onTrue(zeroGyro);
 
       driverController.leftBumper().whileTrue(holdIntake);
@@ -222,11 +224,9 @@ public class RobotContainer {
       driverController.povUp().onTrue(resetIntake);
     } else {
       // driver controls
-      driverController
-          .leftBumper()
-          .onTrue(Commands.runOnce(drive::stopWithX, drive)); // Switch to X pattern
-      driverController.povLeft().onTrue(zeroGyro);
       driverController.a().whileTrue(autoAlign);
+      driverController.leftBumper().whileTrue(lockWheels);
+      driverController.povLeft().onTrue(zeroGyro);
 
       // operator controls
       operatorController.leftBumper().whileTrue(holdIntake);
