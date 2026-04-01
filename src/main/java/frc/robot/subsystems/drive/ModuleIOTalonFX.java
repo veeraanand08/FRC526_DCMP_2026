@@ -46,7 +46,6 @@ import java.util.Queue;
 public class ModuleIOTalonFX implements ModuleIO {
   // Current limits
   private static final double DRIVE_SUPPLY_LIMIT = 70.0;
-  private static final double TURN_STATOR_LIMIT = 60.0;
   private static final double TURN_SUPPLY_LIMIT = 40.0;
 
   private final SwerveModuleConstants<
@@ -124,7 +123,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));
 
     // Configure turn motor
-    var turnConfig = new TalonFXConfiguration();
+    var turnConfig = constants.SteerMotorInitialConfigs;
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     turnConfig.Slot0 = constants.SteerMotorGains;
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
@@ -143,9 +142,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    turnConfig.CurrentLimits.StatorCurrentLimit = TURN_STATOR_LIMIT;
     turnConfig.CurrentLimits.SupplyCurrentLimit = TURN_SUPPLY_LIMIT;
-    turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnConfig.MotorOutput.Inverted =
         constants.SteerMotorInverted
@@ -198,10 +195,11 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     // Refresh all signals
+    BaseStatusSignal.refreshAll(drivePosition, turnPosition);
     var driveStatus =
-        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
+        BaseStatusSignal.refreshAll(driveVelocity, driveAppliedVolts, driveCurrent);
     var turnStatus =
-        BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
+        BaseStatusSignal.refreshAll(turnVelocity, turnAppliedVolts, turnCurrent);
     var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
 
     // Update drive inputs

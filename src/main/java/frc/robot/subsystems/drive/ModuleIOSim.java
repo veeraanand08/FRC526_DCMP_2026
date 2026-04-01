@@ -15,6 +15,8 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import frc.robot.util.PhoenixUtil;
 import java.util.Arrays;
@@ -27,7 +29,10 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 public class ModuleIOSim extends ModuleIOTalonFX {
   private final SwerveModuleSimulation simulation;
 
-  public ModuleIOSim(SwerveModuleConstants constants, SwerveModuleSimulation simulation) {
+  public ModuleIOSim(
+      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+          constants,
+      SwerveModuleSimulation simulation) {
     super(PhoenixUtil.regulateModuleConstantForSimulation(constants));
 
     this.simulation = simulation;
