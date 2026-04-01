@@ -6,12 +6,14 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
+import frc.robot.util.PhoenixUtil;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX topLeft;
@@ -69,21 +71,23 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, shooterVoltage, shooterCurrent, shooterVelocity);
+
+    PhoenixUtil.registerSignals(
+        CANConstants.SUPERSTRUCTURE_CAN_BUS, shooterVoltage, shooterCurrent, shooterVelocity);
+
+    ParentDevice.optimizeBusUtilizationForAll(0, topLeft, bottomLeft, topRight, bottomRight);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    var shooterStatus =
-        BaseStatusSignal.refreshAll(shooterVoltage, shooterCurrent, shooterVelocity);
-
-    inputs.topLeftConnected = shooterStatus.isOK();
+    inputs.topLeftConnected = topLeft.isConnected();
     inputs.shooterAppliedVolts = shooterVoltage.getValueAsDouble();
     inputs.shooterCurrentAmps = shooterCurrent.getValueAsDouble();
     inputs.shooterVelocityRPS = shooterVelocity.getValueAsDouble();
 
-    inputs.bottomLeftConnected = bottomLeft.isAlive();
-    inputs.topRightConnected = topRight.isAlive();
-    inputs.bottomRightConnected = bottomRight.isAlive();
+    inputs.bottomLeftConnected = bottomLeft.isConnected();
+    inputs.topRightConnected = topRight.isConnected();
+    inputs.bottomRightConnected = bottomRight.isConnected();
   }
 
   @Override

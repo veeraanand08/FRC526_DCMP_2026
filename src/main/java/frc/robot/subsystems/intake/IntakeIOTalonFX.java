@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,6 +18,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
+import frc.robot.util.PhoenixUtil;
 
 public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
@@ -107,6 +109,18 @@ public class IntakeIOTalonFX implements IntakeIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
 
+    PhoenixUtil.registerSignals(
+        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+        pivotVoltage,
+        pivotCurrent,
+        pivotAngle,
+        pivotVelocity,
+        rollerVoltage,
+        rollerCurrent,
+        rollerVelocity);
+
+    ParentDevice.optimizeBusUtilizationForAll(0, roller, pivot);
+
     //    encoderAngle = pivotEncoder.getAbsolutePosition();
     //
     //    BaseStatusSignal.setUpdateFrequencyForAll(50.0, encoderAngle);
@@ -114,17 +128,17 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    var pivotStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
-    var rollerStatus = BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle);
     //    var encoderStatus = BaseStatusSignal.refreshAll(encoderAngle);
 
-    inputs.pivotConnected = pivotStatus.isOK();
+    inputs.pivotConnected =
+        BaseStatusSignal.isAllGood(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
     inputs.pivotPositionDeg = Units.rotationsToDegrees(pivotAngle.getValueAsDouble());
     inputs.pivotVelocityRPS = pivotVelocity.getValueAsDouble();
 
-    inputs.rollerConnected = rollerStatus.isOK();
+    inputs.rollerConnected =
+        BaseStatusSignal.isAllGood(rollerVoltage, rollerCurrent, rollerVelocity);
     inputs.rollerAppliedVolts = rollerVoltage.getValueAsDouble();
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
