@@ -4,8 +4,8 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 public final class IntakeConstants {
-  public static final int ROLLER_STATOR_LIMIT = 80;
-  public static final int ROLLER_SUPPLY_LIMIT = 60;
+  public static final int ROLLER_STATOR_LIMIT = 20;
+  public static final int ROLLER_SUPPLY_LIMIT = 30;
   public static final InvertedValue ROLLER_INVERTED = InvertedValue.Clockwise_Positive;
   public static final double ROLLER_MOI = 0.001;
   public static final double ROLLER_GEAR_RATIO = 1.0;

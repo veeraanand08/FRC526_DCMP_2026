@@ -3,9 +3,9 @@ package frc.robot.subsystems.feeder;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 public final class FeederConstants {
-  public static final int INDEXER_STATOR_LIMIT = 80;
-  public static final int INDEXER_SUPPLY_LIMIT = 60;
-  public static final int KICKER_STATOR_LIMIT = 80;
+  public static final int INDEXER_STATOR_LIMIT = 60;
+  public static final int INDEXER_SUPPLY_LIMIT = 40;
+  public static final int KICKER_STATOR_LIMIT = 100;
   public static final int KICKER_SUPPLY_LIMIT = 60;
 
   public static final InvertedValue INDEXER_INVERTED = InvertedValue.CounterClockwise_Positive;
