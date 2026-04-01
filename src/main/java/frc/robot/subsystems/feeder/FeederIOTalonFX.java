@@ -31,8 +31,8 @@ public class FeederIOTalonFX implements FeederIO {
   private final StatusSignal<AngularVelocity> kickerVelocity;
 
   public FeederIOTalonFX() {
-    indexer = new TalonFX(CANConstants.indexer, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    kicker = new TalonFX(CANConstants.kicker, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    indexer = new TalonFX(CANConstants.INDEXER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    kicker = new TalonFX(CANConstants.KICKER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     indexerPid = new VelocityVoltage(0);
     kickerPid = new VelocityVoltage(0);
@@ -47,9 +47,11 @@ public class FeederIOTalonFX implements FeederIO {
     indexerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     indexerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    indexerConfig.Slot0.kP = FeederConstants.INDEXER_P;
-    indexerConfig.Slot0.kI = FeederConstants.INDEXER_I;
-    indexerConfig.Slot0.kD = FeederConstants.INDEXER_D;
+    indexerConfig.Slot0.kP = FeederConstants.INDEXER_KP;
+    indexerConfig.Slot0.kI = FeederConstants.INDEXER_KI;
+    indexerConfig.Slot0.kD = FeederConstants.INDEXER_KD;
+    indexerConfig.Slot0.kS = FeederConstants.INDEXER_KS;
+    indexerConfig.Slot0.kV =  FeederConstants.INDEXER_KV;
 
     kickerConfig.MotorOutput.Inverted = FeederConstants.KICKER_INVERTED;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -58,9 +60,11 @@ public class FeederIOTalonFX implements FeederIO {
     kickerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     kickerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    kickerConfig.Slot0.kP = FeederConstants.KICKER_P;
-    kickerConfig.Slot0.kI = FeederConstants.KICKER_I;
-    kickerConfig.Slot0.kD = FeederConstants.KICKER_D;
+    kickerConfig.Slot0.kP = FeederConstants.KICKER_KP;
+    kickerConfig.Slot0.kI = FeederConstants.KICKER_KI;
+    kickerConfig.Slot0.kD = FeederConstants.KICKER_KD;
+    kickerConfig.Slot0.kS = FeederConstants.KICKER_KS;
+    kickerConfig.Slot0.kV =  FeederConstants.KICKER_KV;
 
     tryUntilOk(5, () -> indexer.getConfigurator().apply(indexerConfig));
     tryUntilOk(5, () -> kicker.getConfigurator().apply(kickerConfig));

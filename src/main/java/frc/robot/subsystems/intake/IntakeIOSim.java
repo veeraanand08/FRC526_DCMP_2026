@@ -40,10 +40,10 @@ public class IntakeIOSim implements IntakeIO {
 
     pivotPID =
         new PIDController(
-            IntakeConstants.PIVOT_P * 125.0, IntakeConstants.PIVOT_I, IntakeConstants.PIVOT_D);
+            IntakeConstants.PIVOT_KP * 125.0, IntakeConstants.PIVOT_KI, IntakeConstants.PIVOT_KD);
     rollerPID =
         new PIDController(
-            IntakeConstants.ROLLER_P * 10.0, IntakeConstants.ROLLER_I, IntakeConstants.ROLLER_D);
+            IntakeConstants.ROLLER_KP * 10.0, IntakeConstants.ROLLER_KI, IntakeConstants.ROLLER_KD);
   }
 
   public void updateInputs(IntakeIOInputs inputs) {

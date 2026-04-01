@@ -27,11 +27,11 @@ public class ShooterIOTalonFX implements ShooterIO {
   private final StatusSignal<AngularVelocity> shooterVelocity;
 
   public ShooterIOTalonFX() {
-    topLeft = new TalonFX(CANConstants.topLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    bottomLeft = new TalonFX(CANConstants.bottomLeft, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    topLeft = new TalonFX(CANConstants.SHOOTER_TOP_LEFT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    bottomLeft = new TalonFX(CANConstants.SHOOTER_BOTTOM_LEFT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
-    topRight = new TalonFX(CANConstants.topRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    bottomRight = new TalonFX(CANConstants.bottomRight, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    topRight = new TalonFX(CANConstants.SHOOTER_TOP_RIGHT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    bottomRight = new TalonFX(CANConstants.SHOOTER_BOTTOM_RIGHT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     shooterPid = new VelocityVoltage(0);
 
@@ -44,9 +44,11 @@ public class ShooterIOTalonFX implements ShooterIO {
     shooterConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    shooterConfig.Slot0.kP = ShooterConstants.SHOOTER_P;
-    shooterConfig.Slot0.kI = ShooterConstants.SHOOTER_I;
-    shooterConfig.Slot0.kD = ShooterConstants.SHOOTER_D;
+    shooterConfig.Slot0.kP = ShooterConstants.SHOOTER_KP;
+    shooterConfig.Slot0.kI = ShooterConstants.SHOOTER_KI;
+    shooterConfig.Slot0.kD = ShooterConstants.SHOOTER_KD;
+    shooterConfig.Slot0.kS = ShooterConstants.SHOOTER_KS;
+    shooterConfig.Slot0.kV = ShooterConstants.SHOOTER_KV;
 
     tryUntilOk(5, () -> topLeft.getConfigurator().apply(shooterConfig));
     tryUntilOk(5, () -> bottomLeft.getConfigurator().apply(shooterConfig));

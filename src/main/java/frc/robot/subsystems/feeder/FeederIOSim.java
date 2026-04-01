@@ -38,12 +38,12 @@ public class FeederIOSim implements FeederIO {
 
     kickerPID =
         new PIDController(
-            FeederConstants.KICKER_P * 125.0, FeederConstants.KICKER_I, FeederConstants.KICKER_D);
+            FeederConstants.KICKER_KP * 125.0, FeederConstants.KICKER_KI, FeederConstants.KICKER_KD);
     indexerPID =
         new PIDController(
-            FeederConstants.INDEXER_P * 125.0,
-            FeederConstants.INDEXER_I,
-            FeederConstants.INDEXER_D);
+            FeederConstants.INDEXER_KP * 125.0,
+            FeederConstants.INDEXER_KI,
+            FeederConstants.INDEXER_KD);
   }
 
   public void updateInputs(FeederIOInputs inputs) {

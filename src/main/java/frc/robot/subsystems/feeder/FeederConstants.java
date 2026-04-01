@@ -15,15 +15,17 @@ public final class FeederConstants {
   public static final double KICKER_MOI = 0.001;
   public static final double KICKER_GEAR_RATIO = 1.0; // adjust
 
-  public static final double INDEXER_P = 0.0004;
-  public static final double INDEXER_I = 0;
-  public static final double INDEXER_D = 0;
-  public static final double INDEXER_FF = 1.0 / 5676.0;
+  public static final double INDEXER_KP = 0.1;
+  public static final double INDEXER_KI = 0;
+  public static final double INDEXER_KD = 0;
+  public static final double INDEXER_KS = 0;
+  public static final double INDEXER_KV = 0.12;
 
-  public static final double KICKER_P = 0.0004;
-  public static final double KICKER_I = 0;
-  public static final double KICKER_D = 0;
-  public static final double KICKER_FF = 1.0 / 5676.0;
+  public static final double KICKER_KP = 0.1;
+  public static final double KICKER_KI = 0;
+  public static final double KICKER_KD = 0;
+  public static final double KICKER_KS = 0;
+  public static final double KICKER_KV = 0.12;
 
   public static final double INDEXER_RPS = 5000 / 60.0;
   public static final double KICKER_RPS = 5000 / 60.0;

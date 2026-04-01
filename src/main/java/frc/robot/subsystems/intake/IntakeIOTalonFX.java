@@ -4,10 +4,10 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,7 +22,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
   private final TalonFX pivot;
 
-  private final CANcoder pivotEncoder;
+//  private final CANcoder pivotEncoder;
 
   private final VelocityVoltage rollerPid;
   private final PositionVoltage pivotPid;
@@ -36,18 +36,19 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Current> rollerCurrent;
   private final StatusSignal<AngularVelocity> rollerVelocity;
 
-  private final StatusSignal<Angle> encoderAngle;
+//  private final StatusSignal<Angle> encoderAngle;
 
   public IntakeIOTalonFX() {
-    roller = new TalonFX(CANConstants.roller, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    pivot = new TalonFX(CANConstants.pivot, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    pivotEncoder = new CANcoder(CANConstants.encoder, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    roller = new TalonFX(CANConstants.INTAKE_ROLLER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    pivot = new TalonFX(CANConstants.INTAKE_PIVOT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+//    pivotEncoder = new CANcoder(CANConstants.PIVOT_ENCODER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     rollerPid = new VelocityVoltage(0);
     pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
+    CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
 
     rollerConfig.MotorOutput.Inverted = IntakeConstants.ROLLER_INVERTED;
     rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -56,9 +57,11 @@ public class IntakeIOTalonFX implements IntakeIO {
     rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     rollerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    rollerConfig.Slot0.kP = IntakeConstants.ROLLER_P;
-    rollerConfig.Slot0.kI = IntakeConstants.ROLLER_I;
-    rollerConfig.Slot0.kD = IntakeConstants.ROLLER_D;
+    rollerConfig.Slot0.kP = IntakeConstants.ROLLER_KP;
+    rollerConfig.Slot0.kI = IntakeConstants.ROLLER_KI;
+    rollerConfig.Slot0.kD = IntakeConstants.ROLLER_KD;
+    rollerConfig.Slot0.kS = IntakeConstants.ROLLER_KS;
+    rollerConfig.Slot0.kV = IntakeConstants.ROLLER_KV;
 
     pivotConfig.MotorOutput.Inverted = IntakeConstants.PIVOT_INVERTED;
     pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -67,16 +70,28 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
-    pivotConfig.Feedback.RotorToSensorRatio = IntakeConstants.PIVOT_GEAR_RATIO;
+    pivotConfig.Feedback.FeedbackSensorSource = IntakeConstants.FEEDBACK_SENSOR;
+    if (IntakeConstants.FEEDBACK_SENSOR == FeedbackSensorSourceValue.RotorSensor) {
+      pivotConfig.Feedback.SensorToMechanismRatio = IntakeConstants.PIVOT_GEAR_RATIO;
+    }
+    else {
+//      pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
+      pivotConfig.Feedback.RotorToSensorRatio = IntakeConstants.PIVOT_GEAR_RATIO;
+    }
 
-    pivotConfig.Slot0.kP = IntakeConstants.PIVOT_P;
-    pivotConfig.Slot0.kI = IntakeConstants.PIVOT_I;
-    pivotConfig.Slot0.kD = IntakeConstants.PIVOT_D;
+    pivotConfig.Slot0.kP = IntakeConstants.PIVOT_KP;
+    pivotConfig.Slot0.kI = IntakeConstants.PIVOT_KI;
+    pivotConfig.Slot0.kD = IntakeConstants.PIVOT_KD;
+    pivotConfig.Slot0.kS = IntakeConstants.PIVOT_KS;
+    pivotConfig.Slot0.kV = IntakeConstants.PIVOT_KV;
+    pivotConfig.Slot0.kA = IntakeConstants.PIVOT_KA;
+    pivotConfig.Slot0.kG = IntakeConstants.PIVOT_KG;
+
+    encoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.PIVOT_ENCODER_OFFSET;
 
     tryUntilOk(5, () -> pivot.getConfigurator().apply(pivotConfig));
     tryUntilOk(5, () -> roller.getConfigurator().apply(rollerConfig));
+//    tryUntilOk(5, () -> pivotEncoder.getConfigurator().apply(encoderConfig));
 
     rollerVoltage = roller.getMotorVoltage();
     rollerCurrent = roller.getStatorCurrent();
@@ -92,16 +107,16 @@ public class IntakeIOTalonFX implements IntakeIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
 
-    encoderAngle = pivotEncoder.getAbsolutePosition();
-
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, encoderAngle);
+//    encoderAngle = pivotEncoder.getAbsolutePosition();
+//
+//    BaseStatusSignal.setUpdateFrequencyForAll(50.0, encoderAngle);
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
     var pivotStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
     var rollerStatus = BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle);
-    var encoderStatus = BaseStatusSignal.refreshAll(encoderAngle);
+//    var encoderStatus = BaseStatusSignal.refreshAll(encoderAngle);
 
     inputs.pivotConnected = pivotStatus.isOK();
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
@@ -114,8 +129,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
 
-    inputs.encoderConnected = encoderStatus.isOK();
-    inputs.encoderPositionDeg = Units.rotationsToDegrees(encoderAngle.getValueAsDouble());
+//    inputs.encoderConnected = encoderStatus.isOK();
+//    inputs.encoderPositionDeg = Units.rotationsToDegrees(encoderAngle.getValueAsDouble());
   }
 
   @Override

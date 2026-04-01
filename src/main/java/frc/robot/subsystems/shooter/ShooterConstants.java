@@ -12,10 +12,11 @@ public final class ShooterConstants {
   public static final int SHOOTER_SUPPLY_LIMIT = 60;
   public static final int SHOOTER_STATOR_LIMIT = 80;
   public static final InvertedValue SHOOTER_LEFT_INVERTED = InvertedValue.Clockwise_Positive;
-  public static final double SHOOTER_P = 0.00004;
-  public static final double SHOOTER_I = 0;
-  public static final double SHOOTER_D = 0;
-  public static final double SHOOTER_FF = 1.0 / 5676.0;
+  public static final double SHOOTER_KP = 0.1;
+  public static final double SHOOTER_KI = 0;
+  public static final double SHOOTER_KD = 0;
+  public static final double SHOOTER_KS = 0;
+  public static final double SHOOTER_KV = 0.12;
 
   public static final MotorAlignmentValue BOTTOM_LEFT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
   public static final MotorAlignmentValue TOP_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Opposed;

@@ -39,20 +39,17 @@ public final class Constants {
   public static final class CANConstants {
     public static final CANBus SUPERSTRUCTURE_CAN_BUS = new CANBus("Superstructure");
 
-    public static final int indexer = 8;
-    public static final int kicker = 1;
+    public static final int SHOOTER_TOP_LEFT = 14;
+    public static final int SHOOTER_BOTTOM_LEFT = 15;
+    public static final int SHOOTER_TOP_RIGHT = 16;
+    public static final int SHOOTER_BOTTOM_RIGHT = 17;
 
-    public static final int roller = 10;
-    public static final int encoder = 9;
-    public static final int pivot = 7;
+    public static final int INTAKE_PIVOT = 18;
+    public static final int PIVOT_ENCODER = 22;
+    public static final int INTAKE_ROLLER = 19;
 
-    public static final int bottomLeft = 2;
-    public static final int bottomRight = 4;
-
-    public static final int topLeft = 3;
-    public static final int topRight = 5;
-
-    public static final int hood = 6;
+    public static final int KICKER = 20;
+    public static final int INDEXER = 21;
   }
 
   public static final class FieldConstants {

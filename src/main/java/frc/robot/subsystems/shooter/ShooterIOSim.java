@@ -24,9 +24,9 @@ public class ShooterIOSim implements ShooterIO {
 
     shooterPID =
         new PIDController(
-            ShooterConstants.SHOOTER_P * 125.0,
-            ShooterConstants.SHOOTER_I,
-            ShooterConstants.SHOOTER_D);
+            ShooterConstants.SHOOTER_KP * 125.0,
+            ShooterConstants.SHOOTER_KI,
+            ShooterConstants.SHOOTER_KD);
   }
 
   public void updateInputs(ShooterIOInputs inputs) {
