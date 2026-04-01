@@ -32,7 +32,8 @@ public final class IntakeConstants {
   public static final double PIVOT_KA = 0;
   public static final double PIVOT_KG = 0;
 
-  public static final FeedbackSensorSourceValue FEEDBACK_SENSOR = FeedbackSensorSourceValue.RotorSensor;
+  public static final FeedbackSensorSourceValue FEEDBACK_SENSOR =
+      FeedbackSensorSourceValue.RotorSensor;
 
   // setpoints, in degrees
   public static final double PIVOT_RAISED_ANGLE = 0;

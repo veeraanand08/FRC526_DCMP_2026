@@ -51,7 +51,7 @@ public class FeederIOTalonFX implements FeederIO {
     indexerConfig.Slot0.kI = FeederConstants.INDEXER_KI;
     indexerConfig.Slot0.kD = FeederConstants.INDEXER_KD;
     indexerConfig.Slot0.kS = FeederConstants.INDEXER_KS;
-    indexerConfig.Slot0.kV =  FeederConstants.INDEXER_KV;
+    indexerConfig.Slot0.kV = FeederConstants.INDEXER_KV;
 
     kickerConfig.MotorOutput.Inverted = FeederConstants.KICKER_INVERTED;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -64,7 +64,7 @@ public class FeederIOTalonFX implements FeederIO {
     kickerConfig.Slot0.kI = FeederConstants.KICKER_KI;
     kickerConfig.Slot0.kD = FeederConstants.KICKER_KD;
     kickerConfig.Slot0.kS = FeederConstants.KICKER_KS;
-    kickerConfig.Slot0.kV =  FeederConstants.KICKER_KV;
+    kickerConfig.Slot0.kV = FeederConstants.KICKER_KV;
 
     tryUntilOk(5, () -> indexer.getConfigurator().apply(indexerConfig));
     tryUntilOk(5, () -> kicker.getConfigurator().apply(kickerConfig));

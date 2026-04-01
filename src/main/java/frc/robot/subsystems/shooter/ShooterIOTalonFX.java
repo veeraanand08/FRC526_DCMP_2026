@@ -31,7 +31,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     bottomLeft = new TalonFX(CANConstants.SHOOTER_BOTTOM_LEFT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     topRight = new TalonFX(CANConstants.SHOOTER_TOP_RIGHT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    bottomRight = new TalonFX(CANConstants.SHOOTER_BOTTOM_RIGHT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    bottomRight =
+        new TalonFX(CANConstants.SHOOTER_BOTTOM_RIGHT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     shooterPid = new VelocityVoltage(0);
 

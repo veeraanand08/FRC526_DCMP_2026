@@ -22,7 +22,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
   private final TalonFX pivot;
 
-//  private final CANcoder pivotEncoder;
+  //  private final CANcoder pivotEncoder;
 
   private final VelocityVoltage rollerPid;
   private final PositionVoltage pivotPid;
@@ -36,12 +36,13 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Current> rollerCurrent;
   private final StatusSignal<AngularVelocity> rollerVelocity;
 
-//  private final StatusSignal<Angle> encoderAngle;
+  //  private final StatusSignal<Angle> encoderAngle;
 
   public IntakeIOTalonFX() {
     roller = new TalonFX(CANConstants.INTAKE_ROLLER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
     pivot = new TalonFX(CANConstants.INTAKE_PIVOT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-//    pivotEncoder = new CANcoder(CANConstants.PIVOT_ENCODER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
+    //    pivotEncoder = new CANcoder(CANConstants.PIVOT_ENCODER,
+    // CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     rollerPid = new VelocityVoltage(0);
     pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
@@ -73,9 +74,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotConfig.Feedback.FeedbackSensorSource = IntakeConstants.FEEDBACK_SENSOR;
     if (IntakeConstants.FEEDBACK_SENSOR == FeedbackSensorSourceValue.RotorSensor) {
       pivotConfig.Feedback.SensorToMechanismRatio = IntakeConstants.PIVOT_GEAR_RATIO;
-    }
-    else {
-//      pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
+    } else {
+      //      pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
       pivotConfig.Feedback.RotorToSensorRatio = IntakeConstants.PIVOT_GEAR_RATIO;
     }
 
@@ -91,7 +91,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     tryUntilOk(5, () -> pivot.getConfigurator().apply(pivotConfig));
     tryUntilOk(5, () -> roller.getConfigurator().apply(rollerConfig));
-//    tryUntilOk(5, () -> pivotEncoder.getConfigurator().apply(encoderConfig));
+    //    tryUntilOk(5, () -> pivotEncoder.getConfigurator().apply(encoderConfig));
 
     rollerVoltage = roller.getMotorVoltage();
     rollerCurrent = roller.getStatorCurrent();
@@ -107,16 +107,16 @@ public class IntakeIOTalonFX implements IntakeIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
 
-//    encoderAngle = pivotEncoder.getAbsolutePosition();
-//
-//    BaseStatusSignal.setUpdateFrequencyForAll(50.0, encoderAngle);
+    //    encoderAngle = pivotEncoder.getAbsolutePosition();
+    //
+    //    BaseStatusSignal.setUpdateFrequencyForAll(50.0, encoderAngle);
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
     var pivotStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
     var rollerStatus = BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle);
-//    var encoderStatus = BaseStatusSignal.refreshAll(encoderAngle);
+    //    var encoderStatus = BaseStatusSignal.refreshAll(encoderAngle);
 
     inputs.pivotConnected = pivotStatus.isOK();
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
@@ -129,8 +129,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
 
-//    inputs.encoderConnected = encoderStatus.isOK();
-//    inputs.encoderPositionDeg = Units.rotationsToDegrees(encoderAngle.getValueAsDouble());
+    //    inputs.encoderConnected = encoderStatus.isOK();
+    //    inputs.encoderPositionDeg = Units.rotationsToDegrees(encoderAngle.getValueAsDouble());
   }
 
   @Override

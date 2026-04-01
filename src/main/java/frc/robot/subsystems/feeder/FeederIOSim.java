@@ -38,7 +38,9 @@ public class FeederIOSim implements FeederIO {
 
     kickerPID =
         new PIDController(
-            FeederConstants.KICKER_KP * 125.0, FeederConstants.KICKER_KI, FeederConstants.KICKER_KD);
+            FeederConstants.KICKER_KP * 125.0,
+            FeederConstants.KICKER_KI,
+            FeederConstants.KICKER_KD);
     indexerPID =
         new PIDController(
             FeederConstants.INDEXER_KP * 125.0,
