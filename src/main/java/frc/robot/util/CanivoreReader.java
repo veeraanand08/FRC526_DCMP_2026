@@ -11,12 +11,12 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.CANBus.CANBusStatus;
 import java.util.Optional;
 
-public class CanivoreReader {
+public class CANivoreReader {
   private final CANBus canBus;
   private final Thread thread;
   private Optional<CANBusStatus> status = Optional.empty();
 
-  public CanivoreReader(String canBusName) {
+  public CANivoreReader(String canBusName) {
     canBus = new CANBus(canBusName);
     thread =
         new Thread(
@@ -33,7 +33,7 @@ public class CanivoreReader {
                 }
               }
             });
-    thread.setName("CanivoreReader");
+    thread.setName("CANivoreReader");
     thread.start();
   }
 

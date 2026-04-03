@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.CANivoreReader;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotUtil;
 import org.ironmaple.simulation.SimulatedArena;
@@ -29,6 +30,9 @@ public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+
+  private final CANivoreReader drivebaseReader = new CANivoreReader("Drivebase");
+  private final CANivoreReader superstructureReader = new CANivoreReader("Superstructure");
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -98,6 +102,38 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
 
     PhoenixUtil.refreshAll();
+
+    // Log CANivore status
+    if (Constants.currentMode == Constants.Mode.REAL) {
+      var canivoreStatus = drivebaseReader.getStatus();
+      if (canivoreStatus.isPresent()) {
+        Logger.recordOutput(
+            "CANivoreStatus/Drivebase/Status", canivoreStatus.get().Status.getName());
+        Logger.recordOutput(
+            "CANivoreStatus/Drivebase/Utilization", canivoreStatus.get().BusUtilization);
+        Logger.recordOutput("CANivoreStatus/Drivebase/OffCount", canivoreStatus.get().BusOffCount);
+        Logger.recordOutput(
+            "CANivoreStatus/Drivebase/TxFullCount", canivoreStatus.get().TxFullCount);
+        Logger.recordOutput("CANivoreStatus/Drivebase/ReceiveErrorCount", canivoreStatus.get().REC);
+        Logger.recordOutput(
+            "CANivoreStatus/Drivebase/TransmitErrorCount", canivoreStatus.get().TEC);
+      }
+      canivoreStatus = superstructureReader.getStatus();
+      if (canivoreStatus.isPresent()) {
+        Logger.recordOutput(
+            "CANivoreStatus/Superstructure/Status", canivoreStatus.get().Status.getName());
+        Logger.recordOutput(
+            "CANivoreStatus/Superstructure/Utilization", canivoreStatus.get().BusUtilization);
+        Logger.recordOutput(
+            "CANivoreStatus/Superstructure/OffCount", canivoreStatus.get().BusOffCount);
+        Logger.recordOutput(
+            "CANivoreStatus/Superstructure/TxFullCount", canivoreStatus.get().TxFullCount);
+        Logger.recordOutput(
+            "CANivoreStatus/Superstructure/ReceiveErrorCount", canivoreStatus.get().REC);
+        Logger.recordOutput(
+            "CANivoreStatus/Superstructure/TransmitErrorCount", canivoreStatus.get().TEC);
+      }
+    }
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
