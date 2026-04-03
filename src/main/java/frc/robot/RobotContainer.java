@@ -68,17 +68,15 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight),
                 (pose) -> {});
-        vision =
-            new Vision(
-                drive,
-                new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0),
-                new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1),
-                new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2),
-                new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3));
+        vision = new Vision(drive, new VisionIO() {});
+        //                new VisionIOPhotonVision(
+        //                    VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0),
+        //                new VisionIOPhotonVision(
+        //                    VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1),
+        //                new VisionIOPhotonVision(
+        //                    VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2),
+        //                new VisionIOPhotonVision(
+        //                    VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3));
         shooter = new Shooter(new ShooterIOTalonFX(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOTalonFX());
         intake = new Intake(new IntakeIOTalonFX());

@@ -1,8 +1,11 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.RobotUtil;
+import frc.robot.util.autoalign.AutoAlign;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -31,22 +34,22 @@ public class Shooter extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
 
-    //    Translation2d robotTranslation = robotPose.get().getTranslation();
-    //    Translation2d virtualTarget;
-    //    boolean autoAlignActive = AutoAlign.isActive();
-    //
-    //    if (autoAlignActive) virtualTarget = AutoAlign.getSavedVirtualTarget();
-    //    else
-    //      virtualTarget =
-    //          AutoAlign.getVirtualTarget(
-    //              robotVelocity.get(),
-    //              robotTranslation,
-    //              AutoAlign.getTargetTranslation(AutoAlign.Target.HUB, robotTranslation));
-    //    distanceToTarget = robotTranslation.getDistance(virtualTarget);
-    //
-    //    Logger.recordOutput(
-    //        "Shooter/Shooter Ready", RobotUtil.shiftTimer.isHubActive() && autoAlignActive);
-    //    Logger.recordOutput("Shooter/Distance to Target", distanceToTarget);
+    Translation2d robotTranslation = robotPose.get().getTranslation();
+    Translation2d virtualTarget;
+    boolean autoAlignActive = AutoAlign.isActive();
+
+    if (autoAlignActive) virtualTarget = AutoAlign.getSavedVirtualTarget();
+    else
+      virtualTarget =
+          AutoAlign.getVirtualTarget(
+              robotVelocity.get(),
+              robotTranslation,
+              AutoAlign.getTargetTranslation(AutoAlign.Target.HUB, robotTranslation));
+    distanceToTarget = robotTranslation.getDistance(virtualTarget);
+
+    Logger.recordOutput(
+        "Shooter/Shooter Ready", RobotUtil.shiftTimer.isHubActive() && autoAlignActive);
+    Logger.recordOutput("Shooter/Distance to Target", distanceToTarget);
   }
 
   public void shoot() {

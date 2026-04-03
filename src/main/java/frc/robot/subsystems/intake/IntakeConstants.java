@@ -4,8 +4,8 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 public final class IntakeConstants {
-  public static final int ROLLER_STATOR_LIMIT = 20;
-  public static final int ROLLER_SUPPLY_LIMIT = 30;
+  public static final int ROLLER_STATOR_LIMIT = 60;
+  public static final int ROLLER_SUPPLY_LIMIT = 40;
   public static final InvertedValue ROLLER_INVERTED = InvertedValue.Clockwise_Positive;
   public static final double ROLLER_MOI = 0.001;
   public static final double ROLLER_GEAR_RATIO = 1.0;
@@ -27,10 +27,12 @@ public final class IntakeConstants {
   public static final double PIVOT_KP = 0.1;
   public static final double PIVOT_KI = 0;
   public static final double PIVOT_KD = 0;
-  public static final double PIVOT_KS = 0;
+  public static final double PIVOT_KS = 0.05;
   public static final double PIVOT_KV = 0.12;
   public static final double PIVOT_KA = 0;
-  public static final double PIVOT_KG = 0;
+  public static final double PIVOT_KG = 0.0;
+  public static final double PIVOT_CRUISE_VELOCITY = 5.0;
+  public static final double PIVOT_CRUISE_ACCELERATION = 1.0;
 
   public static final FeedbackSensorSourceValue FEEDBACK_SENSOR =
       FeedbackSensorSourceValue.RotorSensor;

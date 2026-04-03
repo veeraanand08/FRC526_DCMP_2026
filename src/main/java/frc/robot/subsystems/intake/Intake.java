@@ -37,9 +37,6 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake", inputs);
 
     if (pivotState == PivotState.AGITATING) {
-      // safety check
-      //      if (isPivotStalled()) setPivotState(PivotState.LOWERING);
-
       double time = agitationTimer.get();
 
       double pos = Math.sin(time * 2 * Math.PI / IntakeConstants.AGITATION_PERIOD) * 0.5 + 0.5;

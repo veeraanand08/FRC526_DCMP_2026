@@ -6,6 +6,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -28,6 +29,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   private final VelocityVoltage rollerPid;
   private final PositionVoltage pivotPid;
+  private final MotionMagicVoltage pivotPidTrapezoidal;
 
   private final StatusSignal<Voltage> pivotVoltage;
   private final StatusSignal<Current> pivotCurrent;
@@ -48,6 +50,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     rollerPid = new VelocityVoltage(0);
     pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
+    pivotPidTrapezoidal = new MotionMagicVoltage(0);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -89,6 +92,9 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotConfig.Slot0.kA = IntakeConstants.PIVOT_KA;
     pivotConfig.Slot0.kG = IntakeConstants.PIVOT_KG;
 
+    pivotConfig.MotionMagic.MotionMagicCruiseVelocity = IntakeConstants.PIVOT_CRUISE_VELOCITY;
+    pivotConfig.MotionMagic.MotionMagicAcceleration = IntakeConstants.PIVOT_CRUISE_ACCELERATION;
+
     encoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.PIVOT_ENCODER_OFFSET;
 
     tryUntilOk(5, () -> pivot.getConfigurator().apply(pivotConfig));
@@ -101,6 +107,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, rollerVoltage, rollerCurrent, rollerVelocity);
 
+    pivot.setPosition(0.0);
     pivotVoltage = pivot.getMotorVoltage();
     pivotCurrent = pivot.getStatorCurrent();
     pivotAngle = pivot.getPosition();
@@ -153,7 +160,9 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   @Override
-  public void setPivotDeg(double deg) {}
+  public void setPivotDeg(double deg) {
+    pivot.setControl(pivotPidTrapezoidal.withPosition(Units.degreesToRotations(deg)));
+  }
 
   @Override
   public void setRollerRPS(double rps) {
