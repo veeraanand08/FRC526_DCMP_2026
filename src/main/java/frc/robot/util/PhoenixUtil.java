@@ -21,8 +21,11 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.ParentConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -44,6 +47,19 @@ public final class PhoenixUtil {
       var error = command.get();
       if (error.isOK()) break;
     }
+  }
+
+  public static TalonFXConfiguration createBaseTalonConfig(InvertedValue inverted, NeutralModeValue neutralMode, double statorLimit, double supplyLimit) {
+    TalonFXConfiguration config = new TalonFXConfiguration();
+
+    config.MotorOutput.Inverted = inverted;
+    config.MotorOutput.NeutralMode = neutralMode;
+    config.CurrentLimits.StatorCurrentLimit = statorLimit;
+    config.CurrentLimits.SupplyCurrentLimit = supplyLimit;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    return config;
   }
 
   /** Signals for synchronized refresh. */
