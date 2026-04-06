@@ -71,6 +71,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
           Math.max(
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+  private static final double ANGULAR_VELOCITY_COEFFICIENT = 0.1;
+  static final double ANTI_JITTER_THRESHOLD = 4.0 * 0.01;
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 54.431;
@@ -258,6 +260,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     speeds = ChassisSpeeds.discretize(speeds, 0.02);
+//    speeds = angularVelocitySkewCorrection(speeds);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
@@ -408,5 +411,24 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
       new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
       new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
+  }
+
+  /**
+   * Correct for skew that worsens as angular velocity increases
+   *
+   * @param robotRelativeVelocity The chassis speeds to set the robot to achieve.
+   * @return {@link ChassisSpeeds} of the robot after angular velocity skew correction.
+   */
+  public ChassisSpeeds angularVelocitySkewCorrection(ChassisSpeeds robotRelativeVelocity) {
+    var angularVelocity =
+        new Rotation2d(gyroInputs.yawVelocityRadPerSec * ANGULAR_VELOCITY_COEFFICIENT);
+    if (angularVelocity.getRadians() != 0.0) {
+      ChassisSpeeds fieldRelativeVelocity =
+          ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, getRotation());
+      robotRelativeVelocity =
+          ChassisSpeeds.fromFieldRelativeSpeeds(
+              fieldRelativeVelocity, getRotation().plus(angularVelocity));
+    }
+    return robotRelativeVelocity;
   }
 }

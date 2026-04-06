@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static frc.robot.subsystems.drive.Drive.ANTI_JITTER_THRESHOLD;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -30,6 +32,7 @@ public class Module {
   private final Alert turnDisconnectedAlert;
   private final Alert turnEncoderDisconnectedAlert;
   private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
+  private SwerveModuleState lastDesiredState;
 
   public Module(
       ModuleIO io,
@@ -50,6 +53,8 @@ public class Module {
         new Alert(
             "Disconnected turn encoder on module " + Integer.toString(index) + ".",
             AlertType.kError);
+
+    lastDesiredState = getState();
   }
 
   public void periodic() {
@@ -76,10 +81,25 @@ public class Module {
     // Optimize velocity setpoint
     state.optimize(getAngle());
     state.cosineScale(inputs.turnPosition);
+    applyAntiJitter(state, lastDesiredState);
 
     // Apply setpoints
     io.setDriveVelocity(state.speedMetersPerSecond / constants.WheelRadius);
     io.setTurnPosition(state.angle);
+
+    lastDesiredState = state;
+  }
+
+  /**
+   * Perform anti-jitter within modules if the speed requested is too low.
+   *
+   * @param moduleState Current {@link SwerveModuleState} requested.
+   * @param lastModuleState Previous {@link SwerveModuleState} used.
+   */
+  public void applyAntiJitter(SwerveModuleState moduleState, SwerveModuleState lastModuleState) {
+    if (Math.abs(moduleState.speedMetersPerSecond) <= ANTI_JITTER_THRESHOLD) {
+      moduleState.angle = lastModuleState.angle;
+    }
   }
 
   /** Runs the module with the specified output while controlling to zero degrees. */

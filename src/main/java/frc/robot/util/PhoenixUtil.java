@@ -49,7 +49,11 @@ public final class PhoenixUtil {
     }
   }
 
-  public static TalonFXConfiguration createBaseTalonConfig(InvertedValue inverted, NeutralModeValue neutralMode, double statorLimit, double supplyLimit) {
+  public static TalonFXConfiguration createBaseTalonConfig(
+      InvertedValue inverted,
+      NeutralModeValue neutralMode,
+      double statorLimit,
+      double supplyLimit) {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     config.MotorOutput.Inverted = inverted;
