@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.CANivoreReader;
 import frc.robot.util.PhoenixUtil;
-import frc.robot.util.RobotUtil;
+import frc.robot.util.ShiftTimer;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedPowerDistribution;
@@ -139,7 +139,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {
-    RobotUtil.shiftTimer.end();
+    ShiftTimer.instance.end();
   }
 
   @Override
@@ -148,7 +148,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    RobotUtil.shiftTimer.end();
+    ShiftTimer.instance.end();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -163,7 +163,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
-    RobotUtil.shiftTimer.start();
+    ShiftTimer.instance.start();
 
     // m_robotContainer.intakeSubsystem.setPivotBrake(true);
     // This makes sure that the autonomous stops running when
@@ -178,12 +178,12 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    RobotUtil.shiftTimer.update();
+    ShiftTimer.instance.update();
   }
 
   @Override
   public void testInit() {
-    RobotUtil.shiftTimer.end();
+    ShiftTimer.instance.end();
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }

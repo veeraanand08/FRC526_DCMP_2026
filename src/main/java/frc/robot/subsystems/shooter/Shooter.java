@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.RobotUtil;
+import frc.robot.util.ShiftTimer;
 import frc.robot.util.autoalign.AutoAlign;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -48,7 +48,7 @@ public class Shooter extends SubsystemBase {
     distanceToTarget = robotTranslation.getDistance(virtualTarget);
 
     Logger.recordOutput(
-        "Shooter/Shooter Ready", RobotUtil.shiftTimer.isHubActive() && autoAlignActive);
+        "Shooter/Shooter Ready", autoAlignActive && ShiftTimer.instance.isHubActive());
     Logger.recordOutput("Shooter/Distance to Target", distanceToTarget);
   }
 
