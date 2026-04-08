@@ -91,7 +91,7 @@ public class IntakeIOSim implements IntakeIO {
   }
 
   // at some point we'll make this use a profiled pid controller
-  public void setPivotDeg(double deg) {
+  public void setPivotProfiled(double deg) {
     isClosedLoopPivot = true;
     pivotPID.setSetpoint(Math.toRadians(deg));
   }

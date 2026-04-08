@@ -4,14 +4,15 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -25,11 +26,9 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
   private final TalonFX pivot;
 
-  //  private final CANcoder pivotEncoder;
-
   private final VelocityVoltage rollerPid;
   private final PositionVoltage pivotPid;
-  private final MotionMagicVoltage pivotPidTrapezoidal;
+  private final MotionMagicVoltage pivotMotionMagic;
 
   private final StatusSignal<Voltage> pivotVoltage;
   private final StatusSignal<Current> pivotCurrent;
@@ -40,21 +39,16 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final StatusSignal<Current> rollerCurrent;
   private final StatusSignal<AngularVelocity> rollerVelocity;
 
-  //  private final StatusSignal<Angle> encoderAngle;
-
   public IntakeIOTalonFX() {
     roller = new TalonFX(CANConstants.INTAKE_ROLLER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
     pivot = new TalonFX(CANConstants.INTAKE_PIVOT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-    //    pivotEncoder = new CANcoder(CANConstants.PIVOT_ENCODER,
-    // CANConstants.SUPERSTRUCTURE_CAN_BUS);
 
     rollerPid = new VelocityVoltage(0);
     pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
-    pivotPidTrapezoidal = new MotionMagicVoltage(0);
+    pivotMotionMagic = new MotionMagicVoltage(0);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
-    CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
 
     rollerConfig.MotorOutput.Inverted = IntakeConstants.ROLLER_INVERTED;
     rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -76,13 +70,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    pivotConfig.Feedback.FeedbackSensorSource = IntakeConstants.FEEDBACK_SENSOR;
-    if (IntakeConstants.FEEDBACK_SENSOR == FeedbackSensorSourceValue.RotorSensor) {
-      pivotConfig.Feedback.SensorToMechanismRatio = IntakeConstants.PIVOT_GEAR_RATIO;
-    } else {
-      //      pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
-      pivotConfig.Feedback.RotorToSensorRatio = IntakeConstants.PIVOT_GEAR_RATIO;
-    }
+    pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    pivotConfig.Feedback.SensorToMechanismRatio = IntakeConstants.PIVOT_GEAR_RATIO;
 
     pivotConfig.Slot0.kP = IntakeConstants.PIVOT_KP;
     pivotConfig.Slot0.kI = IntakeConstants.PIVOT_KI;
@@ -91,15 +80,13 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotConfig.Slot0.kV = IntakeConstants.PIVOT_KV;
     pivotConfig.Slot0.kA = IntakeConstants.PIVOT_KA;
     pivotConfig.Slot0.kG = IntakeConstants.PIVOT_KG;
+    pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     pivotConfig.MotionMagic.MotionMagicCruiseVelocity = IntakeConstants.PIVOT_CRUISE_VELOCITY;
     pivotConfig.MotionMagic.MotionMagicAcceleration = IntakeConstants.PIVOT_CRUISE_ACCELERATION;
 
-    encoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.PIVOT_ENCODER_OFFSET;
-
     tryUntilOk(5, () -> pivot.getConfigurator().apply(pivotConfig));
     tryUntilOk(5, () -> roller.getConfigurator().apply(rollerConfig));
-    //    tryUntilOk(5, () -> pivotEncoder.getConfigurator().apply(encoderConfig));
 
     rollerVoltage = roller.getMotorVoltage();
     rollerCurrent = roller.getStatorCurrent();
@@ -128,15 +115,12 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     ParentDevice.optimizeBusUtilizationForAll(0, roller, pivot);
 
-    //    encoderAngle = pivotEncoder.getAbsolutePosition();
-    //
-    //    BaseStatusSignal.setUpdateFrequencyForAll(50.0, encoderAngle);
+    // Request is ignored until the robot is enabled, where it will switch to brake mode
+    pivot.setControl(new StaticBrake());
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    //    var encoderStatus = BaseStatusSignal.refreshAll(encoderAngle);
-
     inputs.pivotConnected =
         BaseStatusSignal.isAllGood(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
@@ -149,9 +133,6 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.rollerAppliedVolts = rollerVoltage.getValueAsDouble();
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
-
-    //    inputs.encoderConnected = encoderStatus.isOK();
-    //    inputs.encoderPositionDeg = Units.rotationsToDegrees(encoderAngle.getValueAsDouble());
   }
 
   @Override
@@ -160,8 +141,8 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   @Override
-  public void setPivotDeg(double deg) {
-    pivot.setControl(pivotPidTrapezoidal.withPosition(Units.degreesToRotations(deg)));
+  public void setPivotProfiled(double deg) {
+    pivot.setControl(pivotMotionMagic.withPosition(Units.degreesToRotations(deg)));
   }
 
   @Override

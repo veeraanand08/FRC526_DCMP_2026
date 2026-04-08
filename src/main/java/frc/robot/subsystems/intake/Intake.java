@@ -108,7 +108,7 @@ public class Intake extends SubsystemBase {
    * @param deg Angle (in degrees) to rotate.
    */
   public void setPivotAngle(double deg) {
-    io.setPivotDeg(deg);
+    io.setPivotProfiled(deg);
     Logger.recordOutput("Intake/Pivot Setpoint", deg);
   }
 

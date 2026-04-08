@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 public final class IntakeConstants {
@@ -33,9 +32,6 @@ public final class IntakeConstants {
   public static final double PIVOT_KG = 0.0;
   public static final double PIVOT_CRUISE_VELOCITY = 5.0;
   public static final double PIVOT_CRUISE_ACCELERATION = 1.0;
-
-  public static final FeedbackSensorSourceValue FEEDBACK_SENSOR =
-      FeedbackSensorSourceValue.RotorSensor;
 
   // setpoints, in degrees
   public static final double PIVOT_RAISED_ANGLE = 0;
