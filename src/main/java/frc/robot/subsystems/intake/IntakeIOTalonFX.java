@@ -20,7 +20,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
-import frc.robot.util.PhoenixUtil;
 
 public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
@@ -92,28 +91,24 @@ public class IntakeIOTalonFX implements IntakeIO {
     rollerCurrent = roller.getStatorCurrent();
     rollerVelocity = roller.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100.0, rollerVoltage, rollerCurrent, rollerVelocity);
-
+    // Reset the integrated encoder
     pivot.setPosition(0.0);
+
     pivotVoltage = pivot.getMotorVoltage();
     pivotCurrent = pivot.getStatorCurrent();
     pivotAngle = pivot.getPosition();
     pivotVelocity = pivot.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100.0, pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
-
-    PhoenixUtil.registerSignals(
-        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+        100.0,
+        rollerVoltage,
+        rollerCurrent,
+        rollerVelocity,
         pivotVoltage,
         pivotCurrent,
         pivotAngle,
-        pivotVelocity,
-        rollerVoltage,
-        rollerCurrent,
-        rollerVelocity);
-
-    ParentDevice.optimizeBusUtilizationForAll(0, roller, pivot);
+        pivotVelocity);
+    ParentDevice.optimizeBusUtilizationForAll(roller, pivot);
 
     // Request is ignored until the robot is enabled, where it will switch to brake mode
     pivot.setControl(new StaticBrake());
@@ -121,15 +116,17 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    inputs.pivotConnected =
-        BaseStatusSignal.isAllGood(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
+    var pivotStatus =
+        BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
+    var rollerStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
+
+    inputs.pivotConnected = pivotStatus.isOK();
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
     inputs.pivotPositionDeg = Units.rotationsToDegrees(pivotAngle.getValueAsDouble());
     inputs.pivotVelocityRPS = pivotVelocity.getValueAsDouble();
 
-    inputs.rollerConnected =
-        BaseStatusSignal.isAllGood(rollerVoltage, rollerCurrent, rollerVelocity);
+    inputs.rollerConnected = rollerStatus.isOK();
     inputs.rollerAppliedVolts = rollerVoltage.getValueAsDouble();
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();

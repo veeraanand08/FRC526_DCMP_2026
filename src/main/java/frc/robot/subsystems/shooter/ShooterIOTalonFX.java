@@ -13,7 +13,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
-import frc.robot.util.PhoenixUtil;
 
 public class ShooterIOTalonFX implements ShooterIO {
   private final TalonFX topLeft;
@@ -71,16 +70,14 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         100.0, shooterVoltage, shooterCurrent, shooterVelocity);
-
-    PhoenixUtil.registerSignals(
-        CANConstants.SUPERSTRUCTURE_CAN_BUS, shooterVoltage, shooterCurrent, shooterVelocity);
-
-    ParentDevice.optimizeBusUtilizationForAll(0, topLeft, bottomLeft, topRight, bottomRight);
+    ParentDevice.optimizeBusUtilizationForAll(topLeft, bottomLeft, topRight, bottomRight);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    inputs.topLeftConnected = topLeft.isConnected();
+    var leaderStatus = BaseStatusSignal.refreshAll(shooterVoltage, shooterCurrent, shooterVelocity);
+
+    inputs.topLeftConnected = leaderStatus.isOK();
     inputs.shooterAppliedVolts = shooterVoltage.getValueAsDouble();
     inputs.shooterCurrentAmps = shooterCurrent.getValueAsDouble();
     inputs.shooterVelocityRPS = shooterVelocity.getValueAsDouble();
