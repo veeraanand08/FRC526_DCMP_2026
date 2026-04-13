@@ -92,7 +92,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     rollerCurrent = roller.getStatorCurrent();
     rollerVelocity = roller.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, rollerVoltage, rollerCurrent, rollerVelocity);
+    BaseStatusSignal.setUpdateFrequencyForAll(100.0, rollerVoltage, rollerCurrent, rollerVelocity);
 
     pivot.setPosition(0.0);
     pivotVoltage = pivot.getMotorVoltage();
@@ -101,7 +101,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     pivotVelocity = pivot.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
+        100.0, pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
 
     PhoenixUtil.registerSignals(
         CANConstants.SUPERSTRUCTURE_CAN_BUS,

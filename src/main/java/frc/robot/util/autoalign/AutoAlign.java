@@ -36,7 +36,7 @@ public class AutoAlign {
     return new Rotation2d(difference.getX(), difference.getY());
   }
 
-  public static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance) {
+  private static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance) {
     double robotX = robotTranslation.getX();
     if (!isRedAlliance && robotX < FieldConstants.BLUE_ALLIANCE_BOUNDARY) {
       return Target.HUB;

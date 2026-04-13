@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase {
           AutoAlign.getVirtualTarget(
               robotVelocity.get(),
               robotTranslation,
-              AutoAlign.getTargetTranslation(AutoAlign.Target.HUB, robotTranslation));
+              AutoAlign.getTargetTranslation(AutoAlign.Target.AUTO, robotTranslation));
     distanceToTarget = robotTranslation.getDistance(virtualTarget);
 
     Logger.recordOutput(

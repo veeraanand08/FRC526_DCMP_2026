@@ -70,7 +70,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     shooterVelocity = topLeft.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, shooterVoltage, shooterCurrent, shooterVelocity);
+        100.0, shooterVoltage, shooterCurrent, shooterVelocity);
 
     PhoenixUtil.registerSignals(
         CANConstants.SUPERSTRUCTURE_CAN_BUS, shooterVoltage, shooterCurrent, shooterVelocity);

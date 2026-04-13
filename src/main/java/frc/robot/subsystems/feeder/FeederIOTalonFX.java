@@ -22,7 +22,7 @@ public class FeederIOTalonFX implements FeederIO {
   private final VelocityVoltage indexerPid;
   private final VelocityVoltage kickerPid;
 
-  // inputs from spindexer
+  // inputs from indexer
   private final StatusSignal<Voltage> indexerVoltage;
   private final StatusSignal<Current> indexerCurrent;
   private final StatusSignal<AngularVelocity> indexerVelocity;
@@ -76,13 +76,13 @@ public class FeederIOTalonFX implements FeederIO {
     indexerVelocity = indexer.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, indexerVoltage, indexerCurrent, indexerVelocity);
+        100.0, indexerVoltage, indexerCurrent, indexerVelocity);
 
     kickerVoltage = kicker.getMotorVoltage();
     kickerCurrent = kicker.getStatorCurrent();
     kickerVelocity = kicker.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, kickerVoltage, kickerCurrent, kickerVelocity);
+    BaseStatusSignal.setUpdateFrequencyForAll(100.0, kickerVoltage, kickerCurrent, kickerVelocity);
 
     PhoenixUtil.registerSignals(
         CANConstants.SUPERSTRUCTURE_CAN_BUS,

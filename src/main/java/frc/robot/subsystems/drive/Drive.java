@@ -203,15 +203,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
     odometryLock.unlock();
 
-    // Stop moving when disabled
     if (DriverStation.isDisabled()) {
+      // Stop moving when disabled
       for (var module : modules) {
         module.stop();
       }
-    }
-
-    // Log empty setpoint states when disabled
-    if (DriverStation.isDisabled()) {
+      // Log empty setpoint states when disabled
       Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
