@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.CANivoreReader;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.subsystems.RobotStateHandler;
-import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -137,6 +136,7 @@ public class Robot extends LoggedRobot {
   public void disabledInit() {
     ShiftTimer.instance.end();
     RobotStateHandler.getInstance().disable();
+    m_robotContainer.resetSimulationField();
   }
 
   @Override
@@ -199,6 +199,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    SimulatedArena.getInstance().simulationPeriodic();
+    m_robotContainer.updateSimulation();
   }
 }
