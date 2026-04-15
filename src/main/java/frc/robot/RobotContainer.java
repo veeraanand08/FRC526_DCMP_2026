@@ -13,9 +13,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.ShooterFallback;
@@ -119,7 +121,7 @@ public class RobotContainer {
                 new VisionIO() {});
         shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOSim());
-        intake = new Intake(new IntakeIOSim());
+        intake = new Intake(new IntakeIOSimMaple(driveSimulation));
         break;
       default:
         // replay
@@ -210,6 +212,9 @@ public class RobotContainer {
     Command shootDefault = new ShooterFallback(shooter, feeder);
 
     drive.setDefaultCommand(defaultDriveCommand);
+
+    CommandGenericHID keyboard = new CommandGenericHID(0);
+    keyboard.button(1).whileTrue(holdIntake);
 
     if (DriverStation.isTest()) {
       // single controller for testing
