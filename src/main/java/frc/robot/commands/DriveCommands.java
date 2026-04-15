@@ -47,8 +47,8 @@ public class DriveCommands {
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
-    // Cube magnitude for more precise control
-    linearMagnitude = Math.pow(linearMagnitude, 3);
+    // Square magnitude for more precise control
+    linearMagnitude = Math.pow(linearMagnitude, 2);
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
