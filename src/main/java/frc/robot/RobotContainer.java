@@ -217,23 +217,22 @@ public class RobotContainer {
 
     drive.setDefaultCommand(defaultDriveCommand);
 
-    if (Constants.currentMode == Constants.Mode.SIM){
+    if (Constants.currentMode == Constants.Mode.SIM) {
       CommandGenericHID keyboard = new CommandGenericHID(0);
       keyboard.button(1).whileTrue(holdIntake);
 
-      Command keyboardLaunch =
-          Commands.runOnce(
-              () -> {
-                if (Constants.currentMode == Constants.Mode.SIM && driveSimulation != null) {
-                  maplesimIntake.shoot(driveSimulation, drive);
-                }
-              },
-              intake);
+      Command keyboardShootRepeat =
+          Commands.repeatingSequence(
+              // The actual shot logic
+              Commands.runOnce(
+                  () -> {
+                    maplesimIntake.shoot(driveSimulation, drive);
+                  }),
+              Commands.waitSeconds(0.1));
 
-      keyboard.button(2).onTrue(keyboardLaunch);
-      keyboard.button(3).whileFalse(autoAlign);
+      keyboard.button(2).whileTrue(keyboardShootRepeat);
+      keyboard.button(3).whileTrue(autoAlign);
     }
-    
 
     if (DriverStation.isTest()) {
       // single controller for testing
