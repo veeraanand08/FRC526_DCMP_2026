@@ -41,6 +41,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private IntakeIOSimMaple maplesimIntake;
   // subsystems
   private final Drive drive;
   private final Vision vision;
@@ -62,6 +63,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    maplesimIntake = null;
+
     switch (currentMode) {
       case REAL:
         drive =
@@ -121,7 +124,8 @@ public class RobotContainer {
                 new VisionIO() {});
         shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOSim());
-        intake = new Intake(new IntakeIOSimMaple(driveSimulation));
+        maplesimIntake = new IntakeIOSimMaple(driveSimulation);
+        intake = new Intake(maplesimIntake);
         break;
       default:
         // replay
@@ -213,8 +217,23 @@ public class RobotContainer {
 
     drive.setDefaultCommand(defaultDriveCommand);
 
-    CommandGenericHID keyboard = new CommandGenericHID(0);
-    keyboard.button(1).whileTrue(holdIntake);
+    if (Constants.currentMode == Constants.Mode.SIM){
+      CommandGenericHID keyboard = new CommandGenericHID(0);
+      keyboard.button(1).whileTrue(holdIntake);
+
+      Command keyboardLaunch =
+          Commands.runOnce(
+              () -> {
+                if (Constants.currentMode == Constants.Mode.SIM && driveSimulation != null) {
+                  maplesimIntake.shoot(driveSimulation, drive);
+                }
+              },
+              intake);
+
+      keyboard.button(2).onTrue(keyboardLaunch);
+      keyboard.button(3).whileFalse(autoAlign);
+    }
+    
 
     if (DriverStation.isTest()) {
       // single controller for testing
