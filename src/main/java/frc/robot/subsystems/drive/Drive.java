@@ -43,7 +43,6 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -51,6 +50,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.RobotUtil;
+import frc.robot.util.subsystems.ExtendedSubsystem;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -60,7 +60,7 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends SubsystemBase implements Vision.VisionConsumer {
+public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 50.0;
   public static final double DRIVE_BASE_RADIUS =
@@ -126,7 +126,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-  private final SwerveDrivePoseEstimator poseEstimator;
+  private final SwerveDrivePoseEstimator poseEstimator =
+      new SwerveDrivePoseEstimator(
+          kinematics, rawGyroRotation, lastModulePositions, new Pose2d(3, 3, new Rotation2d()));
 
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
@@ -143,15 +145,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
     modules[3] = new Module(brModuleIO, 3, TunerConstants.BackRight);
-
-    Pose2d startingPose =
-        !RobotUtil.isRedAlliance()
-            ? new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0))
-            : new Pose2d(new Translation2d(Meter.of(16), Meter.of(4)), Rotation2d.fromDegrees(180));
-
-    poseEstimator =
-        new SwerveDrivePoseEstimator(
-            kinematics, rawGyroRotation, lastModulePositions, startingPose);
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -194,6 +187,17 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   }
 
   @Override
+  public void disable() {
+    // Stop moving when disabled
+    for (var module : modules) {
+      module.stop();
+    }
+    // Log empty setpoint states when disabled
+    Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
+    Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+  }
+
+  @Override
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
@@ -202,16 +206,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
       module.periodic();
     }
     odometryLock.unlock();
-
-    if (DriverStation.isDisabled()) {
-      // Stop moving when disabled
-      for (var module : modules) {
-        module.stop();
-      }
-      // Log empty setpoint states when disabled
-      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
-    }
 
     // Update odometry
     double[] sampleTimestamps =

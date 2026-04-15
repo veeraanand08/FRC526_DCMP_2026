@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.CANivoreReader;
 import frc.robot.util.ShiftTimer;
+import frc.robot.util.subsystems.RobotStateHandler;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -135,6 +136,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     ShiftTimer.instance.end();
+    RobotStateHandler.getInstance().disable();
   }
 
   @Override
@@ -144,6 +146,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     ShiftTimer.instance.end();
+    RobotStateHandler.getInstance().enable();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -159,6 +162,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     ShiftTimer.instance.start();
+    RobotStateHandler.getInstance().enable();
 
     // m_robotContainer.intakeSubsystem.setPivotBrake(true);
     // This makes sure that the autonomous stops running when
@@ -179,6 +183,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     ShiftTimer.instance.end();
+    RobotStateHandler.getInstance().enable();
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }
