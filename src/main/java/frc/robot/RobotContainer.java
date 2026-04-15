@@ -63,10 +63,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight),
+                new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
+                new ModuleIOTalonFXReal(TunerConstants.FrontRight),
+                new ModuleIOTalonFXReal(TunerConstants.BackLeft),
+                new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
         vision = new Vision(drive, new VisionIO() {});
         //                new VisionIOPhotonVision(
@@ -84,15 +84,16 @@ public class RobotContainer {
       case SIM:
         SimulatedArena.getInstance().resetFieldForAuto();
         driveSimulation =
-            new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+            new SwerveDriveSimulation(
+                Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
                 new GyroIOSim(driveSimulation.getGyroSimulation()) {},
-                new ModuleIOSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
-                new ModuleIOSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
-                new ModuleIOSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
-                new ModuleIOSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
+                new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+                new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+                new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+                new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
                 driveSimulation::setSimulationWorldPose);
         vision =
             new Vision(
