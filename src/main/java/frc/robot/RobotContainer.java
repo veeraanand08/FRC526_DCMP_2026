@@ -294,7 +294,7 @@ public class RobotContainer {
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
 
     double hopperDistAdded =
-        Math.sin(Math.toRadians(intake.getPivotPosition())) * 0.365; // intake length
+        Math.sin(Math.toRadians(intake.getPivotPosition() - 17.5)) * 0.3; // intake length
     hopperDistAdded = hopperDistAdded > 0 ? hopperDistAdded : 0;
     Logger.recordOutput(
         "FieldSimulation/RobotComponentPositions",
