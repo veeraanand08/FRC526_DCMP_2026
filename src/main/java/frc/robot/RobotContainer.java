@@ -234,6 +234,7 @@ public class RobotContainer {
       keyboard.button(2).whileTrue(keyboardShootRepeat);
       keyboard.button(3).whileTrue(autoAlign);
       keyboard.button(4).onTrue(resetIntake);
+      keyboard.button(5).onTrue(agitate);
     }
 
     if (DriverStation.isTest()) {
@@ -286,9 +287,10 @@ public class RobotContainer {
     SimulatedArena.getInstance().simulationPeriodic();
     Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
     // Publish to telemetry using AdvantageKit
-    Logger.recordOutput("FieldSimulation/RobotPosition",
-    driveSimulation.getSimulatedDriveTrainPose());
-    // Logger.recordOutput("FieldSimulation/RobotPosition", new Pose2d(0, 0, Rotation2d.kZero)); // to setup the model
+    Logger.recordOutput(
+        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    // Logger.recordOutput("FieldSimulation/RobotPosition", new Pose2d(0, 0, Rotation2d.kZero)); //
+    // to setup the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
 
     double hopperDistAdded =
