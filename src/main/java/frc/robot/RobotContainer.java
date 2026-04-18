@@ -233,6 +233,7 @@ public class RobotContainer {
 
       keyboard.button(2).whileTrue(keyboardShootRepeat);
       keyboard.button(3).whileTrue(autoAlign);
+      keyboard.button(4).onTrue(resetIntake);
     }
 
     if (DriverStation.isTest()) {
@@ -285,17 +286,24 @@ public class RobotContainer {
     SimulatedArena.getInstance().simulationPeriodic();
     Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
     // Publish to telemetry using AdvantageKit
-    Logger.recordOutput(
-    "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-    // Logger.recordOutput("FieldSimulation/RobotPosition", new Pose2d(0, 0, Rotation2d.kZero)); //to setup the model
+    Logger.recordOutput("FieldSimulation/RobotPosition",
+    driveSimulation.getSimulatedDriveTrainPose());
+    // Logger.recordOutput("FieldSimulation/RobotPosition", new Pose2d(0, 0, Rotation2d.kZero)); // to setup the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
+
+    double hopperDistAdded =
+        Math.sin(Math.toRadians(intake.getPivotPosition())) * 0.365; // intake length
+    hopperDistAdded = hopperDistAdded > 0 ? hopperDistAdded : 0;
     Logger.recordOutput(
         "FieldSimulation/RobotComponentPositions",
         new Pose3d[] {
           new Pose3d(
-              -0.27, 0, 0.21, new Rotation3d(0, -Math.toRadians(intake.getPivotPosition()-17.5), 0))
+              -0.27,
+              0,
+              0.21,
+              new Rotation3d(0, -Math.toRadians(intake.getPivotPosition() - 17.5), 0)),
+          new Pose3d(-.3 - hopperDistAdded, 0, 0, new Rotation3d(0, 0, 0))
           // new Pose3d[] {new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0)) //to setup the model
-
         });
   }
 }
