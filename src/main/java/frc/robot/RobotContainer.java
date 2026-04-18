@@ -223,17 +223,7 @@ public class RobotContainer {
     if (Constants.currentMode == Constants.Mode.SIM) {
       CommandGenericHID keyboard = new CommandGenericHID(0);
       keyboard.button(1).whileTrue(holdIntake);
-
-      Command keyboardShootRepeat =
-          Commands.repeatingSequence(
-              // The actual shot logic
-              Commands.runOnce(
-                  () -> {
-                    superstructureSim.shoot();
-                  }),
-              Commands.waitSeconds(0.1));
-
-      keyboard.button(2).whileTrue(keyboardShootRepeat);
+      keyboard.button(2).whileTrue(superstructureSim.repeatedShoot());
       keyboard.button(3).whileTrue(autoAlign);
       keyboard.button(4).onTrue(resetIntake);
       keyboard.button(5).onTrue(agitate);

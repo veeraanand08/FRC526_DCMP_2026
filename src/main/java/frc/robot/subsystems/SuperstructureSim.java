@@ -7,6 +7,10 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.intake.Intake;
 import org.ironmaple.simulation.IntakeSimulation;
@@ -40,6 +44,10 @@ public class SuperstructureSim {
             IntakeSimulation.IntakeSide.BACK,
             // The intake can hold up to 40 fuel
             40);
+  }
+
+  public Command repeatedShoot() {
+    return new RepeatCommand(new SequentialCommandGroup(Commands.runOnce(this::shoot), Commands.waitSeconds(0.1)));
   }
 
   public void shoot() {
