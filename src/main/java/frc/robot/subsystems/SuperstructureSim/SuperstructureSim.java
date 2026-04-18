@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.SuperstructureSim;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.intake.Intake;
+
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -43,11 +44,11 @@ public class SuperstructureSim {
             // The intake is mounted on the back side of the chassis
             IntakeSimulation.IntakeSide.BACK,
             // The intake can hold up to 40 fuel
-            40);
+            SuperstructureSimConstants.INTAKE_CAPACITY);
   }
 
   public Command repeatedShoot() {
-    return new RepeatCommand(new SequentialCommandGroup(Commands.runOnce(this::shoot), Commands.waitSeconds(0.1)));
+    return new RepeatCommand(new SequentialCommandGroup(Commands.runOnce(this::shoot), Commands.waitSeconds(1 / SuperstructureSimConstants.BPS)));
   }
 
   public void shoot() {
@@ -64,7 +65,7 @@ public class SuperstructureSim {
             swerveDriveSimulation.getSimulatedDriveTrainPose().getTranslation(),
             // Specify the translation of the shooter from the robot center (in the shooter’s
             // reference frame)
-            new Translation2d(0.2, 0),
+            new Translation2d(0.2, -.2 + (Math.random() * (.4))), //y controls sides 
             // Specify the field-relative speed of the chassis, adding it to the initial velocity of
             // the projectile
             drive.getChassisSpeeds(),
@@ -79,18 +80,6 @@ public class SuperstructureSim {
             MetersPerSecond.of(4000.0 / 6000 * 10),
             // The angle at which the fuel is launched
             Degrees.of(65));
-    fuelOnFly
-        // Configure callbacks to visualize the flight trajectory of the projectile
-        .withProjectileTrajectoryDisplayCallBack(
-        // Callback for when the fuel will eventually hit the target (if configured)
-        (pose3ds) ->
-            Logger.recordOutput(
-                "Flywheel/FuelProjectileSuccessfulShot", pose3ds.toArray(Pose3d[]::new)),
-        // Callback for when the fuel will eventually miss the target, or if no target is configured
-        (pose3ds) ->
-            Logger.recordOutput(
-                "Flywheel/FuelProjectileUnsuccessfulShot", pose3ds.toArray(Pose3d[]::new)));
-
     fuelOnFly
         // Configure the note projectile to become a NoteOnField upon touching the ground
         .enableBecomesGamePieceOnFieldAfterTouchGround();

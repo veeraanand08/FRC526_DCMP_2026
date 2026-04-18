@@ -22,7 +22,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.ShooterFallback;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.SuperstructureSim;
+import frc.robot.subsystems.SuperstructureSim.SuperstructureSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.*;
 import frc.robot.subsystems.intake.*;
