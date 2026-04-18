@@ -203,6 +203,10 @@ public class Intake extends SubsystemBase {
     return inputs.pivotPositionDeg;
   }
 
+  public double getRollerRPS() {
+    return inputs.rollerVelocityRPS;
+  }
+
   @Override
   public void simulationPeriodic() {}
 }

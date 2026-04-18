@@ -10,7 +10,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -23,6 +22,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.ShooterFallback;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.SuperstructureSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.*;
 import frc.robot.subsystems.intake.*;
@@ -42,7 +42,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private IntakeIOSimMaple maplesimIntake;
   // subsystems
   private final Drive drive;
   private final Vision vision;
@@ -62,10 +61,13 @@ public class RobotContainer {
   // dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // Simulated things
+  private SuperstructureSim superstructureSim;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    maplesimIntake = null;
 
+    superstructureSim = null;
     switch (currentMode) {
       case REAL:
         drive =
@@ -125,8 +127,8 @@ public class RobotContainer {
                 new VisionIO() {});
         shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOSim());
-        maplesimIntake = new IntakeIOSimMaple(driveSimulation);
-        intake = new Intake(maplesimIntake);
+        intake = new Intake(new IntakeIOSim());
+        superstructureSim = new SuperstructureSim(intake, driveSimulation, drive);
         break;
       default:
         // replay
@@ -227,7 +229,7 @@ public class RobotContainer {
               // The actual shot logic
               Commands.runOnce(
                   () -> {
-                    maplesimIntake.shoot(driveSimulation, drive);
+                    superstructureSim.shoot();
                   }),
               Commands.waitSeconds(0.1));
 
@@ -293,19 +295,6 @@ public class RobotContainer {
     // to setup the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
 
-    double hopperDistAdded =
-        Math.sin(Math.toRadians(intake.getPivotPosition() - 17.5)) * 0.3; // intake length
-    hopperDistAdded = hopperDistAdded > 0 ? hopperDistAdded : 0;
-    Logger.recordOutput(
-        "FieldSimulation/RobotComponentPositions",
-        new Pose3d[] {
-          new Pose3d(
-              -0.27,
-              0,
-              0.21,
-              new Rotation3d(0, -Math.toRadians(intake.getPivotPosition() - 17.5), 0)),
-          new Pose3d(-.3 - hopperDistAdded, 0, 0, new Rotation3d(0, 0, 0))
-          // new Pose3d[] {new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0)) //to setup the model
-        });
+    superstructureSim.updateSuperstructureSim();
   }
 }
