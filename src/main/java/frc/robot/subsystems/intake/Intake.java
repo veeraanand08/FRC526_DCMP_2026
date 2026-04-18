@@ -199,6 +199,10 @@ public class Intake extends SubsystemBase {
         });
   }
 
+  public double getPivotPosition() {
+    return inputs.pivotPositionDeg;
+  }
+
   @Override
   public void simulationPeriodic() {}
 }

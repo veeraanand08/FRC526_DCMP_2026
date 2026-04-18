@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -284,6 +285,17 @@ public class RobotContainer {
     SimulatedArena.getInstance().simulationPeriodic();
     Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
     // Publish to telemetry using AdvantageKit
+    Logger.recordOutput(
+    "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    // Logger.recordOutput("FieldSimulation/RobotPosition", new Pose2d(0, 0, Rotation2d.kZero)); //to setup the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
+    Logger.recordOutput(
+        "FieldSimulation/RobotComponentPositions",
+        new Pose3d[] {
+          new Pose3d(
+              -0.27, 0, 0.21, new Rotation3d(0, -Math.toRadians(intake.getPivotPosition()-17.5), 0))
+          // new Pose3d[] {new Pose3d(0, 0, 0, new Rotation3d(0, 0, 0)) //to setup the model
+
+        });
   }
 }
