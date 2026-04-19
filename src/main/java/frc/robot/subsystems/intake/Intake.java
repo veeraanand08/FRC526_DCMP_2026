@@ -112,6 +112,14 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Intake/Pivot Setpoint", deg);
   }
 
+  public double getPivotPosition() {
+    return inputs.pivotPositionDeg;
+  }
+
+  public double getRollerRPS() {
+    return inputs.rollerVelocityRPS;
+  }
+
   /* Set the pivot and roller motor speeds to 0. */
   public void stop() {
     setRoller(false);
@@ -197,14 +205,6 @@ public class Intake extends SubsystemBase {
           setRoller(false);
           setPivotState(PivotState.RAISING);
         });
-  }
-
-  public double getPivotPosition() {
-    return inputs.pivotPositionDeg;
-  }
-
-  public double getRollerRPS() {
-    return inputs.rollerVelocityRPS;
   }
 
   @Override

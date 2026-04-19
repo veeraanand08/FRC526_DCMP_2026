@@ -43,4 +43,7 @@ public final class IntakeConstants {
       12.0; // time it takes to decay in seconds
 
   public static final double AGITATION_PERIOD = 4; // Period is in seconds
+
+  // sim
+  public static final int INTAKE_CAPACITY = 100;
 }

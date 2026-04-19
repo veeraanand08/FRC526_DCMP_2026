@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.*;
+import static frc.robot.Constants.currentMode;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,12 +22,24 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.commands.ShooterFallback;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.SuperstructureSim.SuperstructureSim;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.feeder.*;
-import frc.robot.subsystems.intake.*;
-import frc.robot.subsystems.shooter.*;
-import frc.robot.subsystems.vision.*;
+import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.FeederIO;
+import frc.robot.subsystems.feeder.FeederIOSim;
+import frc.robot.subsystems.feeder.FeederIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.superstructure.SuperstructureSim;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
 import org.ironmaple.simulation.SimulatedArena;
@@ -49,8 +61,6 @@ public class RobotContainer {
   private final Feeder feeder;
   private final Intake intake;
 
-  private SwerveDriveSimulation driveSimulation;
-
   // controllers
   private final CommandXboxController driverController =
       new CommandXboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
@@ -62,12 +72,11 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   // Simulated things
+  private SwerveDriveSimulation driveSimulation;
   private SuperstructureSim superstructureSim;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    superstructureSim = null;
     switch (currentMode) {
       case REAL:
         drive =
@@ -108,27 +117,21 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive,
-                //                                new VisionIOPhotonVisionSim(
-                //                                    VisionConstants.CAMERA_0_NAME,
-                // VisionConstants.robotToCamera0,
-                //                 drive::getPose),
-                //                                new VisionIOPhotonVisionSim(
-                //                                    VisionConstants.CAMERA_1_NAME,
-                // VisionConstants.robotToCamera1,
-                //                 drive::getPose),
-                //                                new VisionIOPhotonVisionSim(
-                //                                    VisionConstants.CAMERA_2_NAME,
-                // VisionConstants.robotToCamera2,
-                //                 drive::getPose),
-                //                                new VisionIOPhotonVisionSim(
-                //                                    VisionConstants.CAMERA_3_NAME,
-                // VisionConstants.robotToCamera3,
-                //                 drive::getPose));
-                new VisionIO() {});
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.CAMERA_0_NAME,
+                    VisionConstants.robotToCamera0,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.CAMERA_1_NAME,
+                    VisionConstants.robotToCamera1,
+                    driveSimulation::getSimulatedDriveTrainPose));
         shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOSim());
         intake = new Intake(new IntakeIOSim());
-        superstructureSim = new SuperstructureSim(intake, driveSimulation, drive);
+        superstructureSim =
+            new SuperstructureSim(
+                intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
+
         break;
       default:
         // replay
@@ -215,7 +218,9 @@ public class RobotContainer {
     Command agitate = intake.agitateCommand();
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
-    Command shoot = new ShooterCommand(shooter, feeder);
+    Command shoot;
+    if (currentMode == Constants.Mode.SIM) shoot = superstructureSim.shootCommand();
+    else shoot = new ShooterCommand(shooter, feeder);
     Command shootDefault = new ShooterFallback(shooter, feeder);
 
     drive.setDefaultCommand(defaultDriveCommand);
@@ -223,7 +228,7 @@ public class RobotContainer {
     if (Constants.currentMode == Constants.Mode.SIM) {
       CommandGenericHID keyboard = new CommandGenericHID(0);
       keyboard.button(1).whileTrue(holdIntake);
-      keyboard.button(2).whileTrue(superstructureSim.repeatedShoot());
+      keyboard.button(2).whileTrue(shoot);
       keyboard.button(3).whileTrue(autoAlign);
       keyboard.button(4).onTrue(resetIntake);
       keyboard.button(5).onTrue(agitate);
@@ -281,10 +286,7 @@ public class RobotContainer {
     // Publish to telemetry using AdvantageKit
     Logger.recordOutput(
         "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-    // Logger.recordOutput("FieldSimulation/RobotPosition", new Pose2d(0, 0, Rotation2d.kZero)); //
     // to setup the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
-
-    superstructureSim.updateSuperstructureSim();
   }
 }

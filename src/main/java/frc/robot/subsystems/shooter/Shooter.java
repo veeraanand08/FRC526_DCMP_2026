@@ -62,6 +62,10 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/Desired RPS", desiredRPS);
   }
 
+  public double getVelocityRPS() {
+    return inputs.shooterVelocityRPS;
+  }
+
   public boolean hasSpunUp() {
     return inputs.shooterVelocityRPS > desiredRPS - 1.5;
   }
