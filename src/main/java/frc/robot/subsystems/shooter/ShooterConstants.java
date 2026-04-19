@@ -36,5 +36,5 @@ public final class ShooterConstants {
       new LoggedNetworkNumber("/Tuning/Shooter/RPM", 3500);
 
   // sim
-  public static final double BPS = 30.0;
+  public static final double BPS = 15.0;
 }

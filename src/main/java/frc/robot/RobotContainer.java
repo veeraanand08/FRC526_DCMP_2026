@@ -37,9 +37,7 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.superstructure.SuperstructureSim;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
 import org.ironmaple.simulation.SimulatedArena;
@@ -117,14 +115,15 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive,
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.CAMERA_0_NAME,
-                    VisionConstants.robotToCamera0,
-                    driveSimulation::getSimulatedDriveTrainPose),
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.CAMERA_1_NAME,
-                    VisionConstants.robotToCamera1,
-                    driveSimulation::getSimulatedDriveTrainPose));
+                //                new VisionIOPhotonVisionSim(
+                //                    VisionConstants.CAMERA_0_NAME,
+                //                    VisionConstants.robotToCamera0,
+                //                    driveSimulation::getSimulatedDriveTrainPose),
+                //                new VisionIOPhotonVisionSim(
+                //                    VisionConstants.CAMERA_1_NAME,
+                //                    VisionConstants.robotToCamera1,
+                //                    driveSimulation::getSimulatedDriveTrainPose));
+                new VisionIO() {});
         shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIOSim());
         intake = new Intake(new IntakeIOSim());
@@ -218,15 +217,16 @@ public class RobotContainer {
     Command agitate = intake.agitateCommand();
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
-    Command shoot;
-    if (currentMode == Constants.Mode.SIM) shoot = superstructureSim.shootCommand();
-    else shoot = new ShooterCommand(shooter, feeder);
+    Command shoot = new ShooterCommand(shooter, feeder);
+    if (currentMode == Constants.Mode.SIM) {
+      shoot = superstructureSim.shootCommand();
+    }
     Command shootDefault = new ShooterFallback(shooter, feeder);
 
     drive.setDefaultCommand(defaultDriveCommand);
 
     if (Constants.currentMode == Constants.Mode.SIM) {
-      CommandGenericHID keyboard = new CommandGenericHID(0);
+      CommandGenericHID keyboard = new CommandGenericHID(2);
       keyboard.button(1).whileTrue(holdIntake);
       keyboard.button(2).whileTrue(shoot);
       keyboard.button(3).whileTrue(autoAlign);
