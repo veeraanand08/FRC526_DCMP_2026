@@ -152,6 +152,9 @@ public class RobotContainer {
         shooter = new Shooter(new ShooterIO() {}, drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder(new FeederIO() {});
         intake = new Intake(new IntakeIO() {});
+        superstructureSim =
+            new SuperstructureSim(
+                intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
     }
 
     // Have the autoChooser pull in all PathPlanner autos as options
@@ -222,6 +225,9 @@ public class RobotContainer {
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
     Command shoot = new ShooterCommand(shooter, feeder);
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      shoot = shoot.alongWith(superstructureSim.shootCommand());
+    }
     Command shootDefault = new ShooterFallback(shooter, feeder);
 
     new EventTrigger("Auto Align").whileTrue(autoAlign);
@@ -285,16 +291,15 @@ public class RobotContainer {
   }
 
   public void updateSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode == Constants.Mode.REAL) return;
 
     SimulatedArena.getInstance().simulationPeriodic();
     Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
 
-    superstructureSim.simulationPeriodic();
     // Publish to telemetry using AdvantageKit
     Logger.recordOutput(
         "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-    // to setup the model
+    // to set up the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
   }
 }

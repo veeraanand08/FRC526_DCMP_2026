@@ -6,12 +6,14 @@ package frc.robot;
 
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.CANivoreReader;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.subsystems.RobotStateHandler;
 import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedPowerDistribution;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -28,8 +30,8 @@ public class Robot extends LoggedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  private final CANivoreReader drivebaseReader = new CANivoreReader("Drivebase");
-  private final CANivoreReader superstructureReader = new CANivoreReader("Superstructure");
+//  private final CANivoreReader drivebaseReader = new CANivoreReader("Drivebase");
+//  private final CANivoreReader superstructureReader = new CANivoreReader("Superstructure");
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -72,7 +74,7 @@ public class Robot extends LoggedRobot {
         break;
     }
 
-    //    LoggedPowerDistribution.getInstance(50, PowerDistribution.ModuleType.kRev);
+    LoggedPowerDistribution.getInstance(50, PowerDistribution.ModuleType.kRev);
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
@@ -99,6 +101,7 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
 
     // Log CANivore status
+    /*
     if (Constants.currentMode == Constants.Mode.REAL) {
       var canivoreStatus = drivebaseReader.getStatus();
       if (canivoreStatus.isPresent()) {
@@ -129,6 +132,7 @@ public class Robot extends LoggedRobot {
             "CANivoreStatus/Superstructure/TransmitErrorCount", canivoreStatus.get().TEC);
       }
     }
+    */
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -162,9 +166,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     ShiftTimer.instance.start();
-    RobotStateHandler.getInstance().enable();
 
-    // m_robotContainer.intakeSubsystem.setPivotBrake(true);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -172,6 +174,8 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    RobotStateHandler.getInstance().enable();
   }
 
   /** This function is called periodically during operator control. */
@@ -183,9 +187,10 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     ShiftTimer.instance.end();
-    RobotStateHandler.getInstance().enable();
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+
+    RobotStateHandler.getInstance().enable();
   }
 
   /** This function is called periodically during test mode. */

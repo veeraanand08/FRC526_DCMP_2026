@@ -121,7 +121,7 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     shooterLoop.close();
   }
 }
