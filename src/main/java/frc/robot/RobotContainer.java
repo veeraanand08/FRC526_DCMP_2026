@@ -157,6 +157,9 @@ public class RobotContainer {
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
     }
 
+    // Configure the trigger bindings
+    configureBindings();
+
     // Have the autoChooser pull in all PathPlanner autos as options
     autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
 
@@ -180,9 +183,6 @@ public class RobotContainer {
     autoChooser.addDefaultOption("Do Nothing", Commands.none());
 
     DriverStation.silenceJoystickConnectionWarning(true);
-
-    // Configure the trigger bindings
-    configureBindings();
   }
 
   /**
@@ -230,9 +230,8 @@ public class RobotContainer {
     }
     Command shootDefault = new ShooterFallback(shooter, feeder);
 
-    new EventTrigger("Auto Align").whileTrue(autoAlign);
     new EventTrigger("Intake").whileTrue(holdIntake);
-    //    new EventTrigger("Shoot").whileTrue(shoot);
+    NamedCommands.registerCommand("Auto Align", autoAlign);
     NamedCommands.registerCommand("Shoot", shoot);
 
     drive.setDefaultCommand(defaultDriveCommand);
