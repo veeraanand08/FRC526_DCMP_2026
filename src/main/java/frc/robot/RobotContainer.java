@@ -48,6 +48,7 @@ import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -107,6 +108,7 @@ public class RobotContainer {
         break;
       case SIM:
         SimulatedArena.getInstance().resetFieldForAuto();
+        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
         driveSimulation =
             new SwerveDriveSimulation(
                 Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
