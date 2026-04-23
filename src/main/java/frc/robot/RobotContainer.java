@@ -6,7 +6,6 @@ package frc.robot;
 
 import static frc.robot.Constants.currentMode;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -43,6 +42,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.BetterAutoChooser;
 import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
@@ -175,7 +175,8 @@ public class RobotContainer {
     configureBindings();
 
     // Have the autoChooser pull in all PathPlanner autos as options
-    autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+    autoChooser =
+        new LoggedDashboardChooser<>("Auto Chooser", BetterAutoChooser.buildAutoChooser());
 
     // Set up SysId routines
     autoChooser.addOption(

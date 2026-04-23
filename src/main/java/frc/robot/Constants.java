@@ -4,8 +4,11 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -66,5 +69,8 @@ public final class Constants {
 
     public static final double RED_ALLIANCE_BOUNDARY = RED_LEFT_BUMP.getX();
     public static final double BLUE_ALLIANCE_BOUNDARY = BLUE_LEFT_BUMP.getX();
+
+    public static final Distance FIELD_LENGTH = Meters.of(16.541);
+    public static final Distance FIELD_WIDTH = Meters.of(8.069);
   }
 }
