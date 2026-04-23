@@ -107,7 +107,9 @@ public class RobotContainer {
         intake = new Intake(new IntakeIOTalonFX());
         break;
       case SIM:
-        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
+        Arena2026Rebuilt arena = new Arena2026Rebuilt(false);
+        arena.setEfficiencyMode(false); // set to true to limit # of balls
+        SimulatedArena.overrideInstance(arena);
         SimulatedArena.getInstance().resetFieldForAuto();
         driveSimulation =
             new SwerveDriveSimulation(
@@ -143,6 +145,12 @@ public class RobotContainer {
         break;
       default:
         // replay
+        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
+        SimulatedArena.getInstance().resetFieldForAuto();
+        driveSimulation =
+            new SwerveDriveSimulation(
+                Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
                 new GyroIO() {},
