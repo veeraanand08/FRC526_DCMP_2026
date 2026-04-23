@@ -12,6 +12,7 @@ import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -42,6 +43,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
 import org.ironmaple.simulation.SimulatedArena;
@@ -76,6 +78,7 @@ public class RobotContainer {
   // Simulated things
   private SwerveDriveSimulation driveSimulation;
   private SuperstructureSim superstructureSim;
+  private RobotBumpSim robotBumpSim;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -134,7 +137,7 @@ public class RobotContainer {
         superstructureSim =
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
-
+        robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
         break;
       default:
         // replay
@@ -155,6 +158,7 @@ public class RobotContainer {
         superstructureSim =
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
+        robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
     }
 
     // Configure the trigger bindings
@@ -295,9 +299,19 @@ public class RobotContainer {
     SimulatedArena.getInstance().simulationPeriodic();
     Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
 
+    Pose2d simPose = driveSimulation.getSimulatedDriveTrainPose();
+
+    ChassisSpeeds fieldRelativeSpeeds =
+        driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative();
+
+    Pose3d simPose3d = robotBumpSim.update(simPose, fieldRelativeSpeeds, 5);
+
+    if (robotBumpSim.isOnRamp()) {
+      driveSimulation.setSimulationWorldPose(robotBumpSim.getSimWorldPose(simPose));
+    }
+
     // Publish to telemetry using AdvantageKit
-    Logger.recordOutput(
-        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    Logger.recordOutput("FieldSimulation/RobotPosition", simPose3d);
     // to set up the model
     Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
   }
