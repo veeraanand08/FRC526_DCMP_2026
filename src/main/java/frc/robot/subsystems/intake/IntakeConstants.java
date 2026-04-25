@@ -6,7 +6,7 @@ public final class IntakeConstants {
   public static final int ROLLER_STATOR_LIMIT = 60;
   public static final int ROLLER_SUPPLY_LIMIT = 40;
   public static final InvertedValue ROLLER_INVERTED = InvertedValue.Clockwise_Positive;
-  public static final double ROLLER_MOI = 0.001;
+  public static final double ROLLER_MOI = 0.5;
   public static final double ROLLER_GEAR_RATIO = 1.0;
   public static final double ROLLER_KP = 0.1;
   public static final double ROLLER_KI = 0;
@@ -43,4 +43,7 @@ public final class IntakeConstants {
       12.0; // time it takes to decay in seconds
 
   public static final double AGITATION_PERIOD = 4; // Period is in seconds
+
+  // sim
+  public static final int INTAKE_CAPACITY = 100;
 }

@@ -81,7 +81,7 @@ public class Module {
     // Optimize velocity setpoint
     state.optimize(getAngle());
     state.cosineScale(inputs.turnPosition);
-    applyAntiJitter(state, lastDesiredState);
+    applyAntiJitter(state);
 
     // Apply setpoints
     io.setDriveVelocity(state.speedMetersPerSecond / constants.WheelRadius);
@@ -94,11 +94,10 @@ public class Module {
    * Perform anti-jitter within modules if the speed requested is too low.
    *
    * @param moduleState Current {@link SwerveModuleState} requested.
-   * @param lastModuleState Previous {@link SwerveModuleState} used.
    */
-  public void applyAntiJitter(SwerveModuleState moduleState, SwerveModuleState lastModuleState) {
+  public void applyAntiJitter(SwerveModuleState moduleState) {
     if (Math.abs(moduleState.speedMetersPerSecond) <= ANTI_JITTER_THRESHOLD) {
-      moduleState.angle = lastModuleState.angle;
+      moduleState.angle = lastDesiredState.angle;
     }
   }
 

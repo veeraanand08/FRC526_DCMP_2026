@@ -13,7 +13,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
-import frc.robot.util.PhoenixUtil;
 
 public class FeederIOTalonFX implements FeederIO {
   private final TalonFX indexer;
@@ -75,36 +74,33 @@ public class FeederIOTalonFX implements FeederIO {
     indexerCurrent = indexer.getStatorCurrent();
     indexerVelocity = indexer.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        100.0, indexerVoltage, indexerCurrent, indexerVelocity);
-
     kickerVoltage = kicker.getMotorVoltage();
     kickerCurrent = kicker.getStatorCurrent();
     kickerVelocity = kicker.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(100.0, kickerVoltage, kickerCurrent, kickerVelocity);
-
-    PhoenixUtil.registerSignals(
-        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        100.0,
         indexerVoltage,
         indexerCurrent,
         indexerVelocity,
         kickerVoltage,
         kickerCurrent,
         kickerVelocity);
-    ParentDevice.optimizeBusUtilizationForAll(0, indexer, kicker);
+    ParentDevice.optimizeBusUtilizationForAll(indexer, kicker);
   }
 
   @Override
   public void updateInputs(FeederIOInputs inputs) {
-    inputs.indexerConnected =
-        BaseStatusSignal.isAllGood(indexerVoltage, indexerCurrent, indexerVelocity);
+    var indexerStatus =
+        BaseStatusSignal.refreshAll(indexerVoltage, indexerCurrent, indexerVelocity);
+    var kickerStatus = BaseStatusSignal.refreshAll(kickerVoltage, kickerCurrent, kickerVelocity);
+
+    inputs.indexerConnected = indexerStatus.isOK();
     inputs.indexerAppliedVolts = indexerVoltage.getValueAsDouble();
     inputs.indexerCurrentAmps = indexerCurrent.getValueAsDouble();
     inputs.indexerVelocityRPS = indexerVelocity.getValueAsDouble();
 
-    inputs.kickerConnected =
-        BaseStatusSignal.isAllGood(kickerVoltage, kickerCurrent, kickerVelocity);
+    inputs.kickerConnected = kickerStatus.isOK();
     inputs.kickerAppliedVolts = kickerVoltage.getValueAsDouble();
     inputs.kickerCurrentAmps = kickerCurrent.getValueAsDouble();
     inputs.kickerVelocityRPS = kickerVelocity.getValueAsDouble();
