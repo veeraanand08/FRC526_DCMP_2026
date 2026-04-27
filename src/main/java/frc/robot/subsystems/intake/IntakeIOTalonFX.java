@@ -20,6 +20,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
+import frc.robot.util.PhoenixUtil;
 
 public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
@@ -109,6 +110,16 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotAngle,
         pivotVelocity);
     ParentDevice.optimizeBusUtilizationForAll(roller, pivot);
+
+    PhoenixUtil.registerSignals(
+        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+        rollerVoltage,
+        rollerCurrent,
+        rollerVelocity,
+        pivotVoltage,
+        pivotCurrent,
+        pivotAngle,
+        pivotVelocity);
 
     // Request is ignored until the robot is enabled, where it will switch to brake mode
     pivot.setControl(new StaticBrake());

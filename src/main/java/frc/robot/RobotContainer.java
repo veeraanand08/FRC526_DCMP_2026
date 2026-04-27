@@ -43,6 +43,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.BetterAutoChooser;
+import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
@@ -170,6 +171,8 @@ public class RobotContainer {
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
         robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
     }
+
+    PhoenixUtil.startTelemetry();
 
     // Configure the trigger bindings
     configureBindings();
