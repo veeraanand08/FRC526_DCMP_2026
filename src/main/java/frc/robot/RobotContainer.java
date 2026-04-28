@@ -224,7 +224,7 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX());
     // Lock wheels to X pattern
-    Command lockWheels = Commands.runOnce(drive::stopWithX, drive);
+    Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
     // Reset gyro to 0°
     Command zeroGyro = Commands.runOnce(() -> drive.zeroGyro(true), drive).ignoringDisable(true);
     Command autoAlign =

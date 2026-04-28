@@ -72,10 +72,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
   private static final double ANGULAR_VELOCITY_COEFFICIENT = 0.1;
-  static final double ANTI_JITTER_THRESHOLD =
-      Constants.currentMode == Mode.REAL
-          ? TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.01
-          : -1;
+  static final double ANTI_JITTER_THRESHOLD = Constants.currentMode == Mode.REAL ? 4.0 * 0.01 : -1;
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 54.431;

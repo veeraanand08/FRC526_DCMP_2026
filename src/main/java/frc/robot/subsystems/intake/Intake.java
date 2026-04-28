@@ -2,10 +2,10 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.subsystems.ExtendedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase {
+public class Intake extends ExtendedSubsystem {
   public enum PivotState {
     RAISING,
     AGITATING,
@@ -28,6 +28,17 @@ public class Intake extends SubsystemBase {
 
     Logger.recordOutput("Intake/Pivot State", pivotState.toString());
     Logger.recordOutput("Intake/Intake Running", rollerEnabled);
+  }
+
+  @Override
+  public void disable() {
+    ((IntakeIOTalonFX) io).releasePivot();
+    io.stopRoller();
+  }
+
+  @Override
+  public void enable() {
+    io.stopPivot();
   }
 
   @Override

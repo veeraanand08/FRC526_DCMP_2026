@@ -5,10 +5,7 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.StaticBrake;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -26,9 +23,12 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
   private final TalonFX pivot;
 
-  private final VelocityVoltage rollerPid;
-  private final PositionVoltage pivotPid;
-  private final MotionMagicVoltage pivotMotionMagic;
+  private final CoastOut coast = new CoastOut();
+  private final StaticBrake brake = new StaticBrake();
+  private final VelocityVoltage rollerPid = new VelocityVoltage(0);
+  private final PositionVoltage pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
+  private final MotionMagicVoltage pivotMotionMagic =
+      new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true);
 
   private final StatusSignal<Voltage> pivotVoltage;
   private final StatusSignal<Current> pivotCurrent;
@@ -42,10 +42,6 @@ public class IntakeIOTalonFX implements IntakeIO {
   public IntakeIOTalonFX() {
     roller = new TalonFX(CANConstants.INTAKE_ROLLER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
     pivot = new TalonFX(CANConstants.INTAKE_PIVOT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-
-    rollerPid = new VelocityVoltage(0);
-    pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
-    pivotMotionMagic = new MotionMagicVoltage(0);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -120,9 +116,6 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotCurrent,
         pivotAngle,
         pivotVelocity);
-
-    // Request is ignored until the robot is enabled, where it will switch to brake mode
-    pivot.setControl(new StaticBrake());
   }
 
   @Override
@@ -160,7 +153,11 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void stopPivot() {
-    pivot.stopMotor();
+    pivot.setControl(brake);
+  }
+
+  public void releasePivot() {
+    pivot.setControl(coast);
   }
 
   @Override

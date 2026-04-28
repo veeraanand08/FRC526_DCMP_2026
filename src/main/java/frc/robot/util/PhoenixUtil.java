@@ -53,7 +53,7 @@ public final class PhoenixUtil {
   private static BaseStatusSignal[] superstructureSignals = new BaseStatusSignal[0];
 
   /** Notifier loop for signal refresh */
-  private static Notifier signalThread = new Notifier(PhoenixUtil::waitForAll);
+  private static final Notifier signalThread = new Notifier(PhoenixUtil::waitForAll);
 
   /** Registers a set of signals for synchronized refresh. */
   public static void registerSignals(CANBus canbus, BaseStatusSignal... signals) {

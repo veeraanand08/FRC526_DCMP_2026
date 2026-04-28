@@ -53,7 +53,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   protected final CANcoder cancoder;
 
   // Voltage control requests
-  private final VoltageOut voltageRequest = new VoltageOut(0).withOverrideBrakeDurNeutral(true);
+  private final VoltageOut voltageRequest = new VoltageOut(0);
   private final PositionVoltage positionVoltageRequest =
       new PositionVoltage(0.0).withOverrideBrakeDurNeutral(true);
   private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
