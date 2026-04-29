@@ -21,8 +21,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ShooterCommand;
-import frc.robot.commands.ShooterFallback;
+import frc.robot.commands.shooter.ShooterCommand;
+import frc.robot.commands.shooter.ShooterFallback;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.Feeder;
@@ -242,11 +242,11 @@ public class RobotContainer {
     Command agitate = intake.agitateCommand();
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
-    Command shoot = new ShooterCommand(shooter, feeder);
+    Command shoot = new ShooterCommand(shooter, feeder, intake);
     if (Constants.currentMode == Constants.Mode.SIM) {
       shoot = shoot.alongWith(superstructureSim.shootCommand());
     }
-    Command shootDefault = new ShooterFallback(shooter, feeder);
+    Command shootDefault = new ShooterFallback(shooter, feeder, intake);
 
     new EventTrigger("Intake").whileTrue(holdIntake);
     NamedCommands.registerCommand("Auto Align", autoAlign);
