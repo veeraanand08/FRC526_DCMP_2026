@@ -23,15 +23,15 @@ public final class IntakeConstants {
   public static final InvertedValue PIVOT_INVERTED = InvertedValue.CounterClockwise_Positive;
   public static final double PIVOT_ENCODER_OFFSET = 0.0;
   public static final double PIVOT_GEAR_RATIO = 75;
-  public static final double PIVOT_KP = 0.1;
+  public static final double PIVOT_KP = 60.0;
   public static final double PIVOT_KI = 0;
   public static final double PIVOT_KD = 0;
   public static final double PIVOT_KS = 0.05;
   public static final double PIVOT_KV = 0.12;
   public static final double PIVOT_KA = 0;
   public static final double PIVOT_KG = 0.0;
-  public static final double PIVOT_CRUISE_VELOCITY = 5.0;
-  public static final double PIVOT_CRUISE_ACCELERATION = 1.0;
+  public static final double PIVOT_CRUISE_VELOCITY = 10;
+  public static final double PIVOT_CRUISE_ACCELERATION = 15;
 
   // setpoints, in degrees
   public static final double PIVOT_RAISED_ANGLE = 0;
