@@ -32,7 +32,7 @@ public class Intake extends ExtendedSubsystem {
 
   @Override
   public void disable() {
-    ((IntakeIOTalonFX) io).releasePivot();
+    io.setPivotOpenLoop(0);
     io.stopRoller();
   }
 

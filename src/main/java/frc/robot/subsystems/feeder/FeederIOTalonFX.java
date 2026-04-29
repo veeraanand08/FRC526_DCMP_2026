@@ -101,16 +101,14 @@ public class FeederIOTalonFX implements FeederIO {
 
   @Override
   public void updateInputs(FeederIOInputs inputs) {
-    var indexerStatus =
-        BaseStatusSignal.refreshAll(indexerVoltage, indexerCurrent, indexerVelocity);
-    var kickerStatus = BaseStatusSignal.refreshAll(kickerVoltage, kickerCurrent, kickerVelocity);
-
-    inputs.indexerConnected = indexerStatus.isOK();
+    inputs.indexerConnected =
+        BaseStatusSignal.isAllGood(indexerVoltage, indexerCurrent, indexerVelocity);
     inputs.indexerAppliedVolts = indexerVoltage.getValueAsDouble();
     inputs.indexerCurrentAmps = indexerCurrent.getValueAsDouble();
     inputs.indexerVelocityRPS = indexerVelocity.getValueAsDouble();
 
-    inputs.kickerConnected = kickerStatus.isOK();
+    inputs.kickerConnected =
+        BaseStatusSignal.isAllGood(kickerVoltage, kickerCurrent, kickerVelocity);
     inputs.kickerAppliedVolts = kickerVoltage.getValueAsDouble();
     inputs.kickerCurrentAmps = kickerCurrent.getValueAsDouble();
     inputs.kickerVelocityRPS = kickerVelocity.getValueAsDouble();

@@ -17,10 +17,7 @@ import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.*;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -116,6 +113,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     var turnConfig = constants.SteerMotorInitialConfigs;
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     turnConfig.Slot0 = constants.SteerMotorGains;
+    turnConfig.Slot0.GainSchedBehavior = GainSchedBehaviorValue.ZeroOutput;
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
     turnConfig.Feedback.FeedbackSensorSource =
         switch (constants.FeedbackSource) {
@@ -130,8 +128,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicAcceleration =
         turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
-    turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
+    turnConfig.MotionMagic.MotionMagicExpo_kA = 0.5;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    turnConfig.ClosedLoopGeneral.GainSchedErrorThreshold = 0.0;
     turnConfig.CurrentLimits.SupplyCurrentLimit = TURN_SUPPLY_LIMIT;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnConfig.MotorOutput.Inverted =

@@ -11,22 +11,28 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
 import frc.robot.util.PhoenixUtil;
 
 public class ShooterIOTalonFX implements ShooterIO {
-  private final TalonFX topLeft;
-  private final TalonFX bottomLeft;
+  private final TalonFX topLeft; // leader
 
+  private final TalonFX bottomLeft;
   private final TalonFX topRight;
   private final TalonFX bottomRight;
 
   private final VelocityVoltage shooterPid;
 
-  private final StatusSignal<Voltage> shooterVoltage;
-  private final StatusSignal<Current> shooterCurrent;
-  private final StatusSignal<AngularVelocity> shooterVelocity;
+  private final StatusSignal<AngularVelocity> velocity;
+  private final StatusSignal<Voltage> appliedVolts;
+  private final StatusSignal<Current> statorCurrent;
+  private final StatusSignal<Current> supplyCurrent;
+  private final StatusSignal<Temperature> topLeftTemp;
+  private final StatusSignal<Temperature> bottomLeftTemp;
+  private final StatusSignal<Temperature> topRightTemp;
+  private final StatusSignal<Temperature> bottomRightTemp;
 
   public ShooterIOTalonFX() {
     topLeft = new TalonFX(CANConstants.SHOOTER_TOP_LEFT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
@@ -65,30 +71,51 @@ public class ShooterIOTalonFX implements ShooterIO {
     bottomRight.setControl(
         new Follower(topLeft.getDeviceID(), ShooterConstants.BOTTOM_RIGHT_ALIGNMENT_VALUE));
 
-    shooterVoltage = topLeft.getMotorVoltage();
-    shooterCurrent = topLeft.getStatorCurrent();
-    shooterVelocity = topLeft.getVelocity();
+    velocity = topLeft.getVelocity();
+    appliedVolts = topLeft.getMotorVoltage();
+    statorCurrent = topLeft.getStatorCurrent();
+    supplyCurrent = topLeft.getSupplyCurrent();
+    topLeftTemp = topLeft.getDeviceTemp();
+    bottomLeftTemp = bottomLeft.getDeviceTemp();
+    topRightTemp = topRight.getDeviceTemp();
+    bottomRightTemp = bottomRight.getDeviceTemp();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100.0, shooterVoltage, shooterCurrent, shooterVelocity);
+        100.0, velocity, appliedVolts, statorCurrent, supplyCurrent);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, topLeftTemp, bottomLeftTemp, topRightTemp, bottomRightTemp);
     ParentDevice.optimizeBusUtilizationForAll(topLeft, bottomLeft, topRight, bottomRight);
 
     PhoenixUtil.registerSignals(
-        CANConstants.SUPERSTRUCTURE_CAN_BUS, shooterVoltage, shooterCurrent, shooterVelocity);
+        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+        velocity,
+        appliedVolts,
+        statorCurrent,
+        supplyCurrent,
+        topLeftTemp,
+        bottomLeftTemp,
+        topRightTemp,
+        bottomRightTemp);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    var leaderStatus = BaseStatusSignal.refreshAll(shooterVoltage, shooterCurrent, shooterVelocity);
+    inputs.topLeftConnected =
+        BaseStatusSignal.isAllGood(
+            velocity, appliedVolts, statorCurrent, supplyCurrent, topLeftTemp);
+    inputs.bottomLeftConnected = BaseStatusSignal.isAllGood(bottomLeftTemp);
+    inputs.topRightConnected = BaseStatusSignal.isAllGood(topRightTemp);
+    inputs.bottomRightConnected = BaseStatusSignal.isAllGood(bottomRightTemp);
 
-    inputs.topLeftConnected = leaderStatus.isOK();
-    inputs.shooterAppliedVolts = shooterVoltage.getValueAsDouble();
-    inputs.shooterCurrentAmps = shooterCurrent.getValueAsDouble();
-    inputs.shooterVelocityRPS = shooterVelocity.getValueAsDouble();
+    inputs.velocityRPS = velocity.getValueAsDouble();
+    inputs.appliedVolts = appliedVolts.getValueAsDouble();
+    inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
+    inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
 
-    inputs.bottomLeftConnected = bottomLeft.isConnected();
-    inputs.topRightConnected = topRight.isConnected();
-    inputs.bottomRightConnected = bottomRight.isConnected();
+    inputs.topLeftTempCelsius = topLeftTemp.getValueAsDouble();
+    inputs.bottomLeftTempCelsius = bottomLeftTemp.getValueAsDouble();
+    inputs.topRightTempCelsius = topRightTemp.getValueAsDouble();
+    inputs.bottomRightTempCelsius = bottomRightTemp.getValueAsDouble();
   }
 
   @Override

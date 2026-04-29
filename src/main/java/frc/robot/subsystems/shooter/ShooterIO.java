@@ -4,23 +4,27 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface ShooterIO {
   @AutoLog
-  public static class ShooterIOInputs {
-    // leader
-    public boolean topLeftConnected = false;
-    public double shooterAppliedVolts = 0.0;
-    public double shooterCurrentAmps = 0.0;
-    public double shooterVelocityRPS = 0.0;
+  class ShooterIOInputs {
+    public boolean topLeftConnected;
+    public boolean bottomLeftConnected;
+    public boolean topRightConnected;
+    public boolean bottomRightConnected;
 
-    // followers
-    public boolean bottomLeftConnected = false;
-    public boolean topRightConnected = false;
-    public boolean bottomRightConnected = false;
+    public double velocityRPS;
+    public double appliedVolts;
+    public double statorCurrentAmps;
+    public double supplyCurrentAmps;
+
+    public double topLeftTempCelsius;
+    public double bottomLeftTempCelsius;
+    public double topRightTempCelsius;
+    public double bottomRightTempCelsius;
   }
 
-  public default void updateInputs(ShooterIOInputs inputs) {}
+  default void updateInputs(ShooterIOInputs inputs) {}
 
   /** Sets the motor's speed given an RPS input */
-  public default void setRPS(double rps) {}
+  default void setRPS(double rps) {}
 
-  public default void stop() {}
+  default void stop() {}
 }

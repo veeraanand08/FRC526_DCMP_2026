@@ -75,9 +75,9 @@ public class IntakeIOSim implements IntakeIO {
     inputs.encoderPositionDeg = Math.toDegrees(pivotSim.getAngleRads());
   }
 
-  public void setPivot(double speed) {
+  public void setPivotOpenLoop(double voltage) {
     isClosedLoopPivot = false;
-    pivotVolts = speed * 12.0;
+    pivotVolts = voltage;
   }
 
   public void setRoller(double speed) {
@@ -102,7 +102,7 @@ public class IntakeIOSim implements IntakeIO {
   }
 
   public void stopPivot() {
-    setPivot(0);
+    setPivotOpenLoop(0);
   }
 
   public void stopRoller() {

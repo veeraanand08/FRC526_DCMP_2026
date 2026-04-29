@@ -38,9 +38,9 @@ public class ShooterIOSim implements ShooterIO {
     shooterSim.update(0.02);
 
     inputs.topLeftConnected = true;
-    inputs.shooterAppliedVolts = shooterVolts;
-    inputs.shooterCurrentAmps = shooterSim.getCurrentDrawAmps();
-    inputs.shooterVelocityRPS = shooterSim.getAngularVelocityRPM() / 60.0;
+    inputs.appliedVolts = shooterVolts;
+    inputs.statorCurrentAmps = shooterSim.getCurrentDrawAmps();
+    inputs.velocityRPS = shooterSim.getAngularVelocityRPM() / 60.0;
 
     inputs.bottomLeftConnected = true;
     inputs.topRightConnected = true;

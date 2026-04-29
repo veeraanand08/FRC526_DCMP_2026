@@ -23,8 +23,8 @@ public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
   private final TalonFX pivot;
 
-  private final CoastOut coast = new CoastOut();
-  private final StaticBrake brake = new StaticBrake();
+  private final StaticBrake brakeRequest = new StaticBrake();
+  private final VoltageOut voltageRequest = new VoltageOut(0);
   private final VelocityVoltage rollerPid = new VelocityVoltage(0);
   private final PositionVoltage pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
   private final MotionMagicVoltage pivotMotionMagic =
@@ -120,20 +120,23 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    var pivotStatus =
-        BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
-    var rollerStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
-
-    inputs.pivotConnected = pivotStatus.isOK();
+    inputs.pivotConnected =
+        BaseStatusSignal.isAllGood(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
     inputs.pivotPositionDeg = Units.rotationsToDegrees(pivotAngle.getValueAsDouble());
     inputs.pivotVelocityRPS = pivotVelocity.getValueAsDouble();
 
-    inputs.rollerConnected = rollerStatus.isOK();
+    inputs.rollerConnected =
+        BaseStatusSignal.isAllGood(rollerVoltage, rollerCurrent, rollerVelocity);
     inputs.rollerAppliedVolts = rollerVoltage.getValueAsDouble();
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
+  }
+
+  @Override
+  public void setPivotOpenLoop(double output) {
+    pivot.setControl(voltageRequest.withOutput(output));
   }
 
   @Override
@@ -153,11 +156,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void stopPivot() {
-    pivot.setControl(brake);
-  }
-
-  public void releasePivot() {
-    pivot.setControl(coast);
+    pivot.setControl(brakeRequest);
   }
 
   @Override
