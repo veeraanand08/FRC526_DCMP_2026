@@ -2,17 +2,23 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.shooter;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.shooter.ShooterCommand.ShootingStage;
 import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class ShooterFallback extends Command {
   private final Shooter shooterSubsystem;
   private final Feeder feederSubsystem;
-  private boolean startShoot;
+  private final Intake intakeSubsystem;
+
+  private ShootingStage state;
+  private final Timer timer = new Timer();
 
   /**
    * Creates a new ShooterCommand.
@@ -20,9 +26,10 @@ public class ShooterFallback extends Command {
    * @param shooterSubsystem The shooter subsystem used by this command.
    * @param feederSubsystem The feeder subsystem used by this command.
    */
-  public ShooterFallback(Shooter shooterSubsystem, Feeder feederSubsystem) {
+  public ShooterFallback(Shooter shooterSubsystem, Feeder feederSubsystem, Intake intakeSubsystem) {
     this.shooterSubsystem = shooterSubsystem;
     this.feederSubsystem = feederSubsystem;
+    this.intakeSubsystem = intakeSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooterSubsystem, feederSubsystem);
   }
@@ -30,17 +37,23 @@ public class ShooterFallback extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    startShoot = false;
-    shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get() / 60.0);
+    shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get());
+    state = ShootingStage.SPIN_UP;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (!startShoot && shooterSubsystem.hasSpunUp()) {
-      startShoot = true;
+    if (state == ShootingStage.SPIN_UP && shooterSubsystem.hasSpunUp()) {
       feederSubsystem.enableKicker();
       feederSubsystem.enableIndexer();
+      state = ShootingStage.FEED;
+      timer.restart();
+    }
+
+    if (state == ShootingStage.FEED && timer.hasElapsed(ShooterConstants.AGITATION_TIME)) {
+      intakeSubsystem.setPivotState(Intake.PivotState.RAISING);
+      timer.stop();
     }
   }
 

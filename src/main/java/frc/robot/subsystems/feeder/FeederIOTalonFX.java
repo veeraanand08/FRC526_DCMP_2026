@@ -13,6 +13,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
+import frc.robot.util.PhoenixUtil;
 
 public class FeederIOTalonFX implements FeederIO {
   private final TalonFX indexer;
@@ -87,20 +88,27 @@ public class FeederIOTalonFX implements FeederIO {
         kickerCurrent,
         kickerVelocity);
     ParentDevice.optimizeBusUtilizationForAll(indexer, kicker);
+
+    PhoenixUtil.registerSignals(
+        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+        indexerVoltage,
+        indexerCurrent,
+        indexerVelocity,
+        kickerVoltage,
+        kickerCurrent,
+        kickerVelocity);
   }
 
   @Override
   public void updateInputs(FeederIOInputs inputs) {
-    var indexerStatus =
-        BaseStatusSignal.refreshAll(indexerVoltage, indexerCurrent, indexerVelocity);
-    var kickerStatus = BaseStatusSignal.refreshAll(kickerVoltage, kickerCurrent, kickerVelocity);
-
-    inputs.indexerConnected = indexerStatus.isOK();
+    inputs.indexerConnected =
+        BaseStatusSignal.isAllGood(indexerVoltage, indexerCurrent, indexerVelocity);
     inputs.indexerAppliedVolts = indexerVoltage.getValueAsDouble();
     inputs.indexerCurrentAmps = indexerCurrent.getValueAsDouble();
     inputs.indexerVelocityRPS = indexerVelocity.getValueAsDouble();
 
-    inputs.kickerConnected = kickerStatus.isOK();
+    inputs.kickerConnected =
+        BaseStatusSignal.isAllGood(kickerVoltage, kickerCurrent, kickerVelocity);
     inputs.kickerAppliedVolts = kickerVoltage.getValueAsDouble();
     inputs.kickerCurrentAmps = kickerCurrent.getValueAsDouble();
     inputs.kickerVelocityRPS = kickerVelocity.getValueAsDouble();

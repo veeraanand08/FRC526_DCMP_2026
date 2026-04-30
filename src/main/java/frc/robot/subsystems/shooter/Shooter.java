@@ -63,11 +63,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public double getVelocityRPS() {
-    return inputs.shooterVelocityRPS;
+    return inputs.velocityRPS;
   }
 
   public boolean hasSpunUp() {
-    return inputs.shooterVelocityRPS > desiredRPS - 1.5;
+    return inputs.velocityRPS > desiredRPS - 1.5;
   }
 
   public void stop() {

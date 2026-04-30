@@ -25,6 +25,8 @@ public interface IntakeIO {
 
   public default void updateInputs(IntakeIOInputs inputs) {}
 
+  public default void setPivotOpenLoop(double output) {}
+
   /** Sets the intake pivot's angle given a degree input */
   public default void setPivotSetpoint(double deg) {} // Standard PID
 

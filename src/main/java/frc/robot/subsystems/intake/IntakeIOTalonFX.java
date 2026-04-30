@@ -5,10 +5,7 @@ import static frc.robot.util.PhoenixUtil.tryUntilOk;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.StaticBrake;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -20,14 +17,18 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.CANConstants;
+import frc.robot.util.PhoenixUtil;
 
 public class IntakeIOTalonFX implements IntakeIO {
   private final TalonFX roller;
   private final TalonFX pivot;
 
-  private final VelocityVoltage rollerPid;
-  private final PositionVoltage pivotPid;
-  private final MotionMagicVoltage pivotMotionMagic;
+  private final StaticBrake brakeRequest = new StaticBrake();
+  private final VoltageOut voltageRequest = new VoltageOut(0);
+  private final VelocityVoltage rollerPid = new VelocityVoltage(0);
+  private final PositionVoltage pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
+  private final MotionMagicVoltage pivotMotionMagic =
+      new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true);
 
   private final StatusSignal<Voltage> pivotVoltage;
   private final StatusSignal<Current> pivotCurrent;
@@ -41,10 +42,6 @@ public class IntakeIOTalonFX implements IntakeIO {
   public IntakeIOTalonFX() {
     roller = new TalonFX(CANConstants.INTAKE_ROLLER, CANConstants.SUPERSTRUCTURE_CAN_BUS);
     pivot = new TalonFX(CANConstants.INTAKE_PIVOT, CANConstants.SUPERSTRUCTURE_CAN_BUS);
-
-    rollerPid = new VelocityVoltage(0);
-    pivotPid = new PositionVoltage(0).withOverrideBrakeDurNeutral(true);
-    pivotMotionMagic = new MotionMagicVoltage(0);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     TalonFXConfiguration pivotConfig = new TalonFXConfiguration();
@@ -110,26 +107,36 @@ public class IntakeIOTalonFX implements IntakeIO {
         pivotVelocity);
     ParentDevice.optimizeBusUtilizationForAll(roller, pivot);
 
-    // Request is ignored until the robot is enabled, where it will switch to brake mode
-    pivot.setControl(new StaticBrake());
+    PhoenixUtil.registerSignals(
+        CANConstants.SUPERSTRUCTURE_CAN_BUS,
+        rollerVoltage,
+        rollerCurrent,
+        rollerVelocity,
+        pivotVoltage,
+        pivotCurrent,
+        pivotAngle,
+        pivotVelocity);
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    var pivotStatus =
-        BaseStatusSignal.refreshAll(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
-    var rollerStatus = BaseStatusSignal.refreshAll(rollerVoltage, rollerCurrent, rollerVelocity);
-
-    inputs.pivotConnected = pivotStatus.isOK();
+    inputs.pivotConnected =
+        BaseStatusSignal.isAllGood(pivotVoltage, pivotCurrent, pivotAngle, pivotVelocity);
     inputs.pivotAppliedVolts = pivotVoltage.getValueAsDouble();
     inputs.pivotCurrentAmps = pivotCurrent.getValueAsDouble();
     inputs.pivotPositionDeg = Units.rotationsToDegrees(pivotAngle.getValueAsDouble());
     inputs.pivotVelocityRPS = pivotVelocity.getValueAsDouble();
 
-    inputs.rollerConnected = rollerStatus.isOK();
+    inputs.rollerConnected =
+        BaseStatusSignal.isAllGood(rollerVoltage, rollerCurrent, rollerVelocity);
     inputs.rollerAppliedVolts = rollerVoltage.getValueAsDouble();
     inputs.rollerCurrentAmps = rollerCurrent.getValueAsDouble();
     inputs.rollerVelocityRPS = rollerVelocity.getValueAsDouble();
+  }
+
+  @Override
+  public void setPivotOpenLoop(double output) {
+    pivot.setControl(voltageRequest.withOutput(output));
   }
 
   @Override
@@ -149,7 +156,7 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void stopPivot() {
-    pivot.stopMotor();
+    pivot.setControl(brakeRequest);
   }
 
   @Override

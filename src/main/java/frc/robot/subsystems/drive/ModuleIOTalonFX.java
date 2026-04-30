@@ -17,10 +17,7 @@ import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.*;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,6 +27,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.PhoenixUtil;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -52,7 +50,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   protected final CANcoder cancoder;
 
   // Voltage control requests
-  private final VoltageOut voltageRequest = new VoltageOut(0).withOverrideBrakeDurNeutral(true);
+  private final VoltageOut voltageRequest = new VoltageOut(0);
   private final PositionVoltage positionVoltageRequest =
       new PositionVoltage(0.0).withOverrideBrakeDurNeutral(true);
   private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
@@ -115,6 +113,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     var turnConfig = constants.SteerMotorInitialConfigs;
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     turnConfig.Slot0 = constants.SteerMotorGains;
+    turnConfig.Slot0.GainSchedBehavior = GainSchedBehaviorValue.ZeroOutput;
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
     turnConfig.Feedback.FeedbackSensorSource =
         switch (constants.FeedbackSource) {
@@ -129,8 +128,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicAcceleration =
         turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
-    turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
+    turnConfig.MotionMagic.MotionMagicExpo_kA = 0.5;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    turnConfig.ClosedLoopGeneral.GainSchedErrorThreshold = 0.0;
     turnConfig.CurrentLimits.SupplyCurrentLimit = TURN_SUPPLY_LIMIT;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnConfig.MotorOutput.Inverted =
@@ -174,27 +174,38 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnAppliedVolts,
         turnCurrent);
     ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
+
+    PhoenixUtil.registerSignals(
+        TunerConstants.kCANBus,
+        drivePosition,
+        driveVelocity,
+        driveAppliedVolts,
+        driveCurrent,
+        turnPosition,
+        turnVelocity,
+        turnAppliedVolts,
+        turnCurrent,
+        turnAbsolutePosition);
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    // Refresh all signals
-    var driveStatus =
-        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
-    var turnStatus =
-        BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
-    var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
-
     // Update drive inputs
-    inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
+    inputs.driveConnected =
+        driveConnectedDebounce.calculate(
+            BaseStatusSignal.isAllGood(
+                drivePosition, driveVelocity, driveAppliedVolts, driveCurrent));
     inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
     // Update turn inputs
-    inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
-    inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
+    inputs.turnConnected =
+        turnConnectedDebounce.calculate(
+            BaseStatusSignal.isAllGood(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent));
+    inputs.turnEncoderConnected =
+        turnEncoderConnectedDebounce.calculate(BaseStatusSignal.isAllGood(turnAbsolutePosition));
     inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
     inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());

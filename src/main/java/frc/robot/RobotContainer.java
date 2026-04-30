@@ -21,8 +21,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.ShooterCommand;
-import frc.robot.commands.ShooterFallback;
+import frc.robot.commands.shooter.ShooterCommand;
+import frc.robot.commands.shooter.ShooterFallback;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.Feeder;
@@ -43,6 +43,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.BetterAutoChooser;
+import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.autoalign.AutoAlign;
@@ -171,6 +172,8 @@ public class RobotContainer {
         robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
     }
 
+    PhoenixUtil.startTelemetry();
+
     // Configure the trigger bindings
     configureBindings();
 
@@ -221,7 +224,7 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX());
     // Lock wheels to X pattern
-    Command lockWheels = Commands.runOnce(drive::stopWithX, drive);
+    Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
     // Reset gyro to 0°
     Command zeroGyro = Commands.runOnce(() -> drive.zeroGyro(true), drive).ignoringDisable(true);
     Command autoAlign =
@@ -239,11 +242,11 @@ public class RobotContainer {
     Command agitate = intake.agitateCommand();
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
-    Command shoot = new ShooterCommand(shooter, feeder);
+    Command shoot = new ShooterCommand(shooter, feeder, intake);
     if (Constants.currentMode == Constants.Mode.SIM) {
       shoot = shoot.alongWith(superstructureSim.shootCommand());
     }
-    Command shootDefault = new ShooterFallback(shooter, feeder);
+    Command shootDefault = new ShooterFallback(shooter, feeder, intake);
 
     new EventTrigger("Intake").whileTrue(holdIntake);
     NamedCommands.registerCommand("Auto Align", autoAlign);

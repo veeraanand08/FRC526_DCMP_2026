@@ -21,11 +21,8 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.ParentConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -33,6 +30,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.function.Supplier;
@@ -49,27 +47,13 @@ public final class PhoenixUtil {
     }
   }
 
-  public static TalonFXConfiguration createBaseTalonConfig(
-      InvertedValue inverted,
-      NeutralModeValue neutralMode,
-      double statorLimit,
-      double supplyLimit) {
-    TalonFXConfiguration config = new TalonFXConfiguration();
-
-    config.MotorOutput.Inverted = inverted;
-    config.MotorOutput.NeutralMode = neutralMode;
-    config.CurrentLimits.StatorCurrentLimit = statorLimit;
-    config.CurrentLimits.SupplyCurrentLimit = supplyLimit;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-
-    return config;
-  }
-
   /** Signals for synchronized refresh. */
   private static BaseStatusSignal[] drivebaseSignals = new BaseStatusSignal[0];
 
   private static BaseStatusSignal[] superstructureSignals = new BaseStatusSignal[0];
+
+  /** Notifier loop for signal refresh */
+  private static final Notifier signalThread = new Notifier(PhoenixUtil::waitForAll);
 
   /** Registers a set of signals for synchronized refresh. */
   public static void registerSignals(CANBus canbus, BaseStatusSignal... signals) {
@@ -89,13 +73,18 @@ public final class PhoenixUtil {
   }
 
   /** Refresh all registered signals. */
-  public static void refreshAll() {
+  public static void waitForAll() {
     if (drivebaseSignals.length > 0) {
-      BaseStatusSignal.refreshAll(drivebaseSignals);
+      BaseStatusSignal.waitForAll(0.02, drivebaseSignals);
     }
     if (superstructureSignals.length > 0) {
-      BaseStatusSignal.refreshAll(superstructureSignals);
+      BaseStatusSignal.waitForAll(0.02, superstructureSignals);
     }
+  }
+
+  /** Start a thread for refreshing signals */
+  public static void startTelemetry() {
+    signalThread.startPeriodic(0.01);
   }
 
   public static class TalonFXMotorControllerSim implements SimulatedMotorController {
