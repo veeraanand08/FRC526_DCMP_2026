@@ -62,6 +62,8 @@ public class ShooterFallback extends Command {
   public void end(boolean interrupted) {
     feederSubsystem.stop();
     shooterSubsystem.stop();
+    intakeSubsystem.setPivotState(Intake.PivotState.LOWERING);
+    timer.stop();
   }
 
   // Returns true when the command should end.

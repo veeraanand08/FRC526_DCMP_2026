@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class ShooterCommand extends Command {
   public enum ShootingStage {
@@ -57,10 +56,10 @@ public class ShooterCommand extends Command {
       timer.restart();
     }
 
-    if (state == ShootingStage.FEED && timer.hasElapsed(ShooterConstants.AGITATION_TIME)) {
-      intakeSubsystem.setPivotState(Intake.PivotState.RAISING);
-      timer.stop();
-    }
+    //    if (state == ShootingStage.FEED && timer.hasElapsed(ShooterConstants.AGITATION_TIME)) {
+    //      intakeSubsystem.setPivotState(Intake.PivotState.RAISING);
+    //      timer.stop();
+    //    }
   }
 
   // Called once the command ends or is interrupted.
@@ -68,6 +67,7 @@ public class ShooterCommand extends Command {
   public void end(boolean interrupted) {
     feederSubsystem.stop();
     shooterSubsystem.stop();
+    timer.stop();
   }
 
   // Returns true when the command should end.
