@@ -272,7 +272,7 @@ public class RobotContainer {
       driverController.leftBumper().whileTrue(holdIntake);
       driverController.rightBumper().whileTrue(shoot);
       driverController.rightTrigger(0.7).whileTrue(shootDefault);
-      driverController.y().onTrue(agitate);
+      driverController.y().toggleOnTrue(agitate);
       driverController.b().whileTrue(dump);
       driverController.povUp().onTrue(resetIntake);
     } else {
@@ -285,7 +285,7 @@ public class RobotContainer {
       operatorController.leftBumper().whileTrue(holdIntake);
       operatorController.rightBumper().whileTrue(shoot);
       operatorController.rightTrigger(0.7).whileTrue(shootDefault);
-      operatorController.a().onTrue(agitate);
+      operatorController.a().toggleOnTrue(agitate);
       operatorController.b().whileTrue(dump);
       operatorController.povUp().onTrue(resetIntake);
     }

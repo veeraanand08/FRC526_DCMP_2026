@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.subsystems.ExtendedSubsystem;
 import org.littletonrobotics.junction.Logger;
@@ -8,7 +7,18 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends ExtendedSubsystem {
   public enum PivotState {
     RAISING,
-    AGITATING,
+    AGITATING_UPPER {
+      @Override
+      public String toString() {
+        return "AGITATING";
+      }
+    },
+    AGITATING_LOWER {
+      @Override
+      public String toString() {
+        return "AGITATING";
+      }
+    },
     LOWERING
   }
 
@@ -19,12 +29,8 @@ public class Intake extends ExtendedSubsystem {
 
   private boolean rollerEnabled;
 
-  private final Timer agitationTimer;
-
   public Intake(IntakeIO io) {
     this.io = io;
-
-    agitationTimer = new Timer();
 
     Logger.recordOutput("Intake/Pivot State", pivotState.toString());
     Logger.recordOutput("Intake/Intake Running", rollerEnabled);
@@ -46,41 +52,21 @@ public class Intake extends ExtendedSubsystem {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
-
-    if (pivotState == PivotState.AGITATING) {
-      double time = agitationTimer.get();
-
-      double pos = Math.sin(time * 2 * Math.PI / IntakeConstants.AGITATION_PERIOD) * 0.5 + 0.5;
-
-      double upperAngle =
-          IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
-              - (IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
-                      - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN)
-                  * (time / IntakeConstants.PIVOT_UPPER_AGITATION_DECAY_TIME);
-
-      // Clamp so it never goes past the lower angle
-      upperAngle = Math.max(upperAngle, IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN);
-
-      double targetAngle =
-          upperAngle + (IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE - upperAngle) * pos;
-
-      io.setPivotSetpoint(targetAngle);
-      Logger.recordOutput("Intake/Pivot Setpoint", targetAngle);
-    }
   }
 
   public void setPivotState(PivotState newState) {
     switch (newState) {
       case RAISING:
-        agitationTimer.stop();
         setPivotAngle(IntakeConstants.PIVOT_RAISED_ANGLE);
         break;
       case LOWERING:
-        agitationTimer.stop();
         setPivotAngle(IntakeConstants.PIVOT_ENGAGED_ANGLE);
         break;
-      case AGITATING:
-        agitationTimer.restart();
+      case AGITATING_UPPER:
+        setPivotAngle(IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE);
+        break;
+      case AGITATING_LOWER:
+        setPivotAngle(IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE);
         break;
       default:
         break;
@@ -131,7 +117,6 @@ public class Intake extends ExtendedSubsystem {
     return inputs.rollerVelocityRPS;
   }
 
-  /* Set the pivot and roller motor speeds to 0. */
   public void stop() {
     setRoller(false);
     io.stopPivot();
@@ -186,21 +171,25 @@ public class Intake extends ExtendedSubsystem {
   }
 
   /**
-   * Toggle intake agitation
+   * Agitate balls in hopper
    *
    * @return a command to agitate the intake
    */
   public Command agitateCommand() {
-    return runOnce(
-        () -> {
-          if (pivotState == PivotState.AGITATING) {
-            setRoller(false);
-            setPivotState(PivotState.LOWERING);
-          } else {
-            setPivotState(PivotState.AGITATING);
-            slowRoller();
-          }
-        });
+    return startRun(
+            () -> setPivotState(PivotState.AGITATING_UPPER),
+            () -> {
+              if (pivotState == PivotState.AGITATING_UPPER
+                  && Math.abs(inputs.pivotPositionDeg - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE)
+                      < 3.5) {
+                setPivotState(PivotState.AGITATING_LOWER);
+              } else if (pivotState == PivotState.AGITATING_LOWER
+                  && Math.abs(inputs.pivotPositionDeg - IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE)
+                      < 3.5) {
+                setPivotState(PivotState.AGITATING_UPPER);
+              }
+            })
+        .finallyDo(() -> setPivotState(PivotState.LOWERING));
   }
 
   /**
