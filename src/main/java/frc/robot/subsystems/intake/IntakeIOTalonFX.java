@@ -164,7 +164,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     roller.stopMotor();
   }
 
-  public void resetPosition(Angle angle) {
+  @Override
+  public void resetPivotPosition(Angle angle) {
     pivot.setPosition(angle);
   }
 }

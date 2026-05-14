@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.units.measure.Angle;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO {
@@ -39,4 +40,7 @@ public interface IntakeIO {
   public default void stopPivot() {}
 
   public default void stopRoller() {}
+
+  /** Change the encoder reading */
+  public default void resetPivotPosition(Angle angle) {}
 }

@@ -1,6 +1,12 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Rotations;
+
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.util.RobotUtil;
 import frc.robot.util.subsystems.ExtendedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
@@ -29,8 +35,26 @@ public class Intake extends ExtendedSubsystem {
 
   private boolean rollerEnabled;
 
+  private boolean motorSafetyEngaged;
+
   public Intake(IntakeIO io) {
     this.io = io;
+
+    new Trigger(() -> inputs.pivotCurrentAmps >= IntakeConstants.PIVOT_STATOR_LIMIT)
+            .debounce(0.3, Debouncer.DebounceType.kBoth)
+            .onTrue(
+                    runOnce(
+                            () -> {
+                              disable();
+                              motorSafetyEngaged = true;
+                              RobotUtil.setOperatorRumble(0.85, 0.85);
+                            }))
+            .onFalse(
+                    runOnce(
+                            () -> {
+                              motorSafetyEngaged = false;
+                              RobotUtil.setOperatorRumble(0, 0);
+                            }));
 
     Logger.recordOutput("Intake/Pivot State", pivotState.toString());
     Logger.recordOutput("Intake/Intake Running", rollerEnabled);
@@ -45,6 +69,7 @@ public class Intake extends ExtendedSubsystem {
   @Override
   public void enable() {
     io.stopPivot();
+    motorSafetyEngaged = false;
   }
 
   @Override
@@ -105,6 +130,7 @@ public class Intake extends ExtendedSubsystem {
    * @param deg Angle (in degrees) to rotate.
    */
   public void setPivotAngle(double deg) {
+    if (motorSafetyEngaged) return;
     io.setPivotProfiled(deg);
     Logger.recordOutput("Intake/Pivot Setpoint", deg);
   }
@@ -177,7 +203,10 @@ public class Intake extends ExtendedSubsystem {
    */
   public Command agitateCommand() {
     return startRun(
-            () -> setPivotState(PivotState.AGITATING_UPPER),
+            () -> {
+              setPivotState(PivotState.AGITATING_UPPER);
+              slowRoller();
+            },
             () -> {
               if (pivotState == PivotState.AGITATING_UPPER
                   && Math.abs(inputs.pivotPositionDeg - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE)
@@ -189,7 +218,10 @@ public class Intake extends ExtendedSubsystem {
                 setPivotState(PivotState.AGITATING_UPPER);
               }
             })
-        .finallyDo(() -> setPivotState(PivotState.LOWERING));
+        .finallyDo(() -> {
+          setPivotState(PivotState.LOWERING);
+          io.stopRoller();
+        });
   }
 
   /**
@@ -205,6 +237,23 @@ public class Intake extends ExtendedSubsystem {
           setRoller(false);
           setPivotState(PivotState.RAISING);
         });
+  }
+
+  public Command markIntakeLowered() {
+    return startEnd(
+        () -> {
+          RobotUtil.setDriverRumble(0.75, 0.75);
+          RobotUtil.setOperatorRumble(0.75, 0.75);
+          io.resetPivotPosition(Degrees.of(IntakeConstants.MAX_ANGLE));
+        },
+        () -> {
+          RobotUtil.setDriverRumble(0, 0);
+          RobotUtil.setOperatorRumble(0, 0);
+        });
+  }
+
+  public Command markIntakeRaised() {
+    return runOnce(() -> io.resetPivotPosition(Rotations.zero()));
   }
 
   @Override

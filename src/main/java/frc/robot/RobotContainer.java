@@ -8,6 +8,7 @@ import static frc.robot.Constants.currentMode;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -275,6 +276,10 @@ public class RobotContainer {
       driverController.y().toggleOnTrue(agitate);
       driverController.b().whileTrue(dump);
       driverController.povUp().onTrue(resetIntake);
+      driverController
+          .povRight()
+          .debounce(2, Debouncer.DebounceType.kRising)
+          .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
     } else {
       // driver controls
       driverController.a().whileTrue(autoAlign);
