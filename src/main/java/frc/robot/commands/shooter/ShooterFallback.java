@@ -37,7 +37,7 @@ public class ShooterFallback extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get());
+    shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get() / 60.0);
     state = ShootingStage.SPIN_UP;
   }
 
@@ -51,10 +51,10 @@ public class ShooterFallback extends Command {
       timer.restart();
     }
 
-    if (state == ShootingStage.FEED && timer.hasElapsed(ShooterConstants.AGITATION_TIME)) {
-      intakeSubsystem.setPivotState(Intake.PivotState.RAISING);
-      timer.stop();
-    }
+    //    if (state == ShootingStage.FEED && timer.hasElapsed(ShooterConstants.AGITATION_TIME)) {
+    //      intakeSubsystem.setPivotState(Intake.PivotState.RAISING);
+    //      timer.stop();
+    //    }
   }
 
   // Called once the command ends or is interrupted.
@@ -62,7 +62,7 @@ public class ShooterFallback extends Command {
   public void end(boolean interrupted) {
     feederSubsystem.stop();
     shooterSubsystem.stop();
-    intakeSubsystem.setPivotState(Intake.PivotState.LOWERING);
+    //    intakeSubsystem.setPivotState(Intake.PivotState.LOWERING);
     timer.stop();
   }
 

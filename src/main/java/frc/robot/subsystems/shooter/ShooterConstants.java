@@ -9,8 +9,8 @@ public final class ShooterConstants {
   public static final double SHOOTER_MOI = 0.001;
   public static final double SHOOTER_GEAR_RATIO = 1.0;
 
-  public static final int SHOOTER_STATOR_LIMIT = 100;
-  public static final int SHOOTER_SUPPLY_LIMIT = 60;
+  public static final int SHOOTER_STATOR_LIMIT = 80;
+  public static final int SHOOTER_SUPPLY_LIMIT = 40;
   public static final InvertedValue SHOOTER_LEFT_INVERTED = InvertedValue.CounterClockwise_Positive;
   public static final double SHOOTER_KP = 0.3;
   public static final double SHOOTER_KI = 0;
