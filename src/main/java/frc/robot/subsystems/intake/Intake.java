@@ -41,20 +41,20 @@ public class Intake extends ExtendedSubsystem {
     this.io = io;
 
     new Trigger(() -> inputs.pivotCurrentAmps >= IntakeConstants.PIVOT_STATOR_LIMIT)
-            .debounce(0.3, Debouncer.DebounceType.kBoth)
-            .onTrue(
-                    runOnce(
-                            () -> {
-                              disable();
-                              motorSafetyEngaged = true;
-                              RobotUtil.setOperatorRumble(0.85, 0.85);
-                            }))
-            .onFalse(
-                    runOnce(
-                            () -> {
-                              motorSafetyEngaged = false;
-                              RobotUtil.setOperatorRumble(0, 0);
-                            }));
+        .debounce(0.3, Debouncer.DebounceType.kBoth)
+        .onTrue(
+            runOnce(
+                () -> {
+                  disable();
+                  motorSafetyEngaged = true;
+                  RobotUtil.setOperatorRumble(0.85, 0.85);
+                }))
+        .onFalse(
+            runOnce(
+                () -> {
+                  motorSafetyEngaged = false;
+                  RobotUtil.setOperatorRumble(0, 0);
+                }));
 
     Logger.recordOutput("Intake/Pivot State", pivotState.toString());
     Logger.recordOutput("Intake/Intake Running", rollerEnabled);
@@ -218,10 +218,11 @@ public class Intake extends ExtendedSubsystem {
                 setPivotState(PivotState.AGITATING_UPPER);
               }
             })
-        .finallyDo(() -> {
-          setPivotState(PivotState.LOWERING);
-          io.stopRoller();
-        });
+        .finallyDo(
+            () -> {
+              setPivotState(PivotState.LOWERING);
+              io.stopRoller();
+            });
   }
 
   /**
