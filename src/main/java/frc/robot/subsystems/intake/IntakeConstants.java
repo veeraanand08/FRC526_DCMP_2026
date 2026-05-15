@@ -40,7 +40,7 @@ public final class IntakeConstants {
   public static final double PIVOT_AGITATION_LOWER_ANGLE = 80;
 
   // physical max
-  public static final double MAX_ANGLE = 140; // temp
+  public static final double MAX_ANGLE = 148;
 
   public static final double AGITATION_PERIOD = 4; // Period is in seconds
 
