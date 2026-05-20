@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import static frc.robot.subsystems.intake.Intake.PivotState.*;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -10,6 +12,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import java.util.EnumMap;
 
 public final class IntakeConstants {
   public static final double PIVOT_GEAR_RATIO = 75;
@@ -82,10 +85,15 @@ public final class IntakeConstants {
                   .withKV(ROLLER_KV));
 
   // setpoints, in degrees
-  public static final double PIVOT_RAISED_ANGLE = 0;
-  public static final double PIVOT_ENGAGED_ANGLE = 130; // lowered
-  public static final double PIVOT_AGITATION_UPPER_ANGLE = 10;
-  public static final double PIVOT_AGITATION_LOWER_ANGLE = 80;
+  public static final EnumMap<Intake.PivotState, Double> SETPOINTS =
+      new EnumMap<>(Intake.PivotState.class);
+
+  static {
+    SETPOINTS.put(RAISING, 0.0);
+    SETPOINTS.put(LOWERING, 130.0);
+    SETPOINTS.put(AGITATING_UPPER, 10.0);
+    SETPOINTS.put(AGITATING_LOWER, 80.0);
+  }
 
   public static final double ROLLER_RPS = 5000 / 60.0;
   public static final double ROLLER_RPS_REVERSED = -4500 / 60.0;

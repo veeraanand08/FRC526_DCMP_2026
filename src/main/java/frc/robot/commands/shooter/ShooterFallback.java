@@ -42,8 +42,7 @@ public class ShooterFallback extends Command {
   @Override
   public void execute() {
     if (state == ShootingStage.SPIN_UP && shooterSubsystem.hasSpunUp()) {
-      feederSubsystem.enableKicker();
-      feederSubsystem.enableIndexer();
+      feederSubsystem.start();
       state = ShootingStage.FEED;
       timer.restart();
     }

@@ -89,8 +89,13 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shoot(double rps) {
-    setpointRPS = rps;
     roller.runClosedLoop(rps);
+    setpointRPS = rps;
+  }
+
+  public void stop() {
+    roller.stop();
+    setpointRPS = 0.0;
   }
 
   public double getVelocityRPS() {
@@ -99,12 +104,7 @@ public class Shooter extends SubsystemBase {
 
   @AutoLogOutput
   public boolean hasSpunUp() {
-    return roller.getVelocityRPS() > setpointRPS - 1.5;
-  }
-
-  public void stop() {
-    roller.stop();
-    setpointRPS = 0.0;
+    return setpointRPS != 0 && roller.getVelocityRPS() > setpointRPS - 1.5;
   }
 
   public Command startFlywheel() {

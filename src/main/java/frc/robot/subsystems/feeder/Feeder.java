@@ -61,28 +61,21 @@ public class Feeder extends SubsystemBase {
     kicker.periodic();
   }
 
-  public void enableIndexer() {
+  public void start() {
     enabledForShooting = true;
     indexer.runClosedLoop(FeederConstants.INDEXER_RPS);
-  }
-
-  public void enableKicker() {
-    enabledForShooting = true;
     kicker.runClosedLoop(FeederConstants.KICKER_RPS);
   }
 
   public void reverse() {
-    kicker.runClosedLoop(-FeederConstants.KICKER_RPS);
     indexer.runClosedLoop(-FeederConstants.INDEXER_RPS);
+    kicker.runClosedLoop(-FeederConstants.KICKER_RPS);
+    enabledForShooting = false;
   }
 
   public void agitate() {
     indexer.runClosedLoop(FeederConstants.INDEXER_RPS * 0.25);
     kicker.runClosedLoop(-FeederConstants.KICKER_RPS * 0.25);
-  }
-
-  public boolean hasSpunUp() {
-    return kicker.getVelocityRPS() > FeederConstants.KICKER_RPS - 1.5;
   }
 
   public void stop() {
@@ -91,13 +84,12 @@ public class Feeder extends SubsystemBase {
     enabledForShooting = false;
   }
 
+  public boolean hasSpunUp() {
+    return kicker.getVelocityRPS() > FeederConstants.KICKER_RPS - 1.5;
+  }
+
   public Command burst() {
-    return startEnd(
-        () -> {
-          enableKicker();
-          enableIndexer();
-        },
-        this::stop);
+    return startEnd(this::start, this::stop);
   }
 
   public Command reverseCommand() {

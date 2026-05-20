@@ -2,11 +2,13 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
+import static frc.robot.subsystems.intake.IntakeConstants.SETPOINTS;
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.RobotUtil;
@@ -45,10 +47,6 @@ public class Intake extends ExtendedSubsystem {
 
   private final Roller roller;
   private final Pivot pivot;
-
-  private boolean rollerEnabled;
-
-  private boolean motorSafetyEngaged;
 
   public Intake() {
     PivotIO pivotIO =
@@ -91,24 +89,8 @@ public class Intake extends ExtendedSubsystem {
     pivot = new Pivot("Intake/Pivot", pivotIO, RobotStateHandler::isEnabled);
     roller = new Roller("Intake/Roller", rollerIO);
 
-    // new Trigger(() -> inputs.pivotCurrentAmps >= IntakeConstants.PIVOT_STATOR_LIMIT)
-    //     .debounce(0.3, Debouncer.DebounceType.kBoth)
-    //     .onTrue(
-    //         runOnce(
-    //             () -> {
-    //               disable();
-    //               motorSafetyEngaged = true;
-    //               RobotUtil.setOperatorRumble(0.85, 0.85);
-    //             }))
-    //     .onFalse(
-    //         runOnce(
-    //             () -> {
-    //               motorSafetyEngaged = false;
-    //               RobotUtil.setOperatorRumble(0, 0);
-    //             }));
-
     Logger.recordOutput("Intake/PivotState", pivotState.toString());
-    Logger.recordOutput("Intake/Running", rollerEnabled);
+    Logger.recordOutput("Intake/Running", false);
   }
 
   @Override
@@ -120,7 +102,6 @@ public class Intake extends ExtendedSubsystem {
   @Override
   public void enable() {
     roller.stop();
-    motorSafetyEngaged = false;
   }
 
   @Override
@@ -130,53 +111,32 @@ public class Intake extends ExtendedSubsystem {
   }
 
   public void setPivotState(PivotState newState) {
-    switch (newState) {
-      case RAISING:
-        setPivotAngle(IntakeConstants.PIVOT_RAISED_ANGLE);
-        break;
-      case LOWERING:
-        setPivotAngle(IntakeConstants.PIVOT_ENGAGED_ANGLE);
-        break;
-      case AGITATING_UPPER:
-        setPivotAngle(IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE);
-        break;
-      case AGITATING_LOWER:
-        setPivotAngle(IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE);
-        break;
-      default:
-        break;
-    }
+    pivot.runClosedLoop(SETPOINTS.get(newState));
     pivotState = newState;
     Logger.recordOutput("Intake/PivotState", pivotState.toString());
   }
 
-  public void toggleRoller() {
-    setRoller(!rollerEnabled);
-  }
-
-  public void setRoller(boolean enabled) {
-    if (enabled) roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
-    else roller.stop();
-    rollerEnabled = enabled;
-    Logger.recordOutput("Intake/Running", rollerEnabled);
+  public void start() {
+    if (pivotState != PivotState.LOWERING) {
+      setPivotState(PivotState.LOWERING);
+    }
+    roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
+    Logger.recordOutput("Intake/Running", true);
   }
 
   public void slowRoller() {
     roller.runClosedLoop(IntakeConstants.ROLLER_RPS_SLOW);
-    rollerEnabled = false;
     Logger.recordOutput("Intake/Running", false);
   }
 
-  public void setRollerReversed(boolean enabled) {
-    if (enabled) roller.runClosedLoop(IntakeConstants.ROLLER_RPS_REVERSED);
-    else roller.stop();
-    rollerEnabled = false;
+  public void reverseRoller() {
+    roller.runClosedLoop(IntakeConstants.ROLLER_RPS_REVERSED);
     Logger.recordOutput("Intake/Running", false);
   }
 
-  public void setPivotAngle(double deg) {
-    if (motorSafetyEngaged) return;
-    pivot.runClosedLoop(deg);
+  public void stopRoller() {
+    roller.stop();
+    Logger.recordOutput("Intake/Running", false);
   }
 
   public double getPivotPosition() {
@@ -187,11 +147,6 @@ public class Intake extends ExtendedSubsystem {
     return roller.getVelocityRPS();
   }
 
-  public void stop() {
-    setRoller(false);
-    pivot.stop();
-  }
-
   /**
    * Enable the intake roller. If the intake is raised, it will lower and then start.
    *
@@ -199,35 +154,7 @@ public class Intake extends ExtendedSubsystem {
    */
   public Command intakeCommand() {
     // Inline construction of command goes here.
-    return startEnd(
-        () -> {
-          if (pivotState == PivotState.LOWERING) {
-            setRoller(true);
-          } else {
-            setRoller(true);
-            setPivotState(PivotState.LOWERING);
-          }
-        },
-        () -> setRoller(false));
-  }
-
-  /**
-   * Toggle the intake roller. If the intake is raised, it will lower and then start.
-   *
-   * @return a command to toggle the intake
-   */
-  public Command toggleIntakeCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          if (pivotState == PivotState.LOWERING) {
-            toggleRoller();
-          } else {
-            setRoller(true);
-            setPivotState(PivotState.LOWERING);
-          }
-        });
+    return startEnd(this::start, this::stopRoller);
   }
 
   /**
@@ -237,7 +164,7 @@ public class Intake extends ExtendedSubsystem {
    */
   public Command reverseIntakeCommand() {
     // Inline construction of command goes here.
-    return startEnd(() -> setRollerReversed(true), () -> setRollerReversed(false));
+    return startEnd(this::reverseRoller, this::stopRoller);
   }
 
   /**
@@ -246,7 +173,7 @@ public class Intake extends ExtendedSubsystem {
    * @return a command to agitate the intake
    */
   public Command agitateCommand(Feeder feeder) {
-    return startRun(
+    return Commands.startRun(
             () -> {
               if (!feeder.isEnabledForShooting()) {
                 feeder.agitate();
@@ -256,22 +183,24 @@ public class Intake extends ExtendedSubsystem {
             },
             () -> {
               if (pivotState == PivotState.AGITATING_UPPER
-                  && Math.abs(pivot.getPositionDeg() - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE)
+                  && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_UPPER))
                       < 3.5) {
                 setPivotState(PivotState.AGITATING_LOWER);
               } else if (pivotState == PivotState.AGITATING_LOWER
-                  && Math.abs(pivot.getPositionDeg() - IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE)
+                  && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_LOWER))
                       < 3.5) {
                 setPivotState(PivotState.AGITATING_UPPER);
               }
-            })
+            },
+            this,
+            feeder)
         .finallyDo(
             () -> {
               if (!feeder.isEnabledForShooting()) {
                 feeder.stop();
               }
               setPivotState(PivotState.LOWERING);
-              roller.stop();
+              stopRoller();
             });
   }
 
@@ -285,8 +214,8 @@ public class Intake extends ExtendedSubsystem {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          setRoller(false);
           setPivotState(PivotState.RAISING);
+          stopRoller();
         });
   }
 

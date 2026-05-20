@@ -50,8 +50,7 @@ public class ShooterCommand extends Command {
     shooterSubsystem.shoot();
 
     if (state == ShootingStage.SPIN_UP && shooterSubsystem.hasSpunUp()) {
-      feederSubsystem.enableKicker();
-      feederSubsystem.enableIndexer();
+      feederSubsystem.start();
       state = ShootingStage.FEED;
       timer.restart();
     }

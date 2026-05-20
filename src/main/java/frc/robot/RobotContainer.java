@@ -252,7 +252,7 @@ public class RobotContainer {
       keyboard.button(2).whileTrue(shoot);
       keyboard.button(3).whileTrue(autoAlign);
       keyboard.button(4).onTrue(resetIntake);
-      keyboard.button(5).onTrue(agitate);
+      keyboard.button(5).toggleOnTrue(agitate);
     }
 
     if (DriverStation.isTest()) {
