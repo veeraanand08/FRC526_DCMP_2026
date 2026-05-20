@@ -240,7 +240,7 @@ public class RobotContainer {
                         drive.getChassisSpeeds()))
             .finallyDo(AutoAlign::disable);
     Command holdIntake = intake.intakeCommand();
-    Command agitate = intake.agitateCommand();
+    Command agitate = intake.agitateCommand(feeder);
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
     Command shoot = new ShooterCommand(shooter, feeder, intake);
@@ -270,8 +270,8 @@ public class RobotContainer {
 
     // operator controls
     operatorController.leftBumper().whileTrue(holdIntake);
-    operatorController.rightBumper().whileTrue(shoot);
-    operatorController.rightTrigger(0.7).whileTrue(shootDefault);
+    operatorController.rightBumper().whileTrue(shooter.startFlywheel());
+    operatorController.rightTrigger(0.7).whileTrue(feeder.burst());
     operatorController.a().toggleOnTrue(agitate);
     operatorController.b().whileTrue(dump);
     operatorController.povUp().onTrue(resetIntake);

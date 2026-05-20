@@ -3,10 +3,12 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.autoalign.AutoAlign;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -66,6 +68,7 @@ public class Shooter extends SubsystemBase {
     return inputs.velocityRPS;
   }
 
+  @AutoLogOutput
   public boolean hasSpunUp() {
     return inputs.velocityRPS > desiredRPS - 1.5;
   }
@@ -74,5 +77,9 @@ public class Shooter extends SubsystemBase {
     io.stop();
     desiredRPS = 0.0;
     Logger.recordOutput("Shooter/Desired RPS", desiredRPS);
+  }
+
+  public Command startFlywheel() {
+    return startEnd(() -> shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get() / 60.0), this::stop);
   }
 }
