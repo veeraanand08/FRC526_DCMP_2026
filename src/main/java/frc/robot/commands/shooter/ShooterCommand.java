@@ -35,7 +35,7 @@ public class ShooterCommand extends Command {
     this.feederSubsystem = feederSubsystem;
     this.intakeSubsystem = intakeSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooterSubsystem, feederSubsystem);
+    addRequirements(shooterSubsystem, feederSubsystem /*, intakeSubsystem*/);
   }
 
   // Called when the command is initially scheduled.

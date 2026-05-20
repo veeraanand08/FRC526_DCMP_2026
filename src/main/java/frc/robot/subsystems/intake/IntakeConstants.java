@@ -1,27 +1,17 @@
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public final class IntakeConstants {
-  public static final int ROLLER_STATOR_LIMIT = 60;
-  public static final int ROLLER_SUPPLY_LIMIT = 40;
-  public static final InvertedValue ROLLER_INVERTED = InvertedValue.Clockwise_Positive;
-  public static final double ROLLER_MOI = 0.5;
-  public static final double ROLLER_GEAR_RATIO = 1.0;
-  public static final double ROLLER_KP = 0.1;
-  public static final double ROLLER_KI = 0;
-  public static final double ROLLER_KD = 0;
-  public static final double ROLLER_KS = 0;
-  public static final double ROLLER_KV = 0.12;
-
-  public static final double ROLLER_RPS = 5000 / 60.0;
-  public static final double ROLLER_RPS_REVERSED = -4500 / 60.0;
-  public static final double ROLLER_RPS_SLOW = 4000 / 60.0;
-
-  public static final int PIVOT_STATOR_LIMIT = 80;
-  public static final int PIVOT_SUPPLY_LIMIT = 40;
-  public static final InvertedValue PIVOT_INVERTED = InvertedValue.CounterClockwise_Positive;
-  public static final double PIVOT_ENCODER_OFFSET = 0.0;
   public static final double PIVOT_GEAR_RATIO = 75;
   public static final double PIVOT_KP = 60.0;
   public static final double PIVOT_KI = 0;
@@ -33,11 +23,73 @@ public final class IntakeConstants {
   public static final double PIVOT_CRUISE_VELOCITY = 10;
   public static final double PIVOT_CRUISE_ACCELERATION = 15;
 
+  public static final double ROLLER_MOI = 0.002;
+  public static final double ROLLER_GEAR_RATIO = 1.0;
+  public static final double ROLLER_KP = 0.1;
+  public static final double ROLLER_KI = 0;
+  public static final double ROLLER_KD = 0;
+  public static final double ROLLER_KS = 0;
+  public static final double ROLLER_KV = 0.12;
+
+  public static final TalonFXConfiguration PIVOT_CONFIG =
+      new TalonFXConfiguration()
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimit(80)
+                  .withSupplyCurrentLimit(40)
+                  .withStatorCurrentLimitEnable(true)
+                  .withSupplyCurrentLimitEnable(true))
+          .withMotorOutput(
+              new MotorOutputConfigs()
+                  .withInverted(InvertedValue.CounterClockwise_Positive)
+                  .withNeutralMode(NeutralModeValue.Coast))
+          .withFeedback(
+              new FeedbackConfigs()
+                  .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+                  .withSensorToMechanismRatio(PIVOT_GEAR_RATIO))
+          .withSlot0(
+              new Slot0Configs()
+                  .withKP(PIVOT_KP)
+                  .withKI(PIVOT_KI)
+                  .withKD(PIVOT_KD)
+                  .withKS(PIVOT_KS)
+                  .withKV(PIVOT_KV)
+                  .withKG(PIVOT_KG)
+                  .withGravityType(GravityTypeValue.Arm_Cosine))
+          .withMotionMagic(
+              new MotionMagicConfigs()
+                  .withMotionMagicCruiseVelocity(PIVOT_CRUISE_VELOCITY)
+                  .withMotionMagicAcceleration(PIVOT_CRUISE_ACCELERATION));
+
+  public static final TalonFXConfiguration ROLLER_CONFIG =
+      new TalonFXConfiguration()
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimit(60)
+                  .withSupplyCurrentLimit(40)
+                  .withStatorCurrentLimitEnable(true)
+                  .withSupplyCurrentLimitEnable(true))
+          .withMotorOutput(
+              new MotorOutputConfigs()
+                  .withInverted(InvertedValue.Clockwise_Positive)
+                  .withNeutralMode(NeutralModeValue.Coast))
+          .withSlot0(
+              new Slot0Configs()
+                  .withKP(ROLLER_KP)
+                  .withKI(ROLLER_KI)
+                  .withKD(ROLLER_KD)
+                  .withKS(ROLLER_KS)
+                  .withKV(ROLLER_KV));
+
   // setpoints, in degrees
   public static final double PIVOT_RAISED_ANGLE = 0;
   public static final double PIVOT_ENGAGED_ANGLE = 130; // lowered
   public static final double PIVOT_AGITATION_UPPER_ANGLE = 10;
   public static final double PIVOT_AGITATION_LOWER_ANGLE = 80;
+
+  public static final double ROLLER_RPS = 5000 / 60.0;
+  public static final double ROLLER_RPS_REVERSED = -4500 / 60.0;
+  public static final double ROLLER_RPS_SLOW = 4000 / 60.0;
 
   // physical max
   public static final double MAX_ANGLE = 146;

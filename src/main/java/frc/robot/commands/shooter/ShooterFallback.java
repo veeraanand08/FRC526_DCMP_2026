@@ -8,14 +8,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.shooter.ShooterCommand.ShootingStage;
 import frc.robot.subsystems.feeder.Feeder;
-import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 
 public class ShooterFallback extends Command {
   private final Shooter shooterSubsystem;
   private final Feeder feederSubsystem;
-  private final Intake intakeSubsystem;
 
   private ShootingStage state;
   private final Timer timer = new Timer();
@@ -26,10 +24,9 @@ public class ShooterFallback extends Command {
    * @param shooterSubsystem The shooter subsystem used by this command.
    * @param feederSubsystem The feeder subsystem used by this command.
    */
-  public ShooterFallback(Shooter shooterSubsystem, Feeder feederSubsystem, Intake intakeSubsystem) {
+  public ShooterFallback(Shooter shooterSubsystem, Feeder feederSubsystem) {
     this.shooterSubsystem = shooterSubsystem;
     this.feederSubsystem = feederSubsystem;
-    this.intakeSubsystem = intakeSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooterSubsystem, feederSubsystem);
   }
@@ -37,7 +34,7 @@ public class ShooterFallback extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooterSubsystem.shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get() / 60.0);
+    shooterSubsystem.shoot(ShooterConstants.DEFAULT_RPM.get() / 60.0);
     state = ShootingStage.SPIN_UP;
   }
 
@@ -50,11 +47,6 @@ public class ShooterFallback extends Command {
       state = ShootingStage.FEED;
       timer.restart();
     }
-
-    //    if (state == ShootingStage.FEED && timer.hasElapsed(ShooterConstants.AGITATION_TIME)) {
-    //      intakeSubsystem.setPivotState(Intake.PivotState.RAISING);
-    //      timer.stop();
-    //    }
   }
 
   // Called once the command ends or is interrupted.
@@ -62,7 +54,6 @@ public class ShooterFallback extends Command {
   public void end(boolean interrupted) {
     feederSubsystem.stop();
     shooterSubsystem.stop();
-    //    intakeSubsystem.setPivotState(Intake.PivotState.LOWERING);
     timer.stop();
   }
 

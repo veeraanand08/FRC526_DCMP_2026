@@ -1,40 +1,72 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.CANConstants;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.autoalign.AutoAlign;
+import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.io.motors.roller.Roller;
+import frc.robot.util.io.motors.roller.RollerIO;
+import frc.robot.util.io.motors.roller.RollerIOSim;
+import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
-  private final ShooterIO io;
-  private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+  private final Roller roller;
+  private double setpointRPS;
 
   private final Supplier<Pose2d> robotPose;
   private final Supplier<ChassisSpeeds> robotVelocity;
 
-  private double desiredRPS;
-  private double distanceToTarget;
+  @AutoLogOutput private double distanceToTarget;
 
-  public Shooter(ShooterIO io, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotVelocity) {
-    this.io = io;
+  public Shooter(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotVelocity) {
+    RollerIO rollerIO =
+        switch (Constants.currentMode) {
+          case REAL -> new RollerIOTalonFX(
+              CANConstants.SUPERSTRUCTURE_CAN_BUS,
+              CANConstants.SHOOTER_TOP_LEFT,
+              new int[] {
+                CANConstants.SHOOTER_BOTTOM_LEFT,
+                CANConstants.SHOOTER_TOP_RIGHT,
+                CANConstants.SHOOTER_BOTTOM_RIGHT
+              },
+              ShooterConstants.SHOOTER_CONFIG,
+              new MotorAlignmentValue[] {
+                MotorAlignmentValue.Aligned,
+                MotorAlignmentValue.Opposed,
+                MotorAlignmentValue.Opposed
+              });
+          case SIM -> new RollerIOSim(
+              DCMotor.getKrakenX60(4),
+              new MotorIO.MechanismConstraints(
+                  ShooterConstants.SHOOTER_GEAR_RATIO, ShooterConstants.SHOOTER_MOI, 0.2, 0, 0, 0),
+              ShooterConstants.SHOOTER_KP,
+              ShooterConstants.SHOOTER_KD,
+              3);
+          default -> new RollerIO() {};
+        };
+
+    roller = new Roller("Shooter", rollerIO);
 
     this.robotPose = robotPose;
     this.robotVelocity = robotVelocity;
 
-    Logger.recordOutput("Shooter/Shooter Ready", false);
-    Logger.recordOutput("Shooter/Desired RPS", 0.0);
+    Logger.recordOutput("Shooter/Ready", false);
   }
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Shooter", inputs);
+    roller.periodic();
 
     Translation2d robotTranslation = robotPose.get().getTranslation();
     Translation2d virtualTarget;
@@ -49,9 +81,7 @@ public class Shooter extends SubsystemBase {
               AutoAlign.getTargetTranslation(AutoAlign.Target.AUTO, robotTranslation));
     distanceToTarget = robotTranslation.getDistance(virtualTarget);
 
-    Logger.recordOutput(
-        "Shooter/Shooter Ready", autoAlignActive && ShiftTimer.instance.isHubActive());
-    Logger.recordOutput("Shooter/Distance to Target", distanceToTarget);
+    Logger.recordOutput("Shooter/Ready", autoAlignActive && ShiftTimer.instance.isHubActive());
   }
 
   public void shoot() {
@@ -59,27 +89,25 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shoot(double rps) {
-    desiredRPS = rps;
-    io.setRPS(desiredRPS);
-    Logger.recordOutput("Shooter/Desired RPS", desiredRPS);
+    setpointRPS = rps;
+    roller.runClosedLoop(rps);
   }
 
   public double getVelocityRPS() {
-    return inputs.velocityRPS;
+    return roller.getVelocityRPS();
   }
 
   @AutoLogOutput
   public boolean hasSpunUp() {
-    return inputs.velocityRPS > desiredRPS - 1.5;
+    return roller.getVelocityRPS() > setpointRPS - 1.5;
   }
 
   public void stop() {
-    io.stop();
-    desiredRPS = 0.0;
-    Logger.recordOutput("Shooter/Desired RPS", desiredRPS);
+    roller.stop();
+    setpointRPS = 0.0;
   }
 
   public Command startFlywheel() {
-    return startEnd(() -> shoot(ShooterConstants.SHOOTER_DEFAULT_RPM.get() / 60.0), this::stop);
+    return startEnd(() -> shoot(ShooterConstants.DEFAULT_RPM.get() / 60.0), this::stop);
   }
 }

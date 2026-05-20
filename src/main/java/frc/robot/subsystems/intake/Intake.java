@@ -3,12 +3,24 @@ package frc.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
-import edu.wpi.first.math.filter.Debouncer;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.RobotUtil;
+import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.io.motors.pivot.Pivot;
+import frc.robot.util.io.motors.pivot.PivotIO;
+import frc.robot.util.io.motors.pivot.PivotIOSim;
+import frc.robot.util.io.motors.pivot.PivotIOTalonFX;
+import frc.robot.util.io.motors.roller.Roller;
+import frc.robot.util.io.motors.roller.RollerIO;
+import frc.robot.util.io.motors.roller.RollerIOSim;
+import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import frc.robot.util.subsystems.ExtendedSubsystem;
+import frc.robot.util.subsystems.RobotStateHandler;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends ExtendedSubsystem {
@@ -31,52 +43,90 @@ public class Intake extends ExtendedSubsystem {
 
   private PivotState pivotState = PivotState.RAISING;
 
-  private final IntakeIO io;
-  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+  private final Roller roller;
+  private final Pivot pivot;
 
   private boolean rollerEnabled;
 
   private boolean motorSafetyEngaged;
 
-  public Intake(IntakeIO io) {
-    this.io = io;
+  public Intake() {
+    PivotIO pivotIO =
+        switch (Constants.currentMode) {
+          case REAL -> new PivotIOTalonFX(
+                  Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
+                  Constants.CANConstants.INTAKE_PIVOT,
+                  IntakeConstants.PIVOT_CONFIG)
+              .useControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
+          case SIM -> new PivotIOSim(
+              DCMotor.getKrakenX60(1),
+              new MotorIO.MechanismConstraints(
+                  IntakeConstants.PIVOT_GEAR_RATIO,
+                  SingleJointedArmSim.estimateMOI(0.5, 2),
+                  0.5,
+                  0,
+                  IntakeConstants.MAX_ANGLE,
+                  0),
+              IntakeConstants.PIVOT_KP,
+              IntakeConstants.PIVOT_KD,
+              0);
+          default -> new PivotIO() {};
+        };
+    RollerIO rollerIO =
+        switch (Constants.currentMode) {
+          case REAL -> new RollerIOTalonFX(
+              Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
+              Constants.CANConstants.INTAKE_ROLLER,
+              IntakeConstants.ROLLER_CONFIG);
+          case SIM -> new RollerIOSim(
+              DCMotor.getKrakenX60(1),
+              new MotorIO.MechanismConstraints(
+                  IntakeConstants.ROLLER_GEAR_RATIO, IntakeConstants.ROLLER_MOI, 0.2, 0, 0, 0),
+              IntakeConstants.ROLLER_KP * 20,
+              IntakeConstants.ROLLER_KD,
+              0);
+          default -> new RollerIO() {};
+        };
 
-    new Trigger(() -> inputs.pivotCurrentAmps >= IntakeConstants.PIVOT_STATOR_LIMIT)
-        .debounce(0.3, Debouncer.DebounceType.kBoth)
-        .onTrue(
-            runOnce(
-                () -> {
-                  disable();
-                  motorSafetyEngaged = true;
-                  RobotUtil.setOperatorRumble(0.85, 0.85);
-                }))
-        .onFalse(
-            runOnce(
-                () -> {
-                  motorSafetyEngaged = false;
-                  RobotUtil.setOperatorRumble(0, 0);
-                }));
+    pivot = new Pivot("Intake/Pivot", pivotIO, RobotStateHandler::isEnabled);
+    roller = new Roller("Intake/Roller", rollerIO);
 
-    Logger.recordOutput("Intake/Pivot State", pivotState.toString());
-    Logger.recordOutput("Intake/Intake Running", rollerEnabled);
+    // new Trigger(() -> inputs.pivotCurrentAmps >= IntakeConstants.PIVOT_STATOR_LIMIT)
+    //     .debounce(0.3, Debouncer.DebounceType.kBoth)
+    //     .onTrue(
+    //         runOnce(
+    //             () -> {
+    //               disable();
+    //               motorSafetyEngaged = true;
+    //               RobotUtil.setOperatorRumble(0.85, 0.85);
+    //             }))
+    //     .onFalse(
+    //         runOnce(
+    //             () -> {
+    //               motorSafetyEngaged = false;
+    //               RobotUtil.setOperatorRumble(0, 0);
+    //             }));
+
+    Logger.recordOutput("Intake/PivotState", pivotState.toString());
+    Logger.recordOutput("Intake/Running", rollerEnabled);
   }
 
   @Override
   public void disable() {
-    io.setPivotOpenLoop(0);
-    io.stopRoller();
+    pivot.stop();
+    roller.stop();
   }
 
   @Override
   public void enable() {
-    io.stopPivot();
+    roller.stop();
     motorSafetyEngaged = false;
   }
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    roller.periodic();
+    pivot.periodic();
   }
 
   public void setPivotState(PivotState newState) {
@@ -97,7 +147,7 @@ public class Intake extends ExtendedSubsystem {
         break;
     }
     pivotState = newState;
-    Logger.recordOutput("Intake/Pivot State", pivotState.toString());
+    Logger.recordOutput("Intake/PivotState", pivotState.toString());
   }
 
   public void toggleRoller() {
@@ -105,42 +155,41 @@ public class Intake extends ExtendedSubsystem {
   }
 
   public void setRoller(boolean enabled) {
-    if (enabled) io.setRollerRPS(IntakeConstants.ROLLER_RPS);
-    else io.stopRoller();
+    if (enabled) roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
+    else roller.stop();
     rollerEnabled = enabled;
-    Logger.recordOutput("Intake/Intake Running", rollerEnabled);
+    Logger.recordOutput("Intake/Running", rollerEnabled);
   }
 
   public void slowRoller() {
-    io.setRollerRPS(IntakeConstants.ROLLER_RPS_SLOW);
+    roller.runClosedLoop(IntakeConstants.ROLLER_RPS_SLOW);
     rollerEnabled = false;
-    Logger.recordOutput("Intake/Intake Running", false);
+    Logger.recordOutput("Intake/Running", false);
   }
 
   public void setRollerReversed(boolean enabled) {
-    if (enabled) io.setRollerRPS(IntakeConstants.ROLLER_RPS_REVERSED);
-    else io.stopRoller();
+    if (enabled) roller.runClosedLoop(IntakeConstants.ROLLER_RPS_REVERSED);
+    else roller.stop();
     rollerEnabled = false;
-    Logger.recordOutput("Intake/Intake Running", false);
+    Logger.recordOutput("Intake/Running", false);
   }
 
   public void setPivotAngle(double deg) {
     if (motorSafetyEngaged) return;
-    io.setPivotProfiled(deg);
-    Logger.recordOutput("Intake/Pivot Setpoint", deg);
+    pivot.runClosedLoop(deg);
   }
 
   public double getPivotPosition() {
-    return inputs.pivotPositionDeg;
+    return pivot.getPositionDeg();
   }
 
   public double getRollerRPS() {
-    return inputs.rollerVelocityRPS;
+    return roller.getVelocityRPS();
   }
 
   public void stop() {
     setRoller(false);
-    io.stopPivot();
+    pivot.stop();
   }
 
   /**
@@ -200,19 +249,18 @@ public class Intake extends ExtendedSubsystem {
     return startRun(
             () -> {
               if (!feeder.isEnabledForShooting()) {
-                feeder.slowIndexer();
-                feeder.reverseKicker();
+                feeder.agitate();
               }
               slowRoller();
               setPivotState(PivotState.AGITATING_UPPER);
             },
             () -> {
               if (pivotState == PivotState.AGITATING_UPPER
-                  && Math.abs(inputs.pivotPositionDeg - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE)
+                  && Math.abs(pivot.getPositionDeg() - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE)
                       < 3.5) {
                 setPivotState(PivotState.AGITATING_LOWER);
               } else if (pivotState == PivotState.AGITATING_LOWER
-                  && Math.abs(inputs.pivotPositionDeg - IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE)
+                  && Math.abs(pivot.getPositionDeg() - IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE)
                       < 3.5) {
                 setPivotState(PivotState.AGITATING_UPPER);
               }
@@ -223,7 +271,7 @@ public class Intake extends ExtendedSubsystem {
                 feeder.stop();
               }
               setPivotState(PivotState.LOWERING);
-              io.stopRoller();
+              roller.stop();
             });
   }
 
@@ -247,7 +295,7 @@ public class Intake extends ExtendedSubsystem {
         () -> {
           RobotUtil.setDriverRumble(0.75, 0.75);
           RobotUtil.setOperatorRumble(0.75, 0.75);
-          io.resetPivotPosition(Degrees.of(IntakeConstants.MAX_ANGLE));
+          pivot.resetPosition(Degrees.of(IntakeConstants.MAX_ANGLE));
         },
         () -> {
           RobotUtil.setDriverRumble(0, 0);
@@ -256,9 +304,6 @@ public class Intake extends ExtendedSubsystem {
   }
 
   public Command markIntakeRaised() {
-    return runOnce(() -> io.resetPivotPosition(Rotations.zero()));
+    return runOnce(() -> pivot.resetPosition(Rotations.zero()));
   }
-
-  @Override
-  public void simulationPeriodic() {}
 }

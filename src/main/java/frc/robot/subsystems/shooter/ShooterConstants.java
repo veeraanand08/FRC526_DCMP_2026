@@ -1,7 +1,12 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -9,14 +14,31 @@ public final class ShooterConstants {
   public static final double SHOOTER_MOI = 0.001;
   public static final double SHOOTER_GEAR_RATIO = 1.0;
 
-  public static final int SHOOTER_STATOR_LIMIT = 80;
-  public static final int SHOOTER_SUPPLY_LIMIT = 40;
-  public static final InvertedValue SHOOTER_LEFT_INVERTED = InvertedValue.CounterClockwise_Positive;
   public static final double SHOOTER_KP = 0.3;
   public static final double SHOOTER_KI = 0;
   public static final double SHOOTER_KD = 0;
   public static final double SHOOTER_KS = 0.19;
   public static final double SHOOTER_KV = 0.12;
+
+  public static final TalonFXConfiguration SHOOTER_CONFIG =
+      new TalonFXConfiguration()
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimit(80)
+                  .withSupplyCurrentLimit(40)
+                  .withStatorCurrentLimitEnable(true)
+                  .withSupplyCurrentLimitEnable(true))
+          .withMotorOutput(
+              new MotorOutputConfigs()
+                  .withInverted(InvertedValue.CounterClockwise_Positive)
+                  .withNeutralMode(NeutralModeValue.Coast))
+          .withSlot0(
+              new Slot0Configs()
+                  .withKP(SHOOTER_KP)
+                  .withKI(SHOOTER_KI)
+                  .withKD(SHOOTER_KD)
+                  .withKS(SHOOTER_KS)
+                  .withKV(SHOOTER_KV));
 
   public static final MotorAlignmentValue BOTTOM_LEFT_ALIGNMENT_VALUE = MotorAlignmentValue.Aligned;
   public static final MotorAlignmentValue TOP_RIGHT_ALIGNMENT_VALUE = MotorAlignmentValue.Opposed;
@@ -29,10 +51,10 @@ public final class ShooterConstants {
 
   static {
     // Distance, RPS
-    DISTANCE_TO_RPS.put(0.0, 0.0);
+    DISTANCE_TO_RPS.put(0.0, 3500.0);
   }
 
-  public static final LoggedNetworkNumber SHOOTER_DEFAULT_RPM =
+  public static final LoggedNetworkNumber DEFAULT_RPM =
       new LoggedNetworkNumber("/Tuning/Shooter/RPM", 3500);
 
   public static final double AGITATION_TIME = 2.5;

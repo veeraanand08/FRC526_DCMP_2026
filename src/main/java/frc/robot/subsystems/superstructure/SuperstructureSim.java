@@ -98,7 +98,7 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void simulationPeriodic() {
-    if (intake.getRollerRPS() > 83.0) {
+    if (intake.getRollerRPS() > 70.0) {
       intakeSimulation.startIntake();
     } else {
       intakeSimulation.stopIntake();

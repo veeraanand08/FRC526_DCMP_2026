@@ -27,17 +27,8 @@ import frc.robot.commands.shooter.ShooterFallback;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.Feeder;
-import frc.robot.subsystems.feeder.FeederIO;
-import frc.robot.subsystems.feeder.FeederIOSim;
-import frc.robot.subsystems.feeder.FeederIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOSim;
-import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.superstructure.SuperstructureSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -104,13 +95,13 @@ public class RobotContainer {
         //                    VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2),
         //                new VisionIOPhotonVision(
         //                    VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3));
-        shooter = new Shooter(new ShooterIOTalonFX(), drive::getPose, drive::getChassisSpeeds);
-        feeder = new Feeder(new FeederIOTalonFX());
-        intake = new Intake(new IntakeIOTalonFX());
+        shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
+        feeder = new Feeder();
+        intake = new Intake();
         break;
       case SIM:
         Arena2026Rebuilt arena = new Arena2026Rebuilt(false);
-        arena.setEfficiencyMode(false); // set to true to limit # of balls
+        arena.setEfficiencyMode(true); // set to true to limit # of balls
         SimulatedArena.overrideInstance(arena);
         SimulatedArena.getInstance().resetFieldForAuto();
         driveSimulation =
@@ -137,9 +128,9 @@ public class RobotContainer {
                     VisionConstants.robotToCamera1,
                     driveSimulation::getSimulatedDriveTrainPose));
         //                new VisionIO() {});
-        shooter = new Shooter(new ShooterIOSim(), drive::getPose, drive::getChassisSpeeds);
-        feeder = new Feeder(new FeederIOSim());
-        intake = new Intake(new IntakeIOSim());
+        shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
+        feeder = new Feeder();
+        intake = new Intake();
         superstructureSim =
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
@@ -164,9 +155,9 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive, new VisionIO() {}, new VisionIO() {}, new VisionIO() {}, new VisionIO() {});
-        shooter = new Shooter(new ShooterIO() {}, drive::getPose, drive::getChassisSpeeds);
-        feeder = new Feeder(new FeederIO() {});
-        intake = new Intake(new IntakeIO() {});
+        shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
+        feeder = new Feeder();
+        intake = new Intake();
         superstructureSim =
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
@@ -247,7 +238,7 @@ public class RobotContainer {
     if (Constants.currentMode == Constants.Mode.SIM) {
       shoot = shoot.alongWith(superstructureSim.shootCommand());
     }
-    Command shootDefault = new ShooterFallback(shooter, feeder, intake);
+    Command shootDefault = new ShooterFallback(shooter, feeder);
 
     new EventTrigger("Intake").whileTrue(holdIntake);
     NamedCommands.registerCommand("Auto Align", autoAlign);
@@ -294,9 +285,9 @@ public class RobotContainer {
       operatorController.b().whileTrue(dump);
       operatorController.povUp().onTrue(resetIntake);
       operatorController
-              .povRight()
-              .debounce(2, Debouncer.DebounceType.kRising)
-              .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
+          .povRight()
+          .debounce(2, Debouncer.DebounceType.kRising)
+          .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
     }
   }
 
