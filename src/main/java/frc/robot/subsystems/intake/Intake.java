@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.subsystems.ExtendedSubsystem;
 import org.littletonrobotics.junction.Logger;
@@ -73,7 +74,6 @@ public class Intake extends ExtendedSubsystem {
   }
 
   @Override
-  /* Periodically raises/lowers the pivot depending on its current state. Will not run if in lowered/lowering state. */
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Intake", inputs);
@@ -124,11 +124,6 @@ public class Intake extends ExtendedSubsystem {
     Logger.recordOutput("Intake/Intake Running", false);
   }
 
-  /**
-   * Set the pivot motor's setpoint to a given angle.
-   *
-   * @param deg Angle (in degrees) to rotate.
-   */
   public void setPivotAngle(double deg) {
     if (motorSafetyEngaged) return;
     io.setPivotProfiled(deg);
@@ -151,7 +146,7 @@ public class Intake extends ExtendedSubsystem {
   /**
    * Enable the intake roller. If the intake is raised, it will lower and then start.
    *
-   * @return a command to toggle the intake
+   * @return a command to run the intake
    */
   public Command intakeCommand() {
     // Inline construction of command goes here.
@@ -201,11 +196,15 @@ public class Intake extends ExtendedSubsystem {
    *
    * @return a command to agitate the intake
    */
-  public Command agitateCommand() {
+  public Command agitateCommand(Feeder feeder) {
     return startRun(
             () -> {
-              setPivotState(PivotState.AGITATING_UPPER);
+              if (!feeder.isEnabledForShooting()) {
+                feeder.slowIndexer();
+                feeder.reverseKicker();
+              }
               slowRoller();
+              setPivotState(PivotState.AGITATING_UPPER);
             },
             () -> {
               if (pivotState == PivotState.AGITATING_UPPER
@@ -220,6 +219,9 @@ public class Intake extends ExtendedSubsystem {
             })
         .finallyDo(
             () -> {
+              if (!feeder.isEnabledForShooting()) {
+                feeder.stop();
+              }
               setPivotState(PivotState.LOWERING);
               io.stopRoller();
             });

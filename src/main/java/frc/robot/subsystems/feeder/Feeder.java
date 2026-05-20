@@ -12,6 +12,8 @@ public class Feeder extends SubsystemBase {
   private final FeederIO io;
   private final FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged();
 
+  private boolean isEnabledForShooting;
+
   public Feeder(FeederIO io) {
     this.io = io;
   }
@@ -23,11 +25,21 @@ public class Feeder extends SubsystemBase {
   }
 
   public void enableIndexer() {
+    isEnabledForShooting = true;
     io.setIndexerRPS(FeederConstants.INDEXER_RPS);
   }
 
+  public void slowIndexer() {
+    io.setIndexerRPS(FeederConstants.INDEXER_RPS * 0.25);
+  }
+
   public void enableKicker() {
+    isEnabledForShooting = true;
     io.setKickerRPS(FeederConstants.KICKER_RPS);
+  }
+
+  public void reverseKicker() {
+    io.setKickerRPS(-FeederConstants.KICKER_RPS * 0.25);
   }
 
   public void reverse() {
@@ -39,9 +51,23 @@ public class Feeder extends SubsystemBase {
     return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 1.5;
   }
 
+  public boolean isEnabledForShooting() {
+    return isEnabledForShooting;
+  }
+
   public void stop() {
     io.stopIndexer();
     io.stopKicker();
+    isEnabledForShooting = false;
+  }
+
+  public Command burst() {
+    return startEnd(
+        () -> {
+          enableKicker();
+          enableIndexer();
+        },
+        this::stop);
   }
 
   public Command reverseCommand() {

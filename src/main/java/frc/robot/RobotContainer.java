@@ -240,7 +240,7 @@ public class RobotContainer {
                         drive.getChassisSpeeds()))
             .finallyDo(AutoAlign::disable);
     Command holdIntake = intake.intakeCommand();
-    Command agitate = intake.agitateCommand();
+    Command agitate = intake.agitateCommand(feeder);
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
     Command shoot = new ShooterCommand(shooter, feeder, intake);
@@ -264,36 +264,21 @@ public class RobotContainer {
       keyboard.button(5).onTrue(agitate);
     }
 
-    if (DriverStation.isTest()) {
-      // single controller for testing
-      driverController.a().whileTrue(autoAlign);
-      driverController.x().whileTrue(lockWheels);
-      driverController.povLeft().onTrue(zeroGyro);
+    // driver controls
+    driverController.leftBumper().whileTrue(lockWheels);
+    operatorController.povLeft().onTrue(zeroGyro);
 
-      driverController.leftBumper().whileTrue(holdIntake);
-      driverController.rightBumper().whileTrue(shoot);
-      driverController.rightTrigger(0.7).whileTrue(shootDefault);
-      driverController.y().toggleOnTrue(agitate);
-      driverController.b().whileTrue(dump);
-      driverController.povUp().onTrue(resetIntake);
-      driverController
-          .povRight()
-          .debounce(2, Debouncer.DebounceType.kRising)
-          .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
-    } else {
-      // driver controls
-      driverController.a().whileTrue(autoAlign);
-      driverController.leftBumper().whileTrue(lockWheels);
-      driverController.povLeft().onTrue(zeroGyro);
-
-      // operator controls
-      operatorController.leftBumper().whileTrue(holdIntake);
-      operatorController.rightBumper().whileTrue(shoot);
-      operatorController.rightTrigger(0.7).whileTrue(shootDefault);
-      operatorController.a().toggleOnTrue(agitate);
-      operatorController.b().whileTrue(dump);
-      operatorController.povUp().onTrue(resetIntake);
-    }
+    // operator controls
+    operatorController.leftBumper().whileTrue(holdIntake);
+    operatorController.rightBumper().whileTrue(shooter.startFlywheel());
+    operatorController.rightTrigger(0.7).whileTrue(feeder.burst());
+    operatorController.a().toggleOnTrue(agitate);
+    operatorController.b().whileTrue(dump);
+    operatorController.povUp().onTrue(resetIntake);
+    operatorController
+        .povRight()
+        .debounce(2, Debouncer.DebounceType.kRising)
+        .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
   }
 
   /**
