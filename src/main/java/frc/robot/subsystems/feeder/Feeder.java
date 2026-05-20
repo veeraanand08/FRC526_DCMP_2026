@@ -6,13 +6,14 @@ package frc.robot.subsystems.feeder;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Feeder extends SubsystemBase {
   private final FeederIO io;
   private final FeederIOInputsAutoLogged inputs = new FeederIOInputsAutoLogged();
 
-  private boolean isEnabledForShooting;
+  @Getter private boolean enabledForShooting;
 
   public Feeder(FeederIO io) {
     this.io = io;
@@ -25,7 +26,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void enableIndexer() {
-    isEnabledForShooting = true;
+    enabledForShooting = true;
     io.setIndexerRPS(FeederConstants.INDEXER_RPS);
   }
 
@@ -34,7 +35,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void enableKicker() {
-    isEnabledForShooting = true;
+    enabledForShooting = true;
     io.setKickerRPS(FeederConstants.KICKER_RPS);
   }
 
@@ -51,14 +52,10 @@ public class Feeder extends SubsystemBase {
     return inputs.kickerVelocityRPS > FeederConstants.KICKER_RPS - 1.5;
   }
 
-  public boolean isEnabledForShooting() {
-    return isEnabledForShooting;
-  }
-
   public void stop() {
     io.stopIndexer();
     io.stopKicker();
-    isEnabledForShooting = false;
+    enabledForShooting = false;
   }
 
   public Command burst() {
