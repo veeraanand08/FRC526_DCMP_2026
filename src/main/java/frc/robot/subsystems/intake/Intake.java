@@ -22,7 +22,6 @@ import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
 import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import frc.robot.util.subsystems.ExtendedSubsystem;
-import frc.robot.util.subsystems.RobotStateHandler;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends ExtendedSubsystem {
@@ -88,10 +87,7 @@ public class Intake extends ExtendedSubsystem {
 
     pivot =
         new Pivot(
-            "Intake/Pivot",
-            pivotIO,
-            RobotStateHandler::isEnabled,
-            IntakeConstants.PIVOT_CONFIG.CurrentLimits.StatorCurrentLimit);
+            "Intake/Pivot", pivotIO, IntakeConstants.PIVOT_CONFIG.CurrentLimits.StatorCurrentLimit);
     roller = new Roller("Intake/Roller", rollerIO);
 
     Logger.recordOutput("Intake/PivotState", pivotState.toString());

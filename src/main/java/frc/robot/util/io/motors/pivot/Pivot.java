@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -29,7 +30,7 @@ public class Pivot {
   }
 
   public Pivot(String name, PivotIO io, double currentLimit) {
-    this(name, io, () -> false, currentLimit);
+    this(name, io, RobotStateHandler::isEnabled, currentLimit);
   }
 
   public Pivot(String name, PivotIO io, BooleanSupplier brakeMode, double currentLimit) {
