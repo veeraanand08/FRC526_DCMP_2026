@@ -86,7 +86,12 @@ public class Intake extends ExtendedSubsystem {
           default -> new RollerIO() {};
         };
 
-    pivot = new Pivot("Intake/Pivot", pivotIO, RobotStateHandler::isEnabled);
+    pivot =
+        new Pivot(
+            "Intake/Pivot",
+            pivotIO,
+            RobotStateHandler::isEnabled,
+            IntakeConstants.PIVOT_CONFIG.CurrentLimits.StatorCurrentLimit);
     roller = new Roller("Intake/Roller", rollerIO);
 
     Logger.recordOutput("Intake/PivotState", pivotState.toString());
@@ -101,13 +106,14 @@ public class Intake extends ExtendedSubsystem {
 
   @Override
   public void enable() {
+    pivot.stop();
     roller.stop();
   }
 
   @Override
   public void periodic() {
-    roller.periodic();
     pivot.periodic();
+    roller.periodic();
   }
 
   public void setPivotState(PivotState newState) {

@@ -13,22 +13,21 @@ public final class VisionConstants {
               .k2026RebuiltAndymark); // Chesapeake = AndyMark, FIRST Championship = Welded
 
   // Camera names, must match names configured on coprocessor
-  public static final String CAMERA_0_NAME = "Camera_Left";
-  public static final String CAMERA_1_NAME = "Camera_Right";
-  public static final String CAMERA_2_NAME = "Camera_Right";
-  public static final String CAMERA_3_NAME = "Camera_Right";
+  public static final String CAMERA_0_NAME = "Front";
+  public static final String CAMERA_1_NAME = "Side_Left";
+  public static final String CAMERA_2_NAME = "Side_Right";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCamera0 =
       new Transform3d(
-          Units.inchesToMeters(-12.5), // x
-          Units.inchesToMeters(16), // y
-          Units.inchesToMeters(7.5), // z
+          Units.inchesToMeters(13.69), // x, forward
+          Units.inchesToMeters(0.0), // y, left
+          Units.inchesToMeters(13.77), // z, up
           new Rotation3d(
-              Units.degreesToRadians(2.0), // roll
-              Units.degreesToRadians(-6.0), // pitch
-              Units.degreesToRadians(150.0))); // yaw
+              Units.degreesToRadians(0.0), // roll
+              Units.degreesToRadians(20.0), // pitch
+              Units.degreesToRadians(0.0))); // yaw
   public static Transform3d robotToCamera1 =
       new Transform3d(
           Units.inchesToMeters(-12.5), // x
@@ -47,15 +46,6 @@ public final class VisionConstants {
               Units.degreesToRadians(2.0), // roll
               Units.degreesToRadians(-6.0), // pitch
               Units.degreesToRadians(150.0))); // yaw
-  public static Transform3d robotToCamera3 =
-      new Transform3d(
-          Units.inchesToMeters(-12.5), // x
-          Units.inchesToMeters(-16), // y
-          Units.inchesToMeters(7.5), // z
-          new Rotation3d(
-              Units.degreesToRadians(0.0), // roll
-              Units.degreesToRadians(-1.6), // pitch
-              Units.degreesToRadians(-150.0))); // yaw
 
   // Basic filtering thresholds
   public static final double MAX_AMBIGUITY = 0.3;
