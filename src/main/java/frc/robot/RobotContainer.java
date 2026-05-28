@@ -30,10 +30,7 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.superstructure.SuperstructureSim;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.*;
 import frc.robot.util.BetterAutoChooser;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
@@ -86,15 +83,11 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        vision = new Vision(drive, new VisionIO() {});
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3));
+        vision =
+            new Vision(
+                drive,
+                new VisionIOPhotonVision(
+                    VisionConstants.CAMERA_0_NAME, VisionConstants.CAMERA_0_OFFSET));
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
@@ -121,13 +114,16 @@ public class RobotContainer {
                 drive,
                 new VisionIOPhotonVisionSim(
                     VisionConstants.CAMERA_0_NAME,
-                    VisionConstants.robotToCamera0,
+                    VisionConstants.CAMERA_0_OFFSET,
                     driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
                     VisionConstants.CAMERA_1_NAME,
-                    VisionConstants.robotToCamera1,
+                    VisionConstants.CAMERA_1_OFFSET,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.CAMERA_2_NAME,
+                    VisionConstants.CAMERA_2_OFFSET,
                     driveSimulation::getSimulatedDriveTrainPose));
-        //                new VisionIO() {});
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
