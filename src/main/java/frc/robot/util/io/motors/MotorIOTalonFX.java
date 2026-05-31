@@ -70,8 +70,11 @@ public class MotorIOTalonFX implements MotorIO {
     ParentDevice.optimizeBusUtilizationForAll(followers);
     PhoenixUtil.registerSignals(canbus, voltage, supplyCurrent, statorCurrent, temp);
     PhoenixUtil.registerSignals(canbus, followerTemps);
-    leader.setPosition(0);
+    tryUntilOk(5, () -> leader.setPosition(0));
     // Set follower behavior
+    if (followers.length != followerAlignments.length) {
+      throw new IllegalArgumentException("Every follower motor must have an alignment value!");
+    }
     for (int i = 0; i < followers.length; i++) {
       followers[i].setControl(new Follower(leader.getDeviceID(), followerAlignments[i]));
     }

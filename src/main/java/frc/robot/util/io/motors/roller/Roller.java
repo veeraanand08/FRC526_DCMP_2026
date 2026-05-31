@@ -6,6 +6,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import frc.robot.util.io.motors.MotorIO;
 import java.util.function.BooleanSupplier;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Roller {
@@ -18,7 +19,7 @@ public class Roller {
 
   private final Alert tempWarning;
   private final Alert tempFault;
-  private boolean motorSafetyEngaged;
+  @Getter private boolean tempCritical;
 
   public Roller(String name, RollerIO io) {
     this(name, io, () -> false);
@@ -49,18 +50,18 @@ public class Roller {
       highestTemp = Math.max(highestTemp, temp);
     }
     if (highestTemp > 75.0) {
-      motorSafetyEngaged = true;
+      tempCritical = true;
       stop();
       tempFault.set(true);
     } else {
-      motorSafetyEngaged = false;
+      tempCritical = false;
       tempFault.set(false);
       tempWarning.set(highestTemp > 60.0);
     }
   }
 
   public void runOpenLoop(double volts) {
-    if (motorSafetyEngaged) return;
+    if (tempCritical) return;
 
     io.setVoltage(volts);
     mode = MotorIO.MotorIOMode.VOLTAGE_CONTROL;
@@ -69,7 +70,7 @@ public class Roller {
   }
 
   public void runClosedLoop(double rps) {
-    if (motorSafetyEngaged) return;
+    if (tempCritical) return;
 
     io.setVelocity(rps);
     mode = MotorIO.MotorIOMode.VELOCITY_CONTROL;

@@ -84,7 +84,7 @@ public final class PhoenixUtil {
 
   /** Start a thread for refreshing signals */
   public static void startTelemetry() {
-    signalThread.startPeriodic(0.01);
+    signalThread.startPeriodic(0.02);
   }
 
   public static class TalonFXMotorControllerSim implements SimulatedMotorController {

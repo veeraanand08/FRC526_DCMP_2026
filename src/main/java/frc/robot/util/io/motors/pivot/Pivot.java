@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.io.motors.MotorIO;
 import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot {
@@ -23,7 +24,8 @@ public class Pivot {
   private final Alert torqueLimitWarning;
   private final Alert tempWarning;
   private final Alert tempFault;
-  private boolean motorSafetyEngaged;
+  @Getter private boolean stalled;
+  @Getter private boolean tempCritical;
 
   public Pivot(String name, PivotIO io) {
     this(name, io, 120.0);
@@ -56,15 +58,14 @@ public class Pivot {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  motorSafetyEngaged = true;
-                  io.coast();
+                  stalled = true;
+                  stop();
                   torqueLimitWarning.set(true);
                 }))
         .onFalse(
             Commands.runOnce(
                 () -> {
-                  motorSafetyEngaged = false;
-                  stop();
+                  stalled = false;
                   torqueLimitWarning.set(false);
                 }));
   }
@@ -78,18 +79,18 @@ public class Pivot {
       highestTemp = Math.max(highestTemp, temp);
     }
     if (highestTemp > 75.0) {
-      motorSafetyEngaged = true;
+      tempCritical = true;
       stop();
       tempFault.set(true);
     } else {
-      motorSafetyEngaged = false;
+      tempCritical = false;
       tempFault.set(false);
       tempWarning.set(highestTemp > 60.0);
     }
   }
 
   public void runOpenLoop(double volts) {
-    if (motorSafetyEngaged) return;
+    if (stalled || tempCritical) return;
 
     io.setVoltage(volts);
     mode = MotorIO.MotorIOMode.VOLTAGE_CONTROL;
@@ -98,7 +99,7 @@ public class Pivot {
   }
 
   public void runClosedLoop(double deg) {
-    if (motorSafetyEngaged) return;
+    if (stalled || tempCritical) return;
 
     io.setPosition(deg);
     mode = MotorIO.MotorIOMode.POSITION_CONTROL;

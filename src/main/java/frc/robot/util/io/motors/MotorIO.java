@@ -8,8 +8,8 @@ public interface MotorIO {
     public double statorCurrentAmps;
     public double tempCelsius;
 
-    public boolean[] followerConnected;
-    public double[] followerTempCelsius;
+    public boolean[] followerConnected = new boolean[0];
+    public double[] followerTempCelsius = new double[0];
   }
 
   enum MotorIOMode {
