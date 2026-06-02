@@ -41,12 +41,14 @@ public class ShooterCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    shooterSubsystem.isShooting = true;
     state = ShootingStage.SPIN_UP;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    shooterSubsystem.computeShot();
     shooterSubsystem.shoot();
 
     if (state == ShootingStage.SPIN_UP && shooterSubsystem.hasSpunUp()) {
@@ -66,6 +68,7 @@ public class ShooterCommand extends Command {
   public void end(boolean interrupted) {
     feederSubsystem.stop();
     shooterSubsystem.stop();
+    shooterSubsystem.isShooting = false;
     timer.stop();
   }
 

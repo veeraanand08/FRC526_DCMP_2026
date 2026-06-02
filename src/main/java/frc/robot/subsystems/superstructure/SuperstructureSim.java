@@ -1,7 +1,5 @@
 package frc.robot.subsystems.superstructure;
 
-import static edu.wpi.first.units.Units.*;
-
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,13 +10,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.ShooterConstants;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
+import frc.robot.util.sotm.ProjectileSimulator;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import static edu.wpi.first.units.Units.*;
 
 public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
   private final Intake intake;
@@ -84,8 +86,11 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
             // Initial height of the flying fuel
             Meters.of(.45),
             // The launch speed is proportional to the RPM
-            // todo: change to adaptive based on rpm and data
-            MetersPerSecond.of(4000.0 / 6000 * 10),
+            MetersPerSecond.of(
+                ProjectileSimulator.rpmToExitVelocity(
+                    shooterRPS.getAsDouble() * 60.0,
+                    ShooterConstants.WHEEL_DIAMETER,
+                    ShooterConstants.SLIP_FACTOR)),
             // The angle at which the fuel is launched
             Degrees.of(65));
     fuelOnFly

@@ -19,10 +19,8 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import frc.robot.commands.AutoAlign;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.util.RobotUtil;
-import frc.robot.util.autoalign.AutoAlign;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -172,7 +170,6 @@ public class Vision extends SubsystemBase {
     Logger.recordOutput(
         "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
     Logger.recordOutput("Vision/Pose Estimator Ready", RobotUtil.isPoseEstimatorReady);
-    Logger.recordOutput("AutoAlign/Current Target", AutoAlign.getCurrentTarget().toString());
   }
 
   @FunctionalInterface
