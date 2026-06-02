@@ -6,6 +6,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -29,6 +30,9 @@ public class Shooter extends SubsystemBase {
 
   private final Supplier<Pose2d> robotPose;
   private final Supplier<ChassisSpeeds> robotVelocity;
+
+  private final Alert speedWarning =
+      new Alert("Shooter", "Requested speed above limit, check units", Alert.AlertType.kWarning);
 
   @AutoLogOutput private double distanceToTarget;
   @Getter private ShotCalculator.LaunchParameters shot = ShotCalculator.LaunchParameters.INVALID;
@@ -135,6 +139,10 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shoot(double rps) {
+    if (rps > 85.0) {
+      rps = 85.0;
+      speedWarning.set(true);
+    }
     roller.runClosedLoop(rps);
     setpointRPS = rps;
   }

@@ -19,33 +19,33 @@ public final class VisionConstants {
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
-  public static Transform3d robotToCamera0 =
+  public static Transform3d CAMERA_0_OFFSET =
       new Transform3d(
           Units.inchesToMeters(13.69), // x, forward
           Units.inchesToMeters(0.0), // y, left
           Units.inchesToMeters(13.77), // z, up
           new Rotation3d(
               Units.degreesToRadians(0.0), // roll
-              Units.degreesToRadians(20.0), // pitch
+              Units.degreesToRadians(-20.0), // pitch
               Units.degreesToRadians(0.0))); // yaw
-  public static Transform3d robotToCamera1 =
+  public static Transform3d CAMERA_1_OFFSET =
       new Transform3d(
-          Units.inchesToMeters(-12.5), // x
-          Units.inchesToMeters(-16), // y
-          Units.inchesToMeters(7.5), // z
+          Units.inchesToMeters(-0.5), // x, forward
+          Units.inchesToMeters(13.421), // y, left
+          Units.inchesToMeters(7.75), // z, up
           new Rotation3d(
               Units.degreesToRadians(0.0), // roll
-              Units.degreesToRadians(-1.6), // pitch
-              Units.degreesToRadians(-150.0))); // yaw
-  public static Transform3d robotToCamera2 =
+              Units.degreesToRadians(0.0), // pitch
+              Units.degreesToRadians(90))); // yaw
+  public static final Transform3d CAMERA_2_OFFSET =
       new Transform3d(
-          Units.inchesToMeters(-12.5), // x
-          Units.inchesToMeters(16), // y
-          Units.inchesToMeters(7.5), // z
+          Units.inchesToMeters(-0.5), // x, forward
+          Units.inchesToMeters(-13.421), // y, left
+          Units.inchesToMeters(7.75), // z, up
           new Rotation3d(
               Units.degreesToRadians(2.0), // roll
-              Units.degreesToRadians(-6.0), // pitch
-              Units.degreesToRadians(150.0))); // yaw
+              Units.degreesToRadians(0.0), // pitch
+              Units.degreesToRadians(-90))); // yaw
 
   // Basic filtering thresholds
   public static final double MAX_AMBIGUITY = 0.3;

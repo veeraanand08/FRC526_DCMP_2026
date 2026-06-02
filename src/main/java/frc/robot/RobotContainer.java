@@ -30,10 +30,7 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.superstructure.SuperstructureSim;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.*;
 import frc.robot.util.BetterAutoChooser;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
@@ -76,7 +73,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (currentMode) {
-      case REAL:
+      case REAL -> {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -85,20 +82,20 @@ public class RobotContainer {
                 new ModuleIOTalonFXReal(TunerConstants.BackLeft),
                 new ModuleIOTalonFXReal(TunerConstants.BackRight),
                 (pose) -> {});
-        vision = new Vision(drive, new VisionIO() {});
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_0_NAME, VisionConstants.robotToCamera0),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_1_NAME, VisionConstants.robotToCamera1),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_2_NAME, VisionConstants.robotToCamera2),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_3_NAME, VisionConstants.robotToCamera3));
+        vision =
+            new Vision(
+                drive,
+                new VisionIOPhotonVision(
+                    VisionConstants.CAMERA_0_NAME, VisionConstants.CAMERA_0_OFFSET),
+                new VisionIOPhotonVision(
+                    VisionConstants.CAMERA_1_NAME, VisionConstants.CAMERA_1_OFFSET),
+                new VisionIOPhotonVision(
+                    VisionConstants.CAMERA_2_NAME, VisionConstants.CAMERA_2_OFFSET));
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
-        break;
-      case SIM:
+      }
+      case SIM -> {
         Arena2026Rebuilt arena = new Arena2026Rebuilt(false);
         arena.setEfficiencyMode(true); // set to true to limit # of balls
         SimulatedArena.overrideInstance(arena);
@@ -120,13 +117,16 @@ public class RobotContainer {
                 drive,
                 new VisionIOPhotonVisionSim(
                     VisionConstants.CAMERA_0_NAME,
-                    VisionConstants.robotToCamera0,
+                    VisionConstants.CAMERA_0_OFFSET,
                     driveSimulation::getSimulatedDriveTrainPose),
                 new VisionIOPhotonVisionSim(
                     VisionConstants.CAMERA_1_NAME,
-                    VisionConstants.robotToCamera1,
+                    VisionConstants.CAMERA_1_OFFSET,
+                    driveSimulation::getSimulatedDriveTrainPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.CAMERA_2_NAME,
+                    VisionConstants.CAMERA_2_OFFSET,
                     driveSimulation::getSimulatedDriveTrainPose));
-        //                new VisionIO() {});
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
@@ -134,15 +134,9 @@ public class RobotContainer {
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
         robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
-        break;
-      default:
-        // replay
-        SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
-        SimulatedArena.getInstance().resetFieldForAuto();
-        driveSimulation =
-            new SwerveDriveSimulation(
-                Drive.getMapleSimConfig(), new Pose2d(3, 3, new Rotation2d()));
-        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+      }
+      default -> {
+        /* REPLAY */
         drive =
             new Drive(
                 new GyroIO() {},
@@ -157,10 +151,11 @@ public class RobotContainer {
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
+        // for robot component poses
         superstructureSim =
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
-        robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
+      }
     }
 
     PhoenixUtil.startTelemetry();
