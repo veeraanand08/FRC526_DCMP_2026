@@ -20,7 +20,7 @@ public final class ShooterConstants {
   public static final double LAUNCH_ANGLE = 65; // degrees
   public static final double WHEEL_DIAMETER = Units.inchesToMeters(4); // meters
   public static final double SLIP_FACTOR = 0.6;
-  public static final Translation2d ROBOT_TO_SHOOTER = new Translation2d(2.0, 0.0);
+  public static final Translation2d ROBOT_TO_SHOOTER = new Translation2d(0.2, 0.0);
 
   public static final double SHOOTER_KP = 0.3;
   public static final double SHOOTER_KI = 0;
@@ -57,20 +57,22 @@ public final class ShooterConstants {
 
   // shot calculation
   private static final ShotCalculator.Config SHOT_CALC_CONFIG = new ShotCalculator.Config();
+
   static {
     SHOT_CALC_CONFIG.launcherOffsetX =
-            ROBOT_TO_SHOOTER.getX(); // how far forward the launcher is from robot center (m)
+        ROBOT_TO_SHOOTER.getX(); // how far forward the launcher is from robot center (m)
     SHOT_CALC_CONFIG.launcherOffsetY = ROBOT_TO_SHOOTER.getY(); // how far left, 0 if centered
     SHOT_CALC_CONFIG.phaseDelayMs = 30.0; // your vision pipeline latency
     SHOT_CALC_CONFIG.mechLatencyMs = 20.0; // how long the mechanism takes to respond
     SHOT_CALC_CONFIG.maxTiltDeg = 5.0; // suppress firing when chassis tilts past this (bumps/ramps)
     SHOT_CALC_CONFIG.headingSpeedScalar =
-            1.0; // heading tolerance tightens with robot speed (0 to disable)
+        1.0; // heading tolerance tightens with robot speed (0 to disable)
     SHOT_CALC_CONFIG.headingReferenceDistance =
-            2.5; // heading tolerance scales with distance from hub
+        2.5; // heading tolerance scales with distance from hub
   }
 
   public static final ShotCalculator SHOT_CALC = new ShotCalculator(SHOT_CALC_CONFIG);
+
   static {
     // code generated from projectile sim goes here
     SHOT_CALC.loadLUTEntry(2.0, 2005.859375, 0.7685994994437195);
