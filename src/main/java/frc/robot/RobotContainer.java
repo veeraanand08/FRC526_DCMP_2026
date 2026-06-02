@@ -132,7 +132,7 @@ public class RobotContainer {
         intake = new Intake();
         superstructureSim =
             new SuperstructureSim(
-                intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
+                intake, driveSimulation, drive::getChassisSpeeds, shooter::getSetpointRPS);
         robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
       }
       default -> {

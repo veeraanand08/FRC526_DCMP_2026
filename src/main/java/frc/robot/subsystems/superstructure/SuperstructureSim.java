@@ -74,7 +74,9 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
             swerveDriveSimulation.getSimulatedDriveTrainPose().getTranslation(),
             // Specify the translation of the shooter from the robot center (in the shooter’s
             // reference frame)
-            new Translation2d(0.2, -.2 + (Math.random() * (.4))), // y controls sides
+            new Translation2d(
+                ShooterConstants.ROBOT_TO_SHOOTER.getX(),
+                -.2 + (Math.random() * (.4))), // y controls sides
             // Specify the field-relative speed of the chassis, adding it to the initial velocity of
             // the projectile
             chassisSpeeds.get(),
@@ -83,7 +85,7 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
             // Add the shooter’s rotation
             // + Translation2d.kZero,
             // Initial height of the flying fuel
-            Meters.of(.45),
+            Meters.of(ShooterConstants.EXIT_HEIGHT),
             // The launch speed is proportional to the RPM
             MetersPerSecond.of(
                 ProjectileSimulator.rpmToExitVelocity(
@@ -91,7 +93,7 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
                     ShooterConstants.WHEEL_DIAMETER,
                     ShooterConstants.SLIP_FACTOR)),
             // The angle at which the fuel is launched
-            Degrees.of(65));
+            Degrees.of(ShooterConstants.LAUNCH_ANGLE));
     fuelOnFly
         // Configure the note projectile to become a NoteOnField upon touching the ground
         .enableBecomesGamePieceOnFieldAfterTouchGround();

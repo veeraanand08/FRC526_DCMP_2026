@@ -26,7 +26,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final Roller roller;
-  private double setpointRPS;
+  @Getter private double setpointRPS;
 
   private final Supplier<Pose2d> robotPose;
   private final Supplier<ChassisSpeeds> robotVelocity;
@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
             );
 
     ProjectileSimulator sim = new ProjectileSimulator(params, -1.0);
-    ProjectileSimulator.GeneratedLUT lut = sim.generateLUT();
+    ProjectileSimulator.GeneratedLUT lut = sim.generateLUT(2.0, 6.0, 0.05);
 
     // print data
     System.out.println("Generated lookup table:");
@@ -101,7 +101,7 @@ public class Shooter extends SubsystemBase {
               DCMotor.getKrakenX60(4),
               new MotorIO.MechanismConstraints(
                   ShooterConstants.SHOOTER_GEAR_RATIO, ShooterConstants.SHOOTER_MOI, 0.2, 0, 0, 0),
-              ShooterConstants.SHOOTER_KP,
+              3.1,
               ShooterConstants.SHOOTER_KD,
               3);
           default -> new RollerIO() {};
