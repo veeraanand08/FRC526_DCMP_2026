@@ -1,6 +1,6 @@
 package frc.robot.subsystems.shooter;
 
-import static frc.robot.subsystems.shooter.ShooterConstants.SHOT_CALC;
+import static frc.robot.subsystems.shooter.ShooterConstants.*;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,12 +16,10 @@ import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
 import frc.robot.util.io.motors.roller.RollerIOTalonFX;
-import frc.robot.util.sotm.ProjectileSimulator;
 import frc.robot.util.sotm.ShootingTasks;
 import frc.robot.util.sotm.ShotCalculator;
 import java.util.function.Supplier;
 import lombok.Getter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -34,51 +32,9 @@ public class Shooter extends SubsystemBase {
   private final Alert speedWarning =
       new Alert("Shooter", "Requested speed above limit, check units", Alert.AlertType.kWarning);
 
-  @AutoLogOutput private double distanceToTarget;
   @Getter private ShotCalculator.LaunchParameters shot = ShotCalculator.LaunchParameters.INVALID;
+  private boolean calculating;
   public boolean isShooting;
-
-  private static void generateLookupTable() {
-    ProjectileSimulator.SimParameters params =
-        new ProjectileSimulator.SimParameters(
-            0.215, // ball mass kg
-            0.1501, // ball diameter m
-            0.47, // drag coeff (smooth sphere)
-            0.2, // Magnus coeff
-            1.225, // air density
-            ShooterConstants
-                .EXIT_HEIGHT, // exit height (m), floor to where the ball leaves the shooter
-            ShooterConstants.WHEEL_DIAMETER, // flywheel diameter (m), measure with calipers
-            1.83, // target height (m), from game manual
-            ShooterConstants
-                .SLIP_FACTOR, // slip factor (0=no grip, 1=perfect), tune this on the real robot
-            ShooterConstants.LAUNCH_ANGLE, // launch angle from horizontal, measure from CAD
-            0.001, // sim timestep
-            1500, // min RPM
-            5000, // max RPM
-            25, // iterations
-            5.0 // max sim time
-            );
-
-    ProjectileSimulator sim = new ProjectileSimulator(params, -1.0);
-    ProjectileSimulator.GeneratedLUT lut = sim.generateLUT(2.0, 6.0, 0.05);
-
-    // print data
-    System.out.println("Generated lookup table:");
-    for (var entry : lut.entries()) {
-      if (entry.reachable()) {
-        System.out.println(
-            "SHOT_CALC.loadLUTEntry("
-                + entry.distanceM()
-                + ", "
-                + entry.rpm()
-                + ", "
-                + entry.tof()
-                + ");");
-      }
-    }
-    System.out.println("End of data");
-  }
 
   public Shooter(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotVelocity) {
     RollerIO rollerIO =
@@ -111,11 +67,17 @@ public class Shooter extends SubsystemBase {
 
     this.robotPose = robotPose;
     this.robotVelocity = robotVelocity;
+
+    loadShooterData();
+
+    Logger.recordOutput("Shooter/Ready", false);
+    Logger.recordOutput("Shooter/LaunchParameters", shot);
   }
 
   @Override
   public void periodic() {
     roller.periodic();
+    Logger.recordOutput("Shooter/Ready", shot != ShotCalculator.LaunchParameters.INVALID);
   }
 
   public void computeShot() {

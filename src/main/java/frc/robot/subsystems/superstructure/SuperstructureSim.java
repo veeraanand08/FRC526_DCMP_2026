@@ -58,7 +58,7 @@ public class SuperstructureSim extends SubsystemBase implements AutoCloseable {
 
   public Command shootCommand() {
     return startEnd(
-        () -> shooterLoop.startPeriodic(Hertz.of(ShooterConstants.BPS)), shooterLoop::stop);
+        () -> shooterLoop.startPeriodic(Hertz.of(ShooterConstants.SIM_BPS)), shooterLoop::stop);
   }
 
   public void shoot() {
