@@ -35,6 +35,7 @@ import frc.robot.util.BetterAutoChooser;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
+import frc.robot.util.sotm.ShootingTasks;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
@@ -215,13 +216,19 @@ public class RobotContainer {
     Command zeroGyro = Commands.runOnce(() -> drive.zeroGyro(true), drive).ignoringDisable(true);
     Command autoAlign =
         DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> {
-              if (!shooter.isShooting) shooter.computeShot();
-              return shooter.getShot().driveAngle();
-            });
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> {
+                  if (!shooter.isShooting()) shooter.computeShot();
+                  return shooter.getShot().driveAngle();
+                })
+            .beforeStarting(() -> ShootingTasks.isAutoAlignRunning = true)
+            .finallyDo(
+                () -> {
+                  ShootingTasks.clearTarget();
+                  ShootingTasks.isAutoAlignRunning = false;
+                });
     Command holdIntake = intake.intakeCommand();
     Command agitate = intake.agitateCommand(feeder);
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());

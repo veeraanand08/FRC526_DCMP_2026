@@ -33,8 +33,7 @@ public class Shooter extends SubsystemBase {
       new Alert("Shooter", "Requested speed above limit, check units", Alert.AlertType.kWarning);
 
   @Getter private ShotCalculator.LaunchParameters shot = ShotCalculator.LaunchParameters.INVALID;
-  private boolean calculating;
-  public boolean isShooting;
+  @Getter private boolean isShooting;
 
   public Shooter(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotVelocity) {
     RollerIO rollerIO =
@@ -68,16 +67,21 @@ public class Shooter extends SubsystemBase {
     this.robotPose = robotPose;
     this.robotVelocity = robotVelocity;
 
-    loadShooterData();
-
     Logger.recordOutput("Shooter/Ready", false);
     Logger.recordOutput("Shooter/LaunchParameters", shot);
+    Logger.recordOutput("Shooter/DistanceToTarget", shot.solvedDistanceM());
   }
 
   @Override
   public void periodic() {
     roller.periodic();
-    Logger.recordOutput("Shooter/Ready", shot != ShotCalculator.LaunchParameters.INVALID);
+
+    if (!ShootingTasks.isAutoAlignRunning) {
+      Logger.recordOutput("Shooter/DistanceToTarget", 0.0);
+    }
+    Logger.recordOutput(
+        "Shooter/Ready",
+        ShootingTasks.isAutoAlignRunning && shot != ShotCalculator.LaunchParameters.INVALID);
   }
 
   public void computeShot() {
@@ -94,9 +98,12 @@ public class Shooter extends SubsystemBase {
                 0.9 // vision confidence, 0 to 1
                 ));
     Logger.recordOutput("Shooter/LaunchParameters", shot);
+    Logger.recordOutput("Shooter/DistanceToTarget", shot.solvedDistanceM());
   }
 
   public void shoot() {
+    isShooting = true;
+    computeShot();
     shoot(shot.rpm() / 60.0);
   }
 
@@ -112,6 +119,8 @@ public class Shooter extends SubsystemBase {
   public void stop() {
     roller.stop();
     setpointRPS = 0.0;
+    ShootingTasks.clearTarget();
+    isShooting = false;
   }
 
   public double getVelocityRPS() {

@@ -67,6 +67,9 @@ public class Pivot {
                   stop();
                   torqueLimitWarning.set(false);
                 }));
+
+    Logger.recordOutput(name + "/SetpointDeg", 0.0);
+    Logger.recordOutput(name + "/MotorMode", mode);
   }
 
   public void periodic() {
@@ -114,7 +117,7 @@ public class Pivot {
       io.coast();
       mode = MotorIO.MotorIOMode.COAST;
     }
-    Logger.recordOutput(name + "/SetpointDeg", -1.0);
+    Logger.recordOutput(name + "/SetpointDeg", 0.0);
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 

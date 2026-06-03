@@ -14,7 +14,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public final class ShooterConstants {
   // physical constants
-  public static final double SIM_BPS = 15.0;
   public static final double SHOOTER_MOI = 0.01;
   public static final double SHOOTER_GEAR_RATIO = 1.0;
   public static final double EXIT_HEIGHT = Units.inchesToMeters(19.484825); // meters
@@ -76,6 +75,12 @@ public final class ShooterConstants {
   }
 
   public static final ShotCalculator SHOT_CALC = new ShotCalculator(SHOT_CALC_CONFIG);
+
+  static {
+    loadShooterData();
+  }
+
+  public static final double SIM_BPS = 15.0;
 
   public static void generateLookupTable() {
     System.out.println("\nGenerating lookup table...");

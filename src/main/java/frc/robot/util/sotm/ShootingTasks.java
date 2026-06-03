@@ -7,6 +7,7 @@ package frc.robot.util.sotm;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.util.RobotUtil;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingTasks {
@@ -21,6 +22,9 @@ public class ShootingTasks {
       }
     }
   }
+
+  @Getter private static Target currentTarget = Target.NONE;
+  public static boolean isAutoAlignRunning = false;
 
   private static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance) {
     double robotX = robotTranslation.getX();
@@ -66,8 +70,14 @@ public class ShootingTasks {
       default:
         targetTranslation = robotTranslation;
     }
-    Logger.recordOutput("Shooter/Target", target);
-    Logger.recordOutput("Shooter/TargetTranslation", targetTranslation);
+    currentTarget = target;
+    Logger.recordOutput("AutoAlign/Target", currentTarget);
+    Logger.recordOutput("AutoAlign/TargetTranslation", targetTranslation);
     return targetTranslation;
+  }
+
+  public static void clearTarget() {
+    currentTarget = Target.NONE;
+    Logger.recordOutput("AutoAlign/Target", currentTarget);
   }
 }
