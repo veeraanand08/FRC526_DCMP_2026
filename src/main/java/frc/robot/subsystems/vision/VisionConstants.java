@@ -48,13 +48,13 @@ public final class VisionConstants {
               Units.degreesToRadians(-90))); // yaw
 
   // Basic filtering thresholds
-  public static final double MAX_AMBIGUITY = 0.3;
+  public static final double MAX_AMBIGUITY = 0.2;
   public static final double MAX_Z_ERROR = 0.75;
 
   // Standard deviation baselines, for 1-meter distance and 1 tag
   // (Adjusted automatically based on distance and # of tags)
-  public static double linearStdDevBaseline = 0.02; // Meters
-  public static double angularStdDevBaseline = 0.6; // Radians
+  public static double linearStdDevBaseline = 0.06; // Meters
+  public static double angularStdDevBaseline = 0.55; // Radians
 
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)

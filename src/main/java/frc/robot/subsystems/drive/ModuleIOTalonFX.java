@@ -130,7 +130,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicExpo_kA = 0.5;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    turnConfig.ClosedLoopGeneral.GainSchedErrorThreshold = 0.0;
+    turnConfig.ClosedLoopGeneral.GainSchedErrorThreshold = 0.002;
     turnConfig.CurrentLimits.SupplyCurrentLimit = TURN_SUPPLY_LIMIT;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnConfig.MotorOutput.Inverted =

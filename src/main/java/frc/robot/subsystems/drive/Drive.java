@@ -166,7 +166,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
         this::getPose,
         this::setPose,
         this::getChassisSpeeds,
-        this::runVelocity,
+        (speeds) -> runVelocity(speeds, true),
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
@@ -180,9 +180,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
           field.getObject("path").setPoses(activePath);
         });
     PathPlannerLogging.setLogTargetPoseCallback(
-        (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+        (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
     SmartDashboard.putData(field);
 
     // Configure SysId
@@ -262,7 +260,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocity(ChassisSpeeds speeds) {
+  public void runVelocity(ChassisSpeeds speeds, boolean enableAntiJitter) {
     // Calculate module setpoints
     speeds = ChassisSpeeds.discretize(speeds, 0.02);
     speeds = angularVelocitySkewCorrection(speeds);
@@ -291,7 +289,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
 
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds());
+    runVelocity(new ChassisSpeeds(), false);
   }
 
   /**

@@ -7,6 +7,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.util.RobotUtil;
 import frc.robot.util.io.motors.MotorIO;
 import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
@@ -57,15 +58,18 @@ public class Pivot {
             Commands.runOnce(
                 () -> {
                   motorSafetyEngaged = true;
-                  io.coast();
+                  stop();
                   torqueLimitWarning.set(true);
+                  RobotUtil.setDriverRumble(0.85, 0.85);
+                  RobotUtil.setOperatorRumble(0.85, 0.85);
                 }))
         .onFalse(
             Commands.runOnce(
                 () -> {
                   motorSafetyEngaged = false;
-                  stop();
                   torqueLimitWarning.set(false);
+                  RobotUtil.setDriverRumble(0, 0);
+                  RobotUtil.setOperatorRumble(0, 0);
                 }));
 
     Logger.recordOutput(name + "/SetpointDeg", 0.0);
