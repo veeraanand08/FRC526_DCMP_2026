@@ -7,10 +7,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.util.RobotUtil;
 import frc.robot.util.io.motors.MotorIO;
 import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot {
@@ -24,7 +24,8 @@ public class Pivot {
   private final Alert torqueLimitWarning;
   private final Alert tempWarning;
   private final Alert tempFault;
-  private boolean motorSafetyEngaged;
+  @Getter private boolean stalled;
+  @Getter private boolean tempCritical;
 
   public Pivot(String name, PivotIO io) {
     this(name, io, 120.0);
@@ -57,23 +58,16 @@ public class Pivot {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  motorSafetyEngaged = true;
+                  stalled = true;
                   stop();
                   torqueLimitWarning.set(true);
-                  RobotUtil.setDriverRumble(0.85, 0.85);
-                  RobotUtil.setOperatorRumble(0.85, 0.85);
                 }))
         .onFalse(
             Commands.runOnce(
                 () -> {
-                  motorSafetyEngaged = false;
+                  stalled = false;
                   torqueLimitWarning.set(false);
-                  RobotUtil.setDriverRumble(0, 0);
-                  RobotUtil.setOperatorRumble(0, 0);
                 }));
-
-    Logger.recordOutput(name + "/SetpointDeg", 0.0);
-    Logger.recordOutput(name + "/MotorMode", mode);
   }
 
   public void periodic() {
@@ -85,18 +79,18 @@ public class Pivot {
       highestTemp = Math.max(highestTemp, temp);
     }
     if (highestTemp > 75.0) {
-      motorSafetyEngaged = true;
+      tempCritical = true;
       stop();
       tempFault.set(true);
     } else {
-      motorSafetyEngaged = false;
+      tempCritical = false;
       tempFault.set(false);
       tempWarning.set(highestTemp > 60.0);
     }
   }
 
   public void runOpenLoop(double volts) {
-    if (motorSafetyEngaged) return;
+    if (stalled || tempCritical) return;
 
     io.setVoltage(volts);
     mode = MotorIO.MotorIOMode.VOLTAGE_CONTROL;
@@ -105,7 +99,7 @@ public class Pivot {
   }
 
   public void runClosedLoop(double deg) {
-    if (motorSafetyEngaged) return;
+    if (stalled || tempCritical) return;
 
     io.setPosition(deg);
     mode = MotorIO.MotorIOMode.POSITION_CONTROL;
@@ -121,7 +115,7 @@ public class Pivot {
       io.coast();
       mode = MotorIO.MotorIOMode.COAST;
     }
-    Logger.recordOutput(name + "/SetpointDeg", 0.0);
+    Logger.recordOutput(name + "/SetpointDeg", -1.0);
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 

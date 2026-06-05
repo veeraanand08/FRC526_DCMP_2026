@@ -1,6 +1,7 @@
 package frc.robot.util.io.motors.pivot;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Rotations;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.CANBus;
@@ -14,6 +15,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Notifier;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.io.sensors.EncoderIOCANcoder;
@@ -23,6 +25,9 @@ public class PivotIOTalonFX extends MotorIOTalonFX implements PivotIO {
   private DoubleConsumer positionRequest;
 
   private final StatusSignal<Angle> position;
+
+  private Angle angleResetVal = Rotations.zero();
+  private final Notifier resetPosition = new Notifier(() -> leader.setPosition(angleResetVal));
 
   public PivotIOTalonFX(CANBus canbus, int id, TalonFXConfiguration config) {
     this(canbus, id, new int[0], config, new MotorAlignmentValue[0]);
@@ -85,6 +90,7 @@ public class PivotIOTalonFX extends MotorIOTalonFX implements PivotIO {
 
   @Override
   public void resetPosition(Angle angle) {
-    new Thread(() -> leader.setPosition(angle)).start();
+    angleResetVal = angle;
+    resetPosition.startSingle(0);
   }
 }
