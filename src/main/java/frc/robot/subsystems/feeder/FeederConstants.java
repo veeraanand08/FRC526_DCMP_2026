@@ -17,7 +17,7 @@ public final class FeederConstants {
   public static final double INDEXER_KS = 0;
   public static final double INDEXER_KV = 0.12;
 
-  public static final double KICKER_KP = 0.1;
+  public static final double KICKER_KP = 0.6;
   public static final double KICKER_KI = 0;
   public static final double KICKER_KD = 0;
   public static final double KICKER_KS = 0;

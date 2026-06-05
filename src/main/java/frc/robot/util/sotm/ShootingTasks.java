@@ -2,18 +2,18 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.util.autoalign;
+package frc.robot.util.sotm;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.util.RobotUtil;
+import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
 
-public class AutoAlign {
+public class ShootingTasks {
   public enum Target {
     HUB,
-    BUMP,
+    PASS,
     AUTO,
     NONE {
       @Override
@@ -23,18 +23,8 @@ public class AutoAlign {
     }
   }
 
-  // used in shooter subsystem to determine if bot is ready to shoot
-  private static Target currentTarget = Target.NONE;
-  private static Translation2d virtualTarget = Translation2d.kZero;
-
-  public static Rotation2d getAngleToTarget(
-      Target target, Translation2d robotTranslation, ChassisSpeeds robotSpeeds) {
-    Translation2d targetTranslation = getTargetTranslation(target, robotTranslation);
-    virtualTarget = getVirtualTarget(robotSpeeds, robotTranslation, targetTranslation);
-
-    Translation2d difference = virtualTarget.minus(robotTranslation);
-    return new Rotation2d(difference.getX(), difference.getY());
-  }
+  @Getter private static Target currentTarget = Target.NONE;
+  public static boolean isAutoAlignRunning = false;
 
   private static Target getTarget(Translation2d robotTranslation, boolean isRedAlliance) {
     double robotX = robotTranslation.getX();
@@ -44,7 +34,7 @@ public class AutoAlign {
       return Target.HUB;
     }
 
-    return Target.BUMP;
+    return Target.PASS;
   }
 
   public static Translation2d getTargetTranslation(Target target, Translation2d robotTranslation) {
@@ -52,14 +42,13 @@ public class AutoAlign {
     Translation2d targetTranslation;
     if (target == Target.AUTO) {
       target = getTarget(robotTranslation, isRedAlliance);
-      currentTarget = target;
     }
     switch (target) {
       case NONE:
       case HUB:
         targetTranslation = isRedAlliance ? FieldConstants.RED_HUB : FieldConstants.BLUE_HUB;
         break;
-      case BUMP:
+      case PASS:
         Translation2d leftBump, rightBump;
 
         if (isRedAlliance) {
@@ -81,40 +70,14 @@ public class AutoAlign {
       default:
         targetTranslation = robotTranslation;
     }
+    currentTarget = target;
+    Logger.recordOutput("AutoAlign/Target", currentTarget);
+    Logger.recordOutput("AutoAlign/TargetTranslation", targetTranslation);
     return targetTranslation;
   }
 
-  public static Translation2d getVirtualTarget(
-      ChassisSpeeds robotSpeed, Translation2d robotTranslation, Translation2d targetTranslation) {
-    Translation2d virtualTargetTranslation = targetTranslation;
-
-    for (int i = 0; i < AutoAlignConstants.MAX_ITERATIONS; i++) {
-      double distanceToTarget = robotTranslation.getDistance(virtualTargetTranslation);
-      double shotTime = AutoAlignConstants.DISTANCE_TO_TIME.get(distanceToTarget);
-
-      double xTranslation = robotSpeed.vxMetersPerSecond * shotTime;
-      double yTranslation = robotSpeed.vyMetersPerSecond * shotTime;
-
-      virtualTargetTranslation =
-          targetTranslation.minus(new Translation2d(xTranslation, yTranslation));
-    }
-
-    return virtualTargetTranslation;
-  }
-
-  public static Translation2d getSavedVirtualTarget() {
-    return virtualTarget;
-  }
-
-  public static Target getCurrentTarget() {
-    return currentTarget;
-  }
-
-  public static void disable() {
+  public static void clearTarget() {
     currentTarget = Target.NONE;
-  }
-
-  public static boolean isActive() {
-    return currentTarget != Target.NONE;
+    Logger.recordOutput("AutoAlign/Target", currentTarget);
   }
 }

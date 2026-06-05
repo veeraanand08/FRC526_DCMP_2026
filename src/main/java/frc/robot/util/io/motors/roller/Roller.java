@@ -39,6 +39,9 @@ public class Roller {
     tempWarning = new Alert(name, "Motor temperature above 60°C", Alert.AlertType.kWarning);
     tempFault =
         new Alert(name, "Motor disabled due to temperature above 75°C", Alert.AlertType.kError);
+
+    Logger.recordOutput(name + "/SetpointRPS", 0.0);
+    Logger.recordOutput(name + "/MotorMode", mode);
   }
 
   public void periodic() {
@@ -86,7 +89,7 @@ public class Roller {
       io.coast();
       mode = MotorIO.MotorIOMode.COAST;
     }
-    Logger.recordOutput(name + "/SetpointRPS", -1.0);
+    Logger.recordOutput(name + "/SetpointRPS", 0.0);
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 

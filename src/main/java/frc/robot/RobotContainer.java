@@ -35,7 +35,7 @@ import frc.robot.util.BetterAutoChooser;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
-import frc.robot.util.autoalign.AutoAlign;
+import frc.robot.util.sotm.ShootingTasks;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
@@ -87,11 +87,11 @@ public class RobotContainer {
             new Vision(
                 drive,
                 new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_0_NAME, VisionConstants.CAMERA_0_OFFSET),
-                new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_1_NAME, VisionConstants.CAMERA_1_OFFSET),
-                new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_2_NAME, VisionConstants.CAMERA_2_OFFSET));
+                    VisionConstants.CAMERA_0_NAME, VisionConstants.CAMERA_0_OFFSET));
+        //                new VisionIOPhotonVision(
+        //                    VisionConstants.CAMERA_1_NAME, VisionConstants.CAMERA_1_OFFSET),
+        //                new VisionIOPhotonVision(
+        //                    VisionConstants.CAMERA_2_NAME, VisionConstants.CAMERA_2_OFFSET));
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
@@ -133,7 +133,7 @@ public class RobotContainer {
         intake = new Intake();
         superstructureSim =
             new SuperstructureSim(
-                intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
+                intake, driveSimulation, drive::getChassisSpeeds, shooter::getSetpointRPS);
         robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
       }
       default -> {
@@ -219,12 +219,16 @@ public class RobotContainer {
                 drive,
                 () -> -driverController.getLeftY(),
                 () -> -driverController.getLeftX(),
-                () ->
-                    AutoAlign.getAngleToTarget(
-                        AutoAlign.Target.AUTO,
-                        drive.getPose().getTranslation(),
-                        drive.getChassisSpeeds()))
-            .finallyDo(AutoAlign::disable);
+                () -> {
+                  if (!shooter.isShooting()) shooter.computeShot();
+                  return shooter.getShot().driveAngle();
+                })
+            .beforeStarting(() -> ShootingTasks.isAutoAlignRunning = true)
+            .finallyDo(
+                () -> {
+                  ShootingTasks.clearTarget();
+                  ShootingTasks.isAutoAlignRunning = false;
+                });
     Command holdIntake = intake.intakeCommand();
     Command agitate = intake.agitateCommand(feeder);
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());

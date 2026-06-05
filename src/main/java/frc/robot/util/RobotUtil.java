@@ -24,12 +24,23 @@ public final class RobotUtil {
     return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
   }
 
-  /** Set the Rumble value for each Xbox controller. */
+  /**
+   * Set the rumble output for the driver controller without needing its instance.
+   *
+   * @param leftRumble The normalized value (0 to 1) to set the left rumble to
+   * @param rightRumble The normalized value (0 to 1) to set the right rumble to
+   */
   public static void setDriverRumble(double leftRumble, double rightRumble) {
     driverController.setRumble(GenericHID.RumbleType.kLeftRumble, leftRumble);
     driverController.setRumble(GenericHID.RumbleType.kRightRumble, rightRumble);
   }
 
+  /**
+   * Set the rumble output for the operator controller without needing its instance.
+   *
+   * @param leftRumble The normalized value (0 to 1) to set the left rumble to
+   * @param rightRumble The normalized value (0 to 1) to set the right rumble to
+   */
   public static void setOperatorRumble(double leftRumble, double rightRumble) {
     operatorController.setRumble(GenericHID.RumbleType.kLeftRumble, leftRumble);
     operatorController.setRumble(GenericHID.RumbleType.kRightRumble, rightRumble);
