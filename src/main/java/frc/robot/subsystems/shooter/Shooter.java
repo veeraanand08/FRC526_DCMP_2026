@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CANConstants;
+import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.io.motors.MotorIO;
 import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
@@ -101,13 +102,7 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/DistanceToTarget", shot.solvedDistanceM());
   }
 
-  public void shoot() {
-    isShooting = true;
-    computeShot();
-    shoot(shot.rpm() / 60.0);
-  }
-
-  public void shoot(double rps) {
+  public void runVelocity(double rps) {
     if (rps > 85.0) {
       rps = 85.0;
       speedWarning.set(true);
@@ -131,7 +126,19 @@ public class Shooter extends SubsystemBase {
     return setpointRPS != 0 && roller.getVelocityRPS() > setpointRPS - 1.5;
   }
 
-  public Command startFlywheel() {
-    return startEnd(() -> shoot(ShooterConstants.DEFAULT_RPM.get() / 60.0), this::stop);
+  public Command shoot(Feeder feeder) {
+    return runEnd(
+            () -> {
+              isShooting = true;
+              computeShot();
+              runVelocity(shot.rpm() / 60.0);
+            },
+            this::stop)
+        .alongWith(feeder.feed().onlyIf(this::hasSpunUp));
+  }
+
+  public Command shootDefault(Feeder feeder) {
+    return startEnd(() -> runVelocity(ShooterConstants.DEFAULT_RPM.get() / 60.0), this::stop)
+        .alongWith(feeder.feed().onlyIf(this::hasSpunUp));
   }
 }

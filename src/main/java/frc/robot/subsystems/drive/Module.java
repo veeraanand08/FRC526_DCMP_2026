@@ -77,11 +77,11 @@ public class Module {
   }
 
   /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
-  public void runSetpoint(SwerveModuleState state) {
+  public void runSetpoint(SwerveModuleState state, boolean enableAntiJitter) {
     // Optimize velocity setpoint
     state.optimize(getAngle());
     state.cosineScale(inputs.turnPosition);
-    //    applyAntiJitter(state);
+    if (enableAntiJitter) applyAntiJitter(state);
 
     // Apply setpoints
     io.setDriveVelocity(state.speedMetersPerSecond / constants.WheelRadius);
@@ -96,7 +96,7 @@ public class Module {
    * @param moduleState Current {@link SwerveModuleState} requested.
    */
   public void applyAntiJitter(SwerveModuleState moduleState) {
-    if (Math.abs(moduleState.speedMetersPerSecond) <= ANTI_JITTER_THRESHOLD) {
+    if (Math.abs(moduleState.speedMetersPerSecond) < ANTI_JITTER_THRESHOLD) {
       moduleState.angle = lastDesiredState.angle;
     }
   }

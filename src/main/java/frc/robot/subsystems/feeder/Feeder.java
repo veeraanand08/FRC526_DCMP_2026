@@ -88,6 +88,11 @@ public class Feeder extends SubsystemBase {
     return kicker.getVelocityRPS() > FeederConstants.KICKER_RPS - 1.5;
   }
 
+  public Command feed() {
+    return startEnd(this::start, this::stop)
+        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+  }
+
   public Command burst() {
     return startEnd(this::start, this::stop);
   }

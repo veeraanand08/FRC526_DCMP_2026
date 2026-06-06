@@ -21,9 +21,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.commands.Autos;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.shooter.ShooterCommand;
-import frc.robot.commands.shooter.ShooterFallback;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.Feeder;
@@ -183,6 +182,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Full System Check", Autos.systemCheck(drive, shooter, feeder, intake));
 
     // Set the default auto (do nothing)
     autoChooser.addDefaultOption("Do Nothing", Commands.none());
@@ -233,11 +233,11 @@ public class RobotContainer {
     Command agitate = intake.agitateCommand(feeder);
     Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
     Command resetIntake = intake.resetIntakeCommand();
-    Command shoot = new ShooterCommand(shooter, feeder, intake);
+    Command shoot = shooter.shoot(feeder);
     if (Constants.currentMode == Constants.Mode.SIM) {
       shoot = shoot.alongWith(superstructureSim.shootCommand());
     }
-    Command shootDefault = new ShooterFallback(shooter, feeder);
+    Command shootDefault = shooter.shootDefault(feeder);
 
     new EventTrigger("Intake").whileTrue(holdIntake);
     NamedCommands.registerCommand("Auto Align", autoAlign);

@@ -8,7 +8,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.RobotUtil;
@@ -175,35 +175,34 @@ public class Intake extends ExtendedSubsystem {
    * @return a command to agitate the intake
    */
   public Command agitateCommand(Feeder feeder) {
-    return Commands.startRun(
-            () -> {
-              if (!feeder.isEnabledForShooting()) {
-                feeder.agitate();
-              }
-              slowRoller();
-              setPivotState(PivotState.AGITATING_UPPER);
-            },
-            () -> {
-              if (pivotState == PivotState.AGITATING_UPPER
-                  && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_UPPER))
-                      < 3.5) {
-                setPivotState(PivotState.AGITATING_LOWER);
-              } else if (pivotState == PivotState.AGITATING_LOWER
-                  && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_LOWER))
-                      < 3.5) {
-                setPivotState(PivotState.AGITATING_UPPER);
-              }
-            },
-            this,
-            feeder)
-        .finallyDo(
-            () -> {
-              if (!feeder.isEnabledForShooting()) {
-                feeder.stop();
-              }
-              setPivotState(PivotState.LOWERING);
-              stopRoller();
-            });
+    return new FunctionalCommand(
+        () -> {
+          if (!feeder.isEnabledForShooting()) {
+            feeder.agitate();
+          }
+          slowRoller();
+          setPivotState(PivotState.AGITATING_UPPER);
+        },
+        () -> {
+          if (pivotState == PivotState.AGITATING_UPPER
+              && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_UPPER))
+                  < 3.5) {
+            setPivotState(PivotState.AGITATING_LOWER);
+          } else if (pivotState == PivotState.AGITATING_LOWER
+              && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_LOWER))
+                  < 3.5) {
+            setPivotState(PivotState.AGITATING_UPPER);
+          }
+        },
+        interrupted -> {
+          if (!feeder.isEnabledForShooting()) {
+            feeder.stop();
+          }
+          setPivotState(PivotState.LOWERING);
+          stopRoller();
+        },
+        () -> false,
+        this);
   }
 
   /**
