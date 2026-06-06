@@ -65,6 +65,8 @@ public class Shooter extends SubsystemBase {
 
     roller = new Roller("Shooter", rollerIO);
 
+    loadShooterData();
+
     this.robotPose = robotPose;
     this.robotVelocity = robotVelocity;
 
