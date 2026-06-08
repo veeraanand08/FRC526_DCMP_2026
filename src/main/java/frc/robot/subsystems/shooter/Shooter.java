@@ -8,10 +8,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CANConstants;
 import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.util.RobotUtil;
+import frc.robot.util.ShiftTimer;
 import frc.robot.util.io.motors.MotorIO;
 import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
@@ -84,7 +87,9 @@ public class Shooter extends SubsystemBase {
     }
     Logger.recordOutput(
         "Shooter/Ready",
-        ShootingTasks.isAutoAlignRunning && shot != ShotCalculator.LaunchParameters.INVALID);
+        ShootingTasks.isAutoAlignRunning
+            && shot != ShotCalculator.LaunchParameters.INVALID
+            && ShiftTimer.instance.isHubActive());
   }
 
   public void computeShot() {
@@ -136,7 +141,12 @@ public class Shooter extends SubsystemBase {
               runVelocity(shot.rpm() / 60.0);
             },
             this::stop)
-        .alongWith(feeder.feed().onlyIf(this::hasSpunUp));
+        .alongWith(feeder.feed().onlyIf(this::hasSpunUp))
+        .alongWith(
+            Commands.startEnd(
+                    () -> RobotUtil.setOperatorRumble(0.0, 0.8),
+                    () -> RobotUtil.setOperatorRumble(0.0, 0.0))
+                .onlyIf(() -> !ShiftTimer.instance.isHubActive()));
   }
 
   public Command shootDefault(Feeder feeder) {
