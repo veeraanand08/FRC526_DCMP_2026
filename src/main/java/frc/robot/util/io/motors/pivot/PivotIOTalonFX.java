@@ -26,7 +26,7 @@ public class PivotIOTalonFX extends MotorIOTalonFX implements PivotIO {
 
   private final StatusSignal<Angle> position;
 
-  private Angle angleResetVal = Rotations.zero();
+  private volatile Angle angleResetVal = Rotations.zero();
   private final Notifier resetPosition = new Notifier(() -> leader.setPosition(angleResetVal));
 
   public PivotIOTalonFX(CANBus canbus, int id, TalonFXConfiguration config) {

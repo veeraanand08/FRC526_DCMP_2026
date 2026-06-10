@@ -52,7 +52,7 @@ public class MotorIOTalonFX implements MotorIO {
     // Configure motors
     tryUntilOk(5, () -> leader.getConfigurator().apply(config));
     for (TalonFX follower : followers) {
-      follower.getConfigurator().apply(config);
+      tryUntilOk(5, () -> follower.getConfigurator().apply(config));
     }
     // Create status signals
     voltage = leader.getMotorVoltage();
