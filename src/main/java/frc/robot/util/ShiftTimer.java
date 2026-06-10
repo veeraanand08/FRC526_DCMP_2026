@@ -47,16 +47,12 @@ public class ShiftTimer {
           char firstInactiveHub;
           if (!gameData.isEmpty()) firstInactiveHub = gameData.charAt(0);
           else firstInactiveHub = ' ';
-          switch (firstInactiveHub) {
-            case 'B':
-              isHubActive = isRedAlliance();
-              break;
-            case 'R':
-              isHubActive = !isRedAlliance();
-              break;
-            default:
-              isHubActive = true;
-          }
+          isHubActive =
+              switch (firstInactiveHub) {
+                case 'B' -> isRedAlliance();
+                case 'R' -> !isRedAlliance();
+                default -> true;
+              };
           currentSegment = ShiftSegment.ALLIANCE;
           allianceShiftNum = 1;
           Logger.recordOutput("Match/CurrentShift", currentSegment + " " + allianceShiftNum);
