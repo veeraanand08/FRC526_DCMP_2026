@@ -59,6 +59,14 @@ public class Vision extends SubsystemBase {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
+  /**
+   * Returns the average pose of the tracked objects to drive towards. TODO: implement this once we
+   * figure out object detection
+   */
+  public Pose2d getObjectPose() {
+    return Pose2d.kZero;
+  }
+
   @Override
   public void periodic() {
     for (int i = 0; i < io.length; i++) {

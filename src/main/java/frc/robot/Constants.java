@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Meters;
 
 import com.ctre.phoenix6.CANBus;
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -66,6 +67,20 @@ public final class Constants {
     public static final Translation2d RED_RIGHT_TRENCH = new Translation2d(11.928, 7.423);
     public static final Translation2d BLUE_LEFT_TRENCH = new Translation2d(4.617, 7.423);
     public static final Translation2d BLUE_RIGHT_TRENCH = new Translation2d(4.617, 0.586);
+    // the translations of these need to be found:
+    // points at which robot should drive to before looking for balls to intake
+    public static final Translation2d RED_LEFT_MID = new Translation2d();
+    public static final Translation2d RED_RIGHT_MID = new Translation2d();
+    public static final Translation2d BLUE_LEFT_MID = FlippingUtil.flipFieldPosition(RED_LEFT_MID);
+    public static final Translation2d BLUE_RIGHT_MID =
+        FlippingUtil.flipFieldPosition(RED_RIGHT_MID);
+    // points at which robot should go to score
+    public static final Translation2d RED_LEFT_SCORING = new Translation2d();
+    public static final Translation2d RED_RIGHT_SCORING = new Translation2d();
+    public static final Translation2d BLUE_LEFT_SCORING =
+        FlippingUtil.flipFieldPosition(RED_LEFT_SCORING);
+    public static final Translation2d BLUE_RIGHT_SCORING =
+        FlippingUtil.flipFieldPosition(RED_RIGHT_SCORING);
 
     public static final double RED_ALLIANCE_BOUNDARY = RED_LEFT_BUMP.getX();
     public static final double BLUE_ALLIANCE_BOUNDARY = BLUE_LEFT_BUMP.getX();

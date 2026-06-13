@@ -229,10 +229,10 @@ public class RobotContainer {
                   ShootingTasks.clearTarget();
                   ShootingTasks.isAutoAlignRunning = false;
                 });
-    Command holdIntake = intake.intakeCommand();
-    Command agitate = intake.agitateCommand(feeder);
-    Command dump = Commands.parallel(intake.reverseIntakeCommand(), feeder.reverseCommand());
-    Command resetIntake = intake.resetIntakeCommand();
+    Command holdIntake = intake.intake();
+    Command agitate = intake.agitate(feeder);
+    Command dump = Commands.parallel(intake.reverse(), feeder.reverseCommand());
+    Command resetIntake = intake.stow();
     Command shoot = shooter.shoot(feeder);
     if (Constants.currentMode == Constants.Mode.SIM) {
       shoot = shoot.alongWith(superstructureSim.shootCommand());
