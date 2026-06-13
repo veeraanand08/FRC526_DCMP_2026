@@ -12,7 +12,7 @@ public interface PivotIO extends MotorIO {
 
   default void updateInputs(PivotIOInputs inputs) {}
 
-  default void setPosition(double deg) {}
+  default void setPosition(Angle angle) {}
 
   default void resetPosition(Angle angle) {}
 }
