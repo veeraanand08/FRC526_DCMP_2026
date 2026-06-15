@@ -222,12 +222,18 @@ public class RobotContainer {
                 () -> {
                   if (!shooter.isShooting()) shooter.computeShot();
                   return shooter.getShot().driveAngle();
+                },
+                () -> shooter.getShot().driveAngularVelocityRadPerSec())
+            .beforeStarting(
+                () -> {
+                  ShootingTasks.isAutoAlignRunning = true;
+                  drive.setSpeedLimiter(true);
                 })
-            .beforeStarting(() -> ShootingTasks.isAutoAlignRunning = true)
             .finallyDo(
                 () -> {
                   ShootingTasks.clearTarget();
                   ShootingTasks.isAutoAlignRunning = false;
+                  drive.setSpeedLimiter(false);
                 });
     Command holdIntake = intake.intakeCommand();
     Command agitate = intake.agitateCommand(feeder);
