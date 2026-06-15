@@ -60,6 +60,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import lombok.Getter;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -77,6 +78,8 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
           Math.max(
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+  private static final double SLOW_SPEED_LIMIT =
+      0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
   private static final double ANGULAR_VELOCITY_COEFFICIENT = 0.1;
   static final double ANTI_JITTER_THRESHOLD = Constants.currentMode == Mode.REAL ? 4.0 * 0.01 : -1;
 
@@ -150,6 +153,10 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
   private final Field2d field = new Field2d();
 
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
+
+  /** The maximum linear speed in meters per sec. */
+  @Getter
+  private double maxLinearSpeedMetersPerSec = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
 
   public Drive(
       GyroIO gyroIO,
@@ -422,14 +429,15 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
-  /** Returns the maximum linear speed in meters per sec. */
-  public double getMaxLinearSpeedMetersPerSec() {
-    return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+  /** Enable or disable the speed limit. */
+  public void setSpeedLimiter(boolean enable) {
+    maxLinearSpeedMetersPerSec =
+        enable ? SLOW_SPEED_LIMIT : TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
   }
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
+    return maxLinearSpeedMetersPerSec / DRIVE_BASE_RADIUS;
   }
 
   /** Returns an array of module translations. */

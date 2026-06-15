@@ -106,12 +106,12 @@ public class Pivot {
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 
-  public void runClosedLoop(double deg) {
+  public void runClosedLoop(Angle angle) {
     if (stalled || tempCritical) return;
 
-    io.setPosition(deg);
+    io.setPosition(angle);
     mode = MotorIO.MotorIOMode.POSITION_CONTROL;
-    Logger.recordOutput(name + "/SetpointDeg", deg);
+    Logger.recordOutput(name + "/SetpointDeg", angle.in(Degrees));
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 

@@ -1,8 +1,11 @@
 package frc.robot.util.io.motors.pivot;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.util.io.motors.MotorIOSim;
 
@@ -43,8 +46,8 @@ public class PivotIOSim extends MotorIOSim implements PivotIO {
   }
 
   @Override
-  public void setPosition(double deg) {
-    pid.setSetpoint(Units.degreesToRotations(deg));
+  public void setPosition(Angle angle) {
+    pid.setSetpoint(angle.in(Rotations));
     isClosedLoop = true;
   }
 }

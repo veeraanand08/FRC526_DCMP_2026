@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static frc.robot.subsystems.intake.Intake.PivotState.*;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -12,6 +13,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Angle;
 import java.util.EnumMap;
 
 public final class IntakeConstants {
@@ -85,14 +87,14 @@ public final class IntakeConstants {
                   .withKV(ROLLER_KV));
 
   // setpoints, in degrees
-  public static final EnumMap<Intake.PivotState, Double> SETPOINTS =
+  public static final EnumMap<Intake.PivotState, Angle> SETPOINTS =
       new EnumMap<>(Intake.PivotState.class);
 
   static {
-    SETPOINTS.put(RAISING, 0.0);
-    SETPOINTS.put(LOWERING, 130.0);
-    SETPOINTS.put(AGITATING_UPPER, 10.0);
-    SETPOINTS.put(AGITATING_LOWER, 80.0);
+    SETPOINTS.put(RAISING, Degrees.of(0.0));
+    SETPOINTS.put(LOWERING, Degrees.of(130.0));
+    SETPOINTS.put(AGITATING_UPPER, Degrees.of(10.0));
+    SETPOINTS.put(AGITATING_LOWER, Degrees.of(80.0));
   }
 
   public static final double ROLLER_RPS = 5000 / 60.0;

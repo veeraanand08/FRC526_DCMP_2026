@@ -13,16 +13,15 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Notifier;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.io.sensors.EncoderIOCANcoder;
-import java.util.function.DoubleConsumer;
+import java.util.function.Consumer;
 
 public class PivotIOTalonFX extends MotorIOTalonFX implements PivotIO {
-  private DoubleConsumer positionRequest;
+  private Consumer<Angle> positionRequest;
 
   private final StatusSignal<Angle> position;
 
@@ -47,20 +46,17 @@ public class PivotIOTalonFX extends MotorIOTalonFX implements PivotIO {
   }
 
   public PivotIOTalonFX useControlRequest(PositionVoltage request) {
-    this.positionRequest =
-        (deg) -> leader.setControl(request.withPosition(Units.degreesToRotations(deg)));
+    this.positionRequest = (angle) -> leader.setControl(request.withPosition(angle));
     return this;
   }
 
   public PivotIOTalonFX useControlRequest(MotionMagicVoltage request) {
-    this.positionRequest =
-        (deg) -> leader.setControl(request.withPosition(Units.degreesToRotations(deg)));
+    this.positionRequest = (angle) -> leader.setControl(request.withPosition(angle));
     return this;
   }
 
   public PivotIOTalonFX useControlRequest(MotionMagicExpoVoltage request) {
-    this.positionRequest =
-        (deg) -> leader.setControl(request.withPosition(Units.degreesToRotations(deg)));
+    this.positionRequest = (angle) -> leader.setControl(request.withPosition(angle));
     return this;
   }
 
@@ -84,8 +80,8 @@ public class PivotIOTalonFX extends MotorIOTalonFX implements PivotIO {
   }
 
   @Override
-  public void setPosition(double deg) {
-    positionRequest.accept(deg);
+  public void setPosition(Angle angle) {
+    positionRequest.accept(angle);
   }
 
   @Override

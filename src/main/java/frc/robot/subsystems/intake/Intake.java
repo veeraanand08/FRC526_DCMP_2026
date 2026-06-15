@@ -192,11 +192,15 @@ public class Intake extends ExtendedSubsystem {
         },
         () -> {
           if (pivotState == PivotState.AGITATING_UPPER
-              && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_UPPER))
+              && Math.abs(
+                      pivot.getPositionDeg()
+                          - SETPOINTS.get(PivotState.AGITATING_UPPER).in(Degrees))
                   < 3.5) {
             setPivotState(PivotState.AGITATING_LOWER);
           } else if (pivotState == PivotState.AGITATING_LOWER
-              && Math.abs(pivot.getPositionDeg() - SETPOINTS.get(PivotState.AGITATING_LOWER))
+              && Math.abs(
+                      pivot.getPositionDeg()
+                          - SETPOINTS.get(PivotState.AGITATING_LOWER).in(Degrees))
                   < 3.5) {
             setPivotState(PivotState.AGITATING_UPPER);
           }
