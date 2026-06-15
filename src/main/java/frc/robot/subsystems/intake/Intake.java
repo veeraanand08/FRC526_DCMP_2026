@@ -154,9 +154,17 @@ public class Intake extends ExtendedSubsystem {
    *
    * @return a command to run the intake
    */
-  public Command intakeCommand() {
-    // Inline construction of command goes here.
+  public Command intake() {
     return startEnd(this::start, this::stopRoller);
+  }
+
+  /**
+   * Toggle the intake roller. If the intake is raised, it will lower and then start.
+   *
+   * @return a command to run the intake
+   */
+  public Command deploy() {
+    return runOnce(this::start);
   }
 
   /**
@@ -164,8 +172,7 @@ public class Intake extends ExtendedSubsystem {
    *
    * @return a command to reverse the intake
    */
-  public Command reverseIntakeCommand() {
-    // Inline construction of command goes here.
+  public Command reverse() {
     return startEnd(this::reverseRoller, this::stopRoller);
   }
 
@@ -174,7 +181,7 @@ public class Intake extends ExtendedSubsystem {
    *
    * @return a command to agitate the intake
    */
-  public Command agitateCommand(Feeder feeder) {
+  public Command agitate(Feeder feeder) {
     return new FunctionalCommand(
         () -> {
           if (!feeder.isEnabledForShooting()) {
@@ -214,9 +221,7 @@ public class Intake extends ExtendedSubsystem {
    *
    * @return a command to reset the intake back to starting position
    */
-  public Command resetIntakeCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
+  public Command stow() {
     return runOnce(
         () -> {
           setPivotState(PivotState.RAISING);

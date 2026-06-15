@@ -10,14 +10,17 @@ package frc.robot.util;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.CANBus.CANBusStatus;
 import java.util.Optional;
+import org.littletonrobotics.junction.Logger;
 
 public class CANivoreReader {
   private final CANBus canBus;
+  private final String logPrefix;
   private final Thread thread;
   private Optional<CANBusStatus> status = Optional.empty();
 
   public CANivoreReader(String canBusName) {
     canBus = new CANBus(canBusName);
+    logPrefix = "CANivoreStatus/" + canBusName + "/";
     thread =
         new Thread(
             () -> {
@@ -39,5 +42,17 @@ public class CANivoreReader {
 
   public synchronized Optional<CANBusStatus> getStatus() {
     return status;
+  }
+
+  public void logStatus() {
+    var canivoreStatus = getStatus();
+    if (canivoreStatus.isPresent()) {
+      Logger.recordOutput(logPrefix + "Status", canivoreStatus.get().Status.getName());
+      Logger.recordOutput(logPrefix + "Utilization", canivoreStatus.get().BusUtilization);
+      Logger.recordOutput(logPrefix + "OffCount", canivoreStatus.get().BusOffCount);
+      Logger.recordOutput(logPrefix + "TxFullCount", canivoreStatus.get().TxFullCount);
+      Logger.recordOutput(logPrefix + "ReceiveErrorCount", canivoreStatus.get().REC);
+      Logger.recordOutput(logPrefix + "TransmitErrorCount", canivoreStatus.get().TEC);
+    }
   }
 }

@@ -20,6 +20,7 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -38,6 +39,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -56,6 +59,7 @@ import frc.robot.util.subsystems.ExtendedSubsystem;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import lombok.Getter;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -95,6 +99,12 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
               TunerConstants.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
+
+  public static final PathConstraints CONSTRAINTS =
+      new PathConstraints(3.0, 4.0, Units.degreesToRadians(640), Units.degreesToRadians(1080));
+
+  private static final TrajectoryConfig TRAJECTORY_CONFIG =
+      new TrajectoryConfig(CONSTRAINTS.maxVelocity(), CONSTRAINTS.maxAcceleration());
 
   private static DriveTrainSimulationConfig mapleSimConfig = null;
 
@@ -310,6 +320,22 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
     }
     kinematics.resetHeadings(headings);
     stop();
+  }
+
+  public Command driveToPose(Pose2d targetPose) {
+    return defer(
+        () -> {
+          Logger.recordOutput("AutoControl/TargetPose", targetPose);
+          return AutoBuilder.pathfindToPose(targetPose, CONSTRAINTS, 0.0);
+        });
+  }
+
+  public Command driveToPose(Supplier<Pose2d> targetPose) {
+    return defer(
+        () -> {
+          Logger.recordOutput("AutoControl/TargetPose", targetPose.get());
+          return AutoBuilder.pathfindToPose(targetPose.get(), CONSTRAINTS, 0.0);
+        });
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
