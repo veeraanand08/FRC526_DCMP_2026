@@ -3,7 +3,6 @@ package frc.robot.commands;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.util.RobotUtil.isRedAlliance;
 
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,6 +25,7 @@ public class Autos {
   // auto cycle
   private static final double INTAKE_TIME = 5.0;
   private static final double AGITATE_START = 3.0;
+  private static final double SHOOT_TIME = 5.0;
 
   public static Command systemCheck(Drive drive, Shooter shooter, Feeder feeder, Intake intake) {
     return Commands.sequence(
@@ -60,15 +60,48 @@ public class Autos {
     Pose2d scoring =
         new Pose2d(
             isRedAlliance() ? RED_LEFT_SCORING : BLUE_LEFT_SCORING, Rotation2d.fromDegrees(45.0));
-    Command autoAlign = NamedCommands.getCommand("Auto Align");
+    return cycle(drive, vision, shooter, feeder, intake, preIntake, scoring);
+  }
+
+  public static Command rightCycle(
+      Drive drive, Vision vision, Shooter shooter, Feeder feeder, Intake intake) {
+    Pose2d preIntake =
+        new Pose2d(isRedAlliance() ? RED_RIGHT_MID : BLUE_RIGHT_MID, Rotation2d.kCCW_Pi_2);
+    Pose2d scoring =
+        new Pose2d(
+            isRedAlliance() ? RED_RIGHT_SCORING : BLUE_RIGHT_SCORING,
+            Rotation2d.fromDegrees(-45.0));
+    return cycle(drive, vision, shooter, feeder, intake, preIntake, scoring);
+  }
+
+  private static Command cycle(
+      Drive drive,
+      Vision vision,
+      Shooter shooter,
+      Feeder feeder,
+      Intake intake,
+      Pose2d preIntake,
+      Pose2d scoring) {
+    Command autoAlign =
+        DriveCommands.aimAtAngle(
+            drive,
+            () -> {
+              shooter.computeShot();
+              return shooter.getShot().driveAngle();
+            });
 
     return Commands.repeatingSequence(
         intake.deploy(),
         drive.driveToPose(preIntake),
         drive
-            .driveToPose(vision::getObjectPose)
-            .withTimeout(INTAKE_TIME), // vision method not impl yet
+            .driveToPose(vision::getObjectPose) // vision method not impl yet
+            .withTimeout(INTAKE_TIME),
         intake.runOnce(intake::stopRoller),
-        drive.driveToPose(scoring));
+        drive.driveToPose(scoring),
+        autoAlign,
+        shooter
+            .shoot(feeder)
+            .alongWith(Commands.waitSeconds(AGITATE_START).andThen(intake.agitate(feeder)))
+            .withTimeout(SHOOT_TIME));
   }
 }

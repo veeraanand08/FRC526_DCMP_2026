@@ -146,6 +146,46 @@ public class DriveCommands {
   }
 
   /**
+   * Rotate the robot to an angle using profiled PID control, stopping when the angle is reached.
+   * Can be used for snapping to an angle during an auto sequence.
+   */
+  public static Command aimAtAngle(Drive drive, Supplier<Rotation2d> rotationSupplier) {
+
+    // Create PID controller
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    // Construct command
+    return Commands.run(
+            () -> {
+              // Calculate angular speed
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+
+              // Convert to field relative speeds & send command
+              ChassisSpeeds speeds = new ChassisSpeeds(0, 0, omega);
+              boolean isFlipped = RobotUtil.isRedAlliance();
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped ? drive.getRotation().plus(Rotation2d.kPi) : drive.getRotation()),
+                  true);
+            },
+            drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()))
+        // End the command when angle is reached
+        .until(angleController::atGoal);
+  }
+
+  /**
    * Measures the velocity feedforward constants for the drive motors.
    *
    * <p>This command should only be used in voltage control mode.

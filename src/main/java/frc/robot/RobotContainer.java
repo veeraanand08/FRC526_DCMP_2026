@@ -183,6 +183,10 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption("Full System Check", Autos.systemCheck(drive, shooter, feeder, intake));
+    autoChooser.addOption(
+        "Dynamic Left Cycle", Autos.leftCycle(drive, vision, shooter, feeder, intake));
+    autoChooser.addOption(
+        "Dynamic Right Cycle", Autos.rightCycle(drive, vision, shooter, feeder, intake));
 
     // Set the default auto (do nothing)
     autoChooser.addDefaultOption("Do Nothing", Commands.none());
