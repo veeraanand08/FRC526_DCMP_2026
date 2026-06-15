@@ -10,14 +10,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.io.motors.MotorIO;
-import frc.robot.util.subsystems.ExtendedSubsystem;
-import frc.robot.util.subsystems.RobotStateHandler; // Assumed helper from Pivot
+import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.EnumMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Elevator<T extends Enum<T>> extends ExtendedSubsystem {
+public class Elevator<T extends Enum<T>> {
   private final String name;
   private final T[] elevatorStates;
   private final EnumMap<T, Double> setpoints;
@@ -144,7 +143,6 @@ public class Elevator<T extends Enum<T>> extends ExtendedSubsystem {
     return null;
   }
 
-  @Override
   public void disable() {
     if (DriverStation.isEStopped()) {
       io.setVoltage(0);
@@ -153,7 +151,6 @@ public class Elevator<T extends Enum<T>> extends ExtendedSubsystem {
     }
   }
 
-  @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs(name, inputs);
@@ -221,7 +218,7 @@ public class Elevator<T extends Enum<T>> extends ExtendedSubsystem {
 
   public Command stow() {
     T stowedState = getStateByName("STOWED");
-    return startEnd(
+    return Commands.startEnd(
             () -> {
               if (stowedState != null) setState(stowedState);
             },
@@ -235,7 +232,7 @@ public class Elevator<T extends Enum<T>> extends ExtendedSubsystem {
     T homingState = getStateByName("HOMING");
     T stowedState = getStateByName("STOWED");
 
-    return startRun(
+    return Commands.startRun(
             () -> {
               if (homingState != null) setState(homingState);
               io.setVoltage(-HOMING_VOLTAGE);
@@ -260,7 +257,7 @@ public class Elevator<T extends Enum<T>> extends ExtendedSubsystem {
 
   public Command manualControl(DoubleSupplier magnitude) {
     T manualState = getStateByName("MANUAL_CONTROL");
-    return startRun(
+    return Commands.startRun(
         () -> {
           if (manualState != null) {
             setState(manualState);
