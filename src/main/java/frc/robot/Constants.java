@@ -24,7 +24,7 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
-  public static enum Mode {
+  public enum Mode {
     /** Running on a real robot. */
     REAL,
 
@@ -35,9 +35,16 @@ public final class Constants {
     REPLAY
   }
 
+  public enum ControllerMode {
+    STANDARD,
+    GUITAR_HERO_OP,
+    GUITAR_HERO_FULL
+  }
+
   public static final class ControllerConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
     public static final int OPERATOR_CONTROLLER_PORT = 1;
+    public static final int GUITAR_HERO_CONTROLLER_PORT = 2;
   }
 
   public static final class CANConstants {

@@ -14,6 +14,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.sotm.ShootingTasks;
 import org.littletonrobotics.junction.Logger;
 
 public class Autos {
@@ -84,11 +85,17 @@ public class Autos {
       Pose2d scoring) {
     Command autoAlign =
         DriveCommands.aimAtAngle(
-            drive,
-            () -> {
-              shooter.computeShot();
-              return shooter.getShot().driveAngle();
-            });
+                drive,
+                () -> {
+                  shooter.computeShot();
+                  return shooter.getShot().driveAngle();
+                })
+            .beforeStarting(() -> ShootingTasks.isAutoAlignRunning = true)
+            .finallyDo(
+                () -> {
+                  ShootingTasks.clearTarget();
+                  ShootingTasks.isAutoAlignRunning = false;
+                });
 
     return Commands.repeatingSequence(
         intake.deploy(),

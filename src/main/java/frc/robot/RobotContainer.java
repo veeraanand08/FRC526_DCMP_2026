@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.ControllerMode;
 import static frc.robot.Constants.currentMode;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -34,6 +35,7 @@ import frc.robot.util.BetterAutoChooser;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
+import frc.robot.util.io.GuitarHeroController;
 import frc.robot.util.sotm.ShootingTasks;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -61,6 +63,10 @@ public class RobotContainer {
 
   private final CommandXboxController operatorController =
       new CommandXboxController(ControllerConstants.OPERATOR_CONTROLLER_PORT);
+
+  private GuitarHeroController guitarHeroController;
+
+  private ControllerMode controllerMode = ControllerMode.STANDARD;
 
   // dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -163,6 +169,16 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
+    LoggedDashboardChooser<ControllerMode> controllerChooser =
+        new LoggedDashboardChooser<>("Controls");
+    controllerChooser.addDefaultOption("Standard", ControllerMode.STANDARD);
+    controllerChooser.addOption("Guitar Hero Operator", ControllerMode.GUITAR_HERO_OP);
+    controllerChooser.addOption("Guitar Hero Full Control", ControllerMode.GUITAR_HERO_FULL);
+    controllerChooser.onChange(this::setControllerMode);
+
+    // Set up commands for PathPlanner
+    configureAutoCommands();
+
     // Have the autoChooser pull in all PathPlanner autos as options
     autoChooser =
         new LoggedDashboardChooser<>("Auto Chooser", BetterAutoChooser.buildAutoChooser());
@@ -249,14 +265,10 @@ public class RobotContainer {
     }
     Command shootDefault = shooter.shootDefault(feeder);
 
-    new EventTrigger("Intake").whileTrue(holdIntake);
-    NamedCommands.registerCommand("Auto Align", autoAlign);
-    NamedCommands.registerCommand("Shoot", shoot);
-
     drive.setDefaultCommand(defaultDriveCommand);
 
     if (Constants.currentMode == Constants.Mode.SIM) {
-      CommandGenericHID keyboard = new CommandGenericHID(2);
+      CommandGenericHID keyboard = new CommandGenericHID(3);
       keyboard.button(1).whileTrue(holdIntake);
       keyboard.button(2).whileTrue(shoot);
       keyboard.button(3).whileTrue(autoAlign);
@@ -298,6 +310,103 @@ public class RobotContainer {
           .debounce(2, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
     }
+  }
+
+  public void setControllerMode(ControllerMode mode) {
+    controllerMode = mode;
+
+    switch (mode) {
+      case STANDARD -> drive.setDefaultCommand(
+          DriveCommands.joystickDrive(
+              drive,
+              () -> -driverController.getLeftY(),
+              () -> -driverController.getLeftX(),
+              () -> -driverController.getRightX()));
+      case GUITAR_HERO_OP -> configureGuitarHeroController(false);
+      case GUITAR_HERO_FULL -> configureGuitarHeroController(true);
+    }
+  }
+
+  private void configureGuitarHeroController(boolean fullControl) {
+    if (guitarHeroController == null) {
+      // lazy instantiation
+      guitarHeroController =
+          new GuitarHeroController(ControllerConstants.GUITAR_HERO_CONTROLLER_PORT);
+
+      // configure triggers only once
+      Command autoAlign =
+          DriveCommands.joystickDriveAtAngle(
+                  drive,
+                  () -> -guitarHeroController.getJoystickY(),
+                  () -> -guitarHeroController.getJoystickX(),
+                  () -> {
+                    if (!shooter.isShooting()) shooter.computeShot();
+                    return shooter.getShot().driveAngle();
+                  },
+                  () -> shooter.getShot().driveAngularVelocityRadPerSec())
+              .beforeStarting(
+                  () -> {
+                    ShootingTasks.isAutoAlignRunning = true;
+                    drive.setSpeedLimiter(true);
+                  })
+              .finallyDo(
+                  () -> {
+                    ShootingTasks.clearTarget();
+                    ShootingTasks.isAutoAlignRunning = false;
+                    drive.setSpeedLimiter(false);
+                  });
+      Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
+
+      // controls are only active during the correct mode, enforced by .and
+      guitarHeroController
+          .green()
+          .and(() -> controllerMode != ControllerMode.STANDARD)
+          .whileTrue(intake.intake());
+      guitarHeroController
+          .red()
+          .and(() -> controllerMode != ControllerMode.STANDARD)
+          .whileTrue(shooter.shoot(feeder));
+      guitarHeroController
+          .yellow()
+          .and(() -> controllerMode == ControllerMode.GUITAR_HERO_FULL)
+          .whileTrue(autoAlign);
+      guitarHeroController
+          .blue()
+          .and(() -> controllerMode == ControllerMode.GUITAR_HERO_FULL)
+          .whileTrue(lockWheels);
+    }
+
+    if (fullControl) {
+      drive.setDefaultCommand(
+          DriveCommands.joystickDrive(
+              drive,
+              () -> -guitarHeroController.getJoystickY(),
+              () -> -guitarHeroController.getJoystickX(),
+              () -> -guitarHeroController.getStrumBarAxis()));
+    }
+  }
+
+  private void configureAutoCommands() {
+    Command autoAlign =
+        DriveCommands.aimAtAngle(
+                drive,
+                () -> {
+                  shooter.computeShot();
+                  return shooter.getShot().driveAngle();
+                })
+            .beforeStarting(
+                () -> {
+                  ShootingTasks.isAutoAlignRunning = true;
+                })
+            .finallyDo(
+                () -> {
+                  ShootingTasks.clearTarget();
+                  ShootingTasks.isAutoAlignRunning = false;
+                });
+
+    new EventTrigger("Intake").whileTrue(intake.intake());
+    NamedCommands.registerCommand("Auto Align", autoAlign);
+    NamedCommands.registerCommand("Shoot", shooter.shoot(feeder));
   }
 
   /**
