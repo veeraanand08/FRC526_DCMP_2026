@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.ControllerMode;
+import static frc.robot.Constants.ControlScheme;
 import static frc.robot.Constants.currentMode;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveCommands;
@@ -37,6 +36,7 @@ import frc.robot.util.RobotBumpSim;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.io.GuitarHeroController;
 import frc.robot.util.sotm.ShootingTasks;
+import java.util.function.BooleanSupplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
@@ -58,15 +58,16 @@ public class RobotContainer {
   private final Intake intake;
 
   // controllers
+  private ControlScheme controlScheme = ControlScheme.SAXON_SPARKS;
   private final CommandXboxController driverController =
       new CommandXboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
-
   private final CommandXboxController operatorController =
       new CommandXboxController(ControllerConstants.OPERATOR_CONTROLLER_PORT);
-
   private GuitarHeroController guitarHeroController;
 
-  private ControllerMode controllerMode = ControllerMode.STANDARD;
+  // default drive commands
+  private Command defaultDriveCommand;
+  private Command guitarHeroDriveCommand;
 
   // dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -169,12 +170,13 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    LoggedDashboardChooser<ControllerMode> controllerChooser =
-        new LoggedDashboardChooser<>("Controls");
-    controllerChooser.addDefaultOption("Standard", ControllerMode.STANDARD);
-    controllerChooser.addOption("Guitar Hero Operator", ControllerMode.GUITAR_HERO_OP);
-    controllerChooser.addOption("Guitar Hero Full Control", ControllerMode.GUITAR_HERO_FULL);
-    controllerChooser.onChange(this::setControllerMode);
+    LoggedDashboardChooser<ControlScheme> controlProfiles =
+        new LoggedDashboardChooser<>("Control Profile");
+    controlProfiles.addDefaultOption("526 (Ben & Iris)", ControlScheme.SAXON_SPARKS);
+    controlProfiles.addOption("611 (Josie & Harun)", ControlScheme.SAXONS);
+    controlProfiles.addOption("Guitar Hero Operator", ControlScheme.GUITAR_HERO_OP);
+    controlProfiles.addOption("Guitar Hero Full Control", ControlScheme.GUITAR_HERO_FULL);
+    controlProfiles.onChange(this::setControlScheme);
 
     // Set up commands for PathPlanner
     configureAutoCommands();
@@ -184,28 +186,28 @@ public class RobotContainer {
         new LoggedDashboardChooser<>("Auto Chooser", BetterAutoChooser.buildAutoChooser());
 
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    //    autoChooser.addOption(
+    //        "Drive Wheel Radius Characterization",
+    // DriveCommands.wheelRadiusCharacterization(drive));
+    //    autoChooser.addOption(
+    //        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    //    autoChooser.addOption(
+    //        "Drive SysId (Quasistatic Forward)",
+    //        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    //    autoChooser.addOption(
+    //        "Drive SysId (Quasistatic Reverse)",
+    //        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    //    autoChooser.addOption(
+    //        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    //    autoChooser.addOption(
+    //        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    // Set up custom autos (non-PathPlanner)
     autoChooser.addOption("Full System Check", Autos.systemCheck(drive, shooter, feeder, intake));
     autoChooser.addOption(
         "Dynamic Left Cycle", Autos.leftCycle(drive, vision, shooter, feeder, intake));
     autoChooser.addOption(
         "Dynamic Right Cycle", Autos.rightCycle(drive, vision, shooter, feeder, intake));
-
-    // Set the default auto (do nothing)
-    autoChooser.addDefaultOption("Do Nothing", Commands.none());
 
     DriverStation.silenceJoystickConnectionWarning(true);
   }
@@ -223,13 +225,6 @@ public class RobotContainer {
     RobotUtil.setDriverController(driverController);
     RobotUtil.setOperatorController(operatorController);
 
-    // Default command, normal field-relative drive
-    Command defaultDriveCommand =
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX());
     // Lock wheels to X pattern
     Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
     // Reset gyro to 0°
@@ -265,7 +260,8 @@ public class RobotContainer {
     }
     Command shootDefault = shooter.shootDefault(feeder);
 
-    drive.setDefaultCommand(defaultDriveCommand);
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(getDefaultDriveCommand());
 
     if (Constants.currentMode == Constants.Mode.SIM) {
       CommandGenericHID keyboard = new CommandGenericHID(3);
@@ -293,38 +289,55 @@ public class RobotContainer {
           .debounce(2, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
     } else {
-      // driver controls
+      /* driver controls */
       driverController.a().whileTrue(autoAlign);
       driverController.leftBumper().whileTrue(lockWheels);
       driverController.povLeft().onTrue(zeroGyro);
 
-      // operator controls
+      /* operator controls */
       operatorController.leftBumper().whileTrue(holdIntake);
-      operatorController.rightBumper().whileTrue(shoot);
-      operatorController.rightTrigger(0.7).whileTrue(shootDefault);
-      operatorController.a().toggleOnTrue(agitate);
-      operatorController.b().whileTrue(dump);
       operatorController.povUp().onTrue(resetIntake);
       operatorController
           .povRight()
           .debounce(2, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
+      // 526 profile
+      BooleanSupplier saxonSparksProfile = () -> controlScheme == ControlScheme.SAXON_SPARKS;
+      operatorController.rightBumper().and(saxonSparksProfile).whileTrue(shoot);
+      operatorController.rightTrigger(0.7).and(saxonSparksProfile).whileTrue(shootDefault);
+      operatorController.a().and(saxonSparksProfile).toggleOnTrue(agitate);
+      operatorController.b().and(saxonSparksProfile).whileTrue(dump);
+      // 611 profile
+      BooleanSupplier saxonsProfile = () -> controlScheme == ControlScheme.SAXONS;
+      operatorController.rightTrigger(0.7).and(saxonsProfile).whileTrue(shoot);
+      operatorController.rightBumper().and(saxonsProfile).whileTrue(shootDefault);
+      operatorController.a().and(saxonsProfile).toggleOnTrue(dump);
+      operatorController.b().and(saxonsProfile).whileTrue(agitate);
     }
   }
 
-  public void setControllerMode(ControllerMode mode) {
-    controllerMode = mode;
-
-    switch (mode) {
-      case STANDARD -> drive.setDefaultCommand(
-          DriveCommands.joystickDrive(
-              drive,
-              () -> -driverController.getLeftY(),
-              () -> -driverController.getLeftX(),
-              () -> -driverController.getRightX()));
-      case GUITAR_HERO_OP -> configureGuitarHeroController(false);
-      case GUITAR_HERO_FULL -> configureGuitarHeroController(true);
+  public void setControlScheme(ControlScheme newScheme) {
+    switch (newScheme) {
+      case SAXONS:
+      case SAXON_SPARKS:
+        if (controlScheme == ControlScheme.GUITAR_HERO_FULL) {
+          drive.setDefaultCommand(getDefaultDriveCommand());
+          drive.getCurrentCommand().cancel();
+        }
+        break;
+      case GUITAR_HERO_OP:
+        configureGuitarHeroController(false);
+        if (controlScheme == ControlScheme.GUITAR_HERO_FULL) {
+          drive.setDefaultCommand(getDefaultDriveCommand());
+          drive.getCurrentCommand().cancel();
+        }
+        break;
+      case GUITAR_HERO_FULL:
+        configureGuitarHeroController(true);
+        break;
+      default:
     }
+    controlScheme = newScheme;
   }
 
   private void configureGuitarHeroController(boolean fullControl) {
@@ -357,32 +370,18 @@ public class RobotContainer {
                   });
       Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
 
-      // controls are only active during the correct mode, enforced by .and
-      guitarHeroController
-          .green()
-          .and(() -> controllerMode != ControllerMode.STANDARD)
-          .whileTrue(intake.intake());
-      guitarHeroController
-          .red()
-          .and(() -> controllerMode != ControllerMode.STANDARD)
-          .whileTrue(shooter.shoot(feeder));
-      guitarHeroController
-          .yellow()
-          .and(() -> controllerMode == ControllerMode.GUITAR_HERO_FULL)
-          .whileTrue(autoAlign);
-      guitarHeroController
-          .blue()
-          .and(() -> controllerMode == ControllerMode.GUITAR_HERO_FULL)
-          .whileTrue(lockWheels);
+      // controls are only active during the correct mode
+      BooleanSupplier guitarHeroControls = () -> controlScheme.isGuitarHero;
+      BooleanSupplier guitarHeroDrive = () -> controlScheme == ControlScheme.GUITAR_HERO_FULL;
+      guitarHeroController.green().and(guitarHeroControls).whileTrue(intake.intake());
+      guitarHeroController.red().and(guitarHeroControls).whileTrue(shooter.shoot(feeder));
+      guitarHeroController.yellow().and(guitarHeroDrive).whileTrue(autoAlign);
+      guitarHeroController.blue().and(guitarHeroDrive).whileTrue(lockWheels);
     }
 
     if (fullControl) {
-      drive.setDefaultCommand(
-          DriveCommands.joystickDrive(
-              drive,
-              () -> -guitarHeroController.getJoystickY(),
-              () -> -guitarHeroController.getJoystickX(),
-              () -> -guitarHeroController.getStrumBarAxis()));
+      drive.setDefaultCommand(getGuitarHeroDriveCommand());
+      drive.getCurrentCommand().cancel();
     }
   }
 
@@ -407,6 +406,30 @@ public class RobotContainer {
     new EventTrigger("Intake").whileTrue(intake.intake());
     NamedCommands.registerCommand("Auto Align", autoAlign);
     NamedCommands.registerCommand("Shoot", shooter.shoot(feeder));
+  }
+
+  private Command getDefaultDriveCommand() {
+    if (defaultDriveCommand == null) {
+      defaultDriveCommand =
+          DriveCommands.joystickDrive(
+              drive,
+              () -> -driverController.getLeftY(),
+              () -> -driverController.getLeftX(),
+              () -> -driverController.getRightX());
+    }
+    return defaultDriveCommand;
+  }
+
+  private Command getGuitarHeroDriveCommand() {
+    if (guitarHeroDriveCommand == null) {
+      guitarHeroDriveCommand =
+          DriveCommands.joystickDrive(
+              drive,
+              () -> -guitarHeroController.getJoystickY(),
+              () -> -guitarHeroController.getJoystickX(),
+              () -> -guitarHeroController.getStrumBarAxis());
+    }
+    return guitarHeroDriveCommand;
   }
 
   /**
