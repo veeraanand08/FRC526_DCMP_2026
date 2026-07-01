@@ -19,7 +19,7 @@ import frc.robot.util.io.motors.pivot.PivotIO;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.sensors.EncoderIO;
 
-public class MotorIOSparkMax implements PivotIO, RollerIO {
+public class MotorIOSparkMax implements RollerIO, PivotIO {
   private static final SparkBaseConfig coastConfig =
       new SparkMaxConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
   private static final SparkBaseConfig brakeConfig =
@@ -94,14 +94,14 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
   }
 
   @Override
-  public void updateInputs(PivotIOInputs inputs) {
-    inputs.positionDeg = Degrees.convertFrom(leaderEncoder.getPosition(), angleUnit);
+  public void updateInputs(RollerIOInputs inputs) {
+    inputs.velocityRPS = leaderEncoder.getVelocity();
     updateMotorInputs(inputs);
   }
 
   @Override
-  public void updateInputs(RollerIOInputs inputs) {
-    inputs.velocityRPS = leaderEncoder.getVelocity();
+  public void updateInputs(PivotIOInputs inputs) {
+    inputs.positionDeg = Degrees.convertFrom(leaderEncoder.getPosition(), angleUnit);
     updateMotorInputs(inputs);
   }
 

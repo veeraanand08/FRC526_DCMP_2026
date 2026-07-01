@@ -13,14 +13,13 @@ import frc.robot.Constants;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.io.motors.pivot.Pivot;
 import frc.robot.util.io.motors.pivot.PivotIO;
 import frc.robot.util.io.motors.pivot.PivotIOSim;
-import frc.robot.util.io.motors.pivot.PivotIOTalonFX;
 import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
-import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import frc.robot.util.subsystems.ExtendedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
@@ -50,11 +49,11 @@ public class Intake extends ExtendedSubsystem {
   public Intake() {
     PivotIO pivotIO =
         switch (Constants.currentMode) {
-          case REAL -> new PivotIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
                   Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
                   Constants.CANConstants.INTAKE_PIVOT,
                   IntakeConstants.PIVOT_CONFIG)
-              .useControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
+              .withControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
           case SIM -> new PivotIOSim(
               DCMotor.getKrakenX60(1),
               new MotorIO.MechanismConstraints(
@@ -71,7 +70,7 @@ public class Intake extends ExtendedSubsystem {
         };
     RollerIO rollerIO =
         switch (Constants.currentMode) {
-          case REAL -> new RollerIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
               Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
               Constants.CANConstants.INTAKE_ROLLER,
               IntakeConstants.ROLLER_CONFIG);

@@ -16,10 +16,10 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
-import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import frc.robot.util.sotm.ShootingTasks;
 import frc.robot.util.sotm.ShotCalculator;
 import java.util.function.Supplier;
@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
   public Shooter(Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotVelocity) {
     RollerIO rollerIO =
         switch (Constants.currentMode) {
-          case REAL -> new RollerIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
               CANConstants.SUPERSTRUCTURE_CAN_BUS,
               CANConstants.SHOOTER_TOP_LEFT,
               new int[] {
