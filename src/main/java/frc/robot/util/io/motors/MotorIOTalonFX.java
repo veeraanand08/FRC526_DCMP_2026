@@ -1,7 +1,6 @@
 package frc.robot.util.io.motors;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -17,12 +16,13 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Notifier;
 import frc.robot.util.PhoenixUtil;
+import frc.robot.util.io.motors.linear.LinearSystemIO;
 import frc.robot.util.io.motors.pivot.PivotIO;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.sensors.EncoderIOCANcoder;
 import java.util.function.Consumer;
 
-public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO {
+public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemIO {
   protected final TalonFX leader;
   protected final TalonFX[] followers;
 
@@ -164,6 +164,13 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO {
   @Override
   public void updateInputs(PivotIOInputs inputs) {
     inputs.positionDeg = position.getValue().in(Degrees);
+    updateMotorInputs(inputs);
+  }
+
+  @Override
+  public void updateInputs(LinearSystemIOInputs inputs) {
+    inputs.positionRad = position.getValue().in(Radians);
+    inputs.velocityRadPerSec = velocity.getValue().in(RadiansPerSecond);
     updateMotorInputs(inputs);
   }
 
