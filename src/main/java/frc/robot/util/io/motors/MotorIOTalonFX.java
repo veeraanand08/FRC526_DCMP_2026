@@ -181,12 +181,12 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemI
 
   @Override
   public void setPosition(Angle angle) {
-    positionRequest.accept(angle);
+    if (positionConfigured) positionRequest.accept(angle);
   }
 
   @Override
   public void setVelocity(double rps) {
-    leader.setControl(velocityRequest.withVelocity(rps));
+    if (velocityConfigured) leader.setControl(velocityRequest.withVelocity(rps));
   }
 
   @Override
@@ -201,6 +201,7 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemI
 
   @Override
   public void resetPosition(Angle angle) {
+    if (!positionConfigured) return;
     angleResetVal = angle;
     resetPosition.startSingle(0);
   }

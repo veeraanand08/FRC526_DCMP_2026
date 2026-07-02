@@ -28,9 +28,9 @@ public class Roller extends Motor<RollerIO, RollerIOInputsAutoLogged> {
   }
 
   public void periodic() {
-    super.periodic();
     io.updateInputs(inputs);
     Logger.processInputs(name, inputs);
+    super.periodic();
   }
 
   public void runClosedLoop(double rps) {

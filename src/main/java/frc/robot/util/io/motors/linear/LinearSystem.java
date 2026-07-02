@@ -46,13 +46,13 @@ public class LinearSystem extends Motor<LinearSystemIO, LinearSystemIOInputsAuto
       ((MotorIOTalonFX) io).withVelocityControl();
     }
     this.distanceToAngle = distanceToAngle;
-    Logger.recordOutput(name + "/SetpointRot", 0.0);
+    Logger.recordOutput(name + "/SetpointRad", 0.0);
   }
 
   public void periodic() {
-    super.periodic();
     io.updateInputs(inputs);
     Logger.processInputs(name, inputs);
+    super.periodic();
   }
 
   public void runClosedLoop(Angle angle) {
@@ -60,7 +60,7 @@ public class LinearSystem extends Motor<LinearSystemIO, LinearSystemIOInputsAuto
 
     io.setPosition(angle);
     mode = MotorIO.MotorIOMode.POSITION_CONTROL;
-    Logger.recordOutput(name + "/SetpointDeg", angle.in(Degrees));
+    Logger.recordOutput(name + "/SetpointRad", angle.in(Radians));
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 

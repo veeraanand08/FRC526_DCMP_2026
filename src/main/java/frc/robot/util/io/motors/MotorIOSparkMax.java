@@ -72,6 +72,8 @@ public class MotorIOSparkMax implements RollerIO, PivotIO, LinearSystemIO {
 
     leaderEncoder = leader.getEncoder();
     leaderEncoder.setPosition(0);
+
+    this.brakeMode = leader.configAccessor.getIdleMode() == SparkBaseConfig.IdleMode.kBrake;
   }
 
   public MotorIOSparkMax withPositionControlType(SparkBase.ControlType controlType) {
@@ -163,7 +165,7 @@ public class MotorIOSparkMax implements RollerIO, PivotIO, LinearSystemIO {
 
   @Override
   public void resetPosition(Angle angle) {
-    leaderEncoder.setPosition(angle.in(Degrees));
+    leaderEncoder.setPosition(angle.in(positionUnit));
   }
 
   @Override
@@ -171,11 +173,11 @@ public class MotorIOSparkMax implements RollerIO, PivotIO, LinearSystemIO {
     return followers.length;
   }
 
-  public EncoderIO getAbsoluteEncoder() {
+  public EncoderIO getAbsoluteEncoder(AngleUnit encoderUnit) {
     AbsoluteEncoder encoder = leader.getAbsoluteEncoder();
     return (inputs) -> {
       inputs.connected = !leader.hasActiveFault();
-      inputs.position = Degrees.of(encoder.getPosition());
+      inputs.position = encoderUnit.of(encoder.getPosition());
     };
   }
 }

@@ -23,6 +23,8 @@ public class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInp
   @Getter protected boolean stalled;
   @Getter protected boolean tempCritical;
 
+  private final RobotUtil.RumbleRequest tempWarnRumble = new RobotUtil.RumbleRequest(0.85, 20);
+
   protected Motor(
       String name, IOType io, InputsType inputs, BooleanSupplier brakeMode, double currentLimit) {
     this.name = name;
@@ -43,6 +45,7 @@ public class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInp
     tempFault =
         new Alert(name, "Motor disabled due to temperature above 75°C", Alert.AlertType.kError);
 
+    final RobotUtil.RumbleRequest stallRumble = new RobotUtil.RumbleRequest(0.85, 10);
     new Trigger(() -> inputs.statorCurrentAmps >= currentLimit)
         .debounce(0.3, Debouncer.DebounceType.kBoth)
         .onTrue(
@@ -51,16 +54,16 @@ public class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInp
                   stalled = true;
                   stop();
                   torqueLimitWarning.set(true);
-                  RobotUtil.setDriverRumble(0.85, 0.85);
-                  RobotUtil.setOperatorRumble(0.85, 0.85);
+                  RobotUtil.requestDriverRumble(stallRumble);
+                  RobotUtil.requestOperatorRumble(stallRumble);
                 }))
         .onFalse(
             Commands.runOnce(
                 () -> {
                   stalled = false;
                   torqueLimitWarning.set(false);
-                  RobotUtil.setDriverRumble(0.0, 0.0);
-                  RobotUtil.setOperatorRumble(0.0, 0.0);
+                  RobotUtil.stopDriverRumble(stallRumble);
+                  RobotUtil.stopOperatorRumble(stallRumble);
                 }));
 
     Logger.recordOutput(name + "/MotorMode", mode);

@@ -28,9 +28,9 @@ public class Pivot extends Motor<PivotIO, PivotIOInputsAutoLogged> {
   }
 
   public void periodic() {
-    super.periodic();
     io.updateInputs(inputs);
     Logger.processInputs(name, inputs);
+    super.periodic();
   }
 
   public void runClosedLoop(Angle angle) {

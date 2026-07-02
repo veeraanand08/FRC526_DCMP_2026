@@ -134,6 +134,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command shoot(Feeder feeder) {
+    RobotUtil.RumbleRequest rumble = new RobotUtil.RumbleRequest(0.0, 0.8, 1);
     return runEnd(
             () -> {
               isShooting = true;
@@ -144,8 +145,8 @@ public class Shooter extends SubsystemBase {
         .alongWith(feeder.feed().onlyIf(this::hasSpunUp))
         .alongWith(
             Commands.startEnd(
-                    () -> RobotUtil.setOperatorRumble(0.0, 0.8),
-                    () -> RobotUtil.setOperatorRumble(0.0, 0.0))
+                    () -> RobotUtil.requestOperatorRumble(rumble),
+                    () -> RobotUtil.stopOperatorRumble(rumble))
                 .onlyIf(() -> !ShiftTimer.instance.isHubActive()));
   }
 
