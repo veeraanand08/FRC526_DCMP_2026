@@ -58,7 +58,7 @@ public class Shooter extends SubsystemBase {
               });
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(4),
-              new MotorIO.MechanismConstraints(
+              new MotorIO.RotationalMechanismConstraints(
                   ShooterConstants.SHOOTER_GEAR_RATIO, ShooterConstants.SHOOTER_MOI, 0.2, 0, 0, 0),
               3.1,
               ShooterConstants.SHOOTER_KD,

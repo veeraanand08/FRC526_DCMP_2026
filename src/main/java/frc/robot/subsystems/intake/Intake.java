@@ -56,7 +56,7 @@ public class Intake extends ExtendedSubsystem {
               .withControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
           case SIM -> new PivotIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(
+              new MotorIO.RotationalMechanismConstraints(
                   IntakeConstants.PIVOT_GEAR_RATIO,
                   SingleJointedArmSim.estimateMOI(0.5, 2),
                   0.5,
@@ -76,7 +76,7 @@ public class Intake extends ExtendedSubsystem {
               IntakeConstants.ROLLER_CONFIG);
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(
+              new MotorIO.RotationalMechanismConstraints(
                   IntakeConstants.ROLLER_GEAR_RATIO, IntakeConstants.ROLLER_MOI, 0.2, 0, 0, 0),
               IntakeConstants.ROLLER_KP * 20,
               IntakeConstants.ROLLER_KD,

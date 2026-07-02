@@ -14,7 +14,7 @@ public class PivotIOSim extends MotorIOSim implements PivotIO {
 
   public PivotIOSim(
       DCMotor motorModel,
-      MechanismConstraints constraints,
+      RotationalMechanismConstraints constraints,
       double kP,
       double kD,
       int numFollowers) {

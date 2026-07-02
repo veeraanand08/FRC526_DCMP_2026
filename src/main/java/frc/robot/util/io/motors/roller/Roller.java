@@ -22,7 +22,7 @@ public class Roller extends Motor<RollerIO, RollerIOInputsAutoLogged> {
   public Roller(String name, RollerIO io, BooleanSupplier brakeMode, double currentLimit) {
     super(name, io, new RollerIOInputsAutoLogged(), brakeMode, currentLimit);
     if (io instanceof MotorIOTalonFX) {
-      ((MotorIOTalonFX) io).withVelocity();
+      ((MotorIOTalonFX) io).withVelocityControl();
     }
     Logger.recordOutput(name + "/SetpointRPS", 0.0);
   }

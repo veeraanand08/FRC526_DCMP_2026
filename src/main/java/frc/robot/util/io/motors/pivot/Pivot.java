@@ -22,7 +22,7 @@ public class Pivot extends Motor<PivotIO, PivotIOInputsAutoLogged> {
   public Pivot(String name, PivotIO io, BooleanSupplier brakeMode, double currentLimit) {
     super(name, io, new PivotIOInputsAutoLogged(), brakeMode, currentLimit);
     if (io instanceof MotorIOTalonFX) {
-      ((MotorIOTalonFX) io).withPosition();
+      ((MotorIOTalonFX) io).withPositionControl();
     }
     Logger.recordOutput(name + "/SetpointDeg", 0.0);
   }

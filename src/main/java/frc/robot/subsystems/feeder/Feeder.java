@@ -30,7 +30,8 @@ public class Feeder extends SubsystemBase {
               FeederConstants.INDEXER_CONFIG);
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(1, FeederConstants.INDEXER_MOI, 0.2, 0, 0, 0),
+              new MotorIO.RotationalMechanismConstraints(
+                  1, FeederConstants.INDEXER_MOI, 0.2, 0, 0, 0),
               FeederConstants.INDEXER_KP,
               FeederConstants.INDEXER_KD,
               0);
@@ -44,7 +45,8 @@ public class Feeder extends SubsystemBase {
               FeederConstants.KICKER_CONFIG);
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(1, FeederConstants.KICKER_MOI, 0.2, 0, 0, 0),
+              new MotorIO.RotationalMechanismConstraints(
+                  1, FeederConstants.KICKER_MOI, 0.2, 0, 0, 0),
               FeederConstants.KICKER_KP,
               FeederConstants.KICKER_KD,
               0);

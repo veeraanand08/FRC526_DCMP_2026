@@ -95,7 +95,7 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO {
     }
   }
 
-  public MotorIOTalonFX withPosition() {
+  public MotorIOTalonFX withPositionControl() {
     if (positionConfigured) return this;
     withControlRequest(new PositionVoltage(0));
     position.setUpdateFrequency(100.0);
@@ -105,7 +105,7 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO {
     return this;
   }
 
-  public MotorIOTalonFX withVelocity() {
+  public MotorIOTalonFX withVelocityControl() {
     if (velocityConfigured) return this;
     velocityRequest = new VelocityVoltage(0);
     velocity.setUpdateFrequency(100.0);
