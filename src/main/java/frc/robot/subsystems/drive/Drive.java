@@ -375,6 +375,12 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
+  @AutoLogOutput(key = "Odometry/LinearVelocityMetersPerSecond")
+  public double getLinearVelocity() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+  }
+
   /** Returns the position of each module in radians. */
   public double[] getWheelRadiusCharacterizationPositions() {
     double[] values = new double[4];
