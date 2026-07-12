@@ -1,19 +1,19 @@
 package frc.robot.util;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import lombok.Setter;
-
 import java.util.*;
+import lombok.Setter;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class contains methods that are used throughout the codebase and are not bound to one
  * subsystem or class.
  */
 public final class RobotUtil {
-  public record RumbleRequest(double left, double right, int priority) implements Comparable<RumbleRequest> {
+  public record RumbleRequest(double left, double right, int priority)
+      implements Comparable<RumbleRequest> {
     public RumbleRequest(double intensity, int priority) {
       this(intensity, intensity, priority);
     }
@@ -77,6 +77,7 @@ public final class RobotUtil {
   /** Update driver controller rumbles based on current queue head */
   private static void updateDriverRumble() {
     if (driverController == null) return;
+    Logger.recordOutput("XboxController/DriverRumble", driverRumble.toArray(new RumbleRequest[0]));
     RumbleRequest active = driverRumble.peek();
     if (active != null) {
       driverController.setRumble(GenericHID.RumbleType.kLeftRumble, active.left);
@@ -90,6 +91,8 @@ public final class RobotUtil {
   /** Update operator controller rumbles based on current queue head */
   private static void updateOperatorRumble() {
     if (operatorController == null) return;
+    Logger.recordOutput(
+        "XboxController/OperatorRumble", operatorRumble.toArray(new RumbleRequest[0]));
     RumbleRequest active = operatorRumble.peek();
     if (active != null) {
       operatorController.setRumble(GenericHID.RumbleType.kLeftRumble, active.left);
