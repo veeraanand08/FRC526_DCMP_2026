@@ -192,8 +192,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
-          Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
           field.getObject("path").setPoses(activePath);
         });
     PathPlannerLogging.setLogTargetPoseCallback(
@@ -290,7 +289,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
-      modules[i].runSetpoint(setpointStates[i], enableAntiJitter);
+      modules[i].runSetpoint(setpointStates[i], false);
     }
 
     // Log optimized setpoints (runSetpoint mutates each state)
@@ -322,6 +321,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
     stop();
   }
 
+  /** Returns a command to drive to a specific pose. */
   public Command driveToPose(Pose2d targetPose) {
     return defer(
         () -> {
@@ -330,6 +330,10 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
         });
   }
 
+  /**
+   * Returns a command to drive to the pose provided by the given supplier at the moment the command
+   * is scheduled.
+   */
   public Command driveToPose(Supplier<Pose2d> targetPose) {
     return defer(
         () -> {
@@ -373,6 +377,13 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
   public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  /** Returns the translational speed of the robot. */
+  //  @AutoLogOutput(key = "SwerveChassisSpeeds/LinearVelocityMetersPerSecond")
+  public double getLinearVelocity() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
   }
 
   /** Returns the position of each module in radians. */

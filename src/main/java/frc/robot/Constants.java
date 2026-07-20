@@ -35,10 +35,17 @@ public final class Constants {
     REPLAY
   }
 
-  public enum ControllerMode {
-    STANDARD,
-    GUITAR_HERO_OP,
-    GUITAR_HERO_FULL
+  public enum ControlScheme {
+    SAXONS(false),
+    SAXON_SPARKS(false),
+    GUITAR_HERO_OP(true),
+    GUITAR_HERO_FULL(true);
+
+    public final boolean isGuitarHero;
+
+    ControlScheme(boolean isGuitarHero) {
+      this.isGuitarHero = isGuitarHero;
+    }
   }
 
   public static final class ControllerConstants {

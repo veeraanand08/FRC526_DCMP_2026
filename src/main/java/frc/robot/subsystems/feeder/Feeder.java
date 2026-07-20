@@ -70,8 +70,8 @@ public class Feeder extends SubsystemBase {
   }
 
   public void reverse() {
-    indexer.runClosedLoop(-FeederConstants.INDEXER_RPS);
-    kicker.runClosedLoop(-FeederConstants.KICKER_RPS);
+    indexer.runClosedLoop(-FeederConstants.INDEXER_RPS * 0.7);
+    kicker.runClosedLoop(-FeederConstants.KICKER_RPS * 0.7);
     enabledForShooting = false;
   }
 
