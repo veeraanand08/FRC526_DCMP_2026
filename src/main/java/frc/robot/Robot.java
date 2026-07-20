@@ -77,6 +77,7 @@ public class Robot extends LoggedRobot {
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+    Elastic.selectTab("Setup");
 
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.

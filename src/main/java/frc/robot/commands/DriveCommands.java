@@ -48,7 +48,7 @@ public class DriveCommands {
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
-    linearMagnitude = Math.pow(linearMagnitude, 2);
+    linearMagnitude = linearMagnitude * linearMagnitude;
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
@@ -87,6 +87,37 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds,
                   isFlipped ? drive.getRotation().plus(Rotation2d.kPi) : drive.getRotation()),
+              true);
+        },
+        drive);
+  }
+
+  /**
+   * Robot relative drive command using two joysticks (controlling linear and angular velocities).
+   */
+  public static Command joystickDriveRobotRelative(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier) {
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+          // Square rotation value for more precise control
+          omega = Math.copySign(omega * omega, omega);
+
+          // Send command
+          drive.runVelocity(
+              new ChassisSpeeds(
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  omega * drive.getMaxAngularSpeedRadPerSec()),
               true);
         },
         drive);
