@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.util.io.motors.Motor;
 import frc.robot.util.io.motors.MotorIO;
-import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,7 +14,7 @@ public class Roller extends Motor<RollerIO, RollerIOInputsAutoLogged> {
   }
 
   public Roller(String name, RollerIO io, double currentLimit) {
-    this(name, io, RobotStateHandler::isEnabled, currentLimit);
+    this(name, io, () -> false, currentLimit);
   }
 
   public Roller(String name, RollerIO io, BooleanSupplier brakeMode, double currentLimit) {
