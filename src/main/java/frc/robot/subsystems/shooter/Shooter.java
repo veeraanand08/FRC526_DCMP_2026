@@ -141,16 +141,19 @@ public class Shooter extends SubsystemBase {
               runVelocity(shot.rpm() / 60.0);
             },
             this::stop)
-        .alongWith(feeder.feed().onlyIf(this::hasSpunUp))
+        .alongWith(Commands.waitUntil(this::hasSpunUp).andThen(feeder.feed()))
         .alongWith(
-            Commands.startEnd(
-                    () -> RobotUtil.setOperatorRumble(0.0, 0.8),
-                    () -> RobotUtil.setOperatorRumble(0.0, 0.0))
-                .onlyIf(() -> !ShiftTimer.instance.isHubActive()));
+            Commands.runEnd(
+                () -> {
+                  if (!ShiftTimer.instance.isHubActive()) {
+                    RobotUtil.setOperatorRumble(0.0, 0.8);
+                  }
+                },
+                () -> RobotUtil.setOperatorRumble(0.0, 0.0)));
   }
 
   public Command shootDefault(Feeder feeder) {
     return startEnd(() -> runVelocity(ShooterConstants.DEFAULT_RPM.get() / 60.0), this::stop)
-        .alongWith(feeder.feed().onlyIf(this::hasSpunUp));
+        .alongWith(Commands.waitUntil(this::hasSpunUp).andThen(feeder.feed()));
   }
 }
