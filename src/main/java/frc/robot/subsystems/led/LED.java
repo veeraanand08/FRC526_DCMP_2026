@@ -47,12 +47,14 @@ public class LED extends ExtendedSubsystem {
   private LED(Shooter shooter) {
     led = new AddressableLED(LEDConstants.PORT);
     ledBuffer = new AddressableLEDBuffer(LEDConstants.LENGTH);
+    led.setLength(ledBuffer.getLength());
     if (shooter == null) {
       patterns = new LEDConstants(() -> 1.0);
     } else {
       patterns = new LEDConstants(() -> shooter.getVelocityRPS() / shooter.getSetpointRPS());
     }
 
+    applyPattern(patterns.disabled);
     led.start();
 
     Logger.recordOutput("LED/CurrentState", state);

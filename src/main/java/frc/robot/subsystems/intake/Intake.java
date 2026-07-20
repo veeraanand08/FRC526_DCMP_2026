@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.led.LED;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.io.motors.MotorIO;
 import frc.robot.util.io.motors.pivot.Pivot;
@@ -123,6 +124,7 @@ public class Intake extends ExtendedSubsystem {
       setPivotState(PivotState.LOWERING);
     }
     roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
+    LED.getInstance().intake();
     Logger.recordOutput("Intake/Running", true);
   }
 
@@ -138,6 +140,7 @@ public class Intake extends ExtendedSubsystem {
 
   public void stopRoller() {
     roller.stop();
+    LED.getInstance().stopIntake();
     Logger.recordOutput("Intake/Running", false);
   }
 

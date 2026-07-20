@@ -27,6 +27,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.superstructure.SuperstructureSim;
 import frc.robot.subsystems.vision.*;
@@ -101,6 +102,7 @@ public class RobotContainer {
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();
+        LED.createInstance(shooter);
       }
       case SIM -> {
         Arena2026Rebuilt arena = new Arena2026Rebuilt(false);

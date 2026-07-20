@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.CANConstants;
 import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.led.LED;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.io.motors.MotorIO;
@@ -116,6 +117,7 @@ public class Shooter extends SubsystemBase {
     }
     roller.runClosedLoop(rps);
     setpointRPS = rps;
+    LED.getInstance().shoot();
   }
 
   public void stop() {
@@ -123,6 +125,7 @@ public class Shooter extends SubsystemBase {
     setpointRPS = 0.0;
     ShootingTasks.clearTarget();
     isShooting = false;
+    LED.getInstance().stopShoot();
   }
 
   public double getVelocityRPS() {

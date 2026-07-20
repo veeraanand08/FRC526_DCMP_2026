@@ -10,7 +10,7 @@ import java.util.function.DoubleSupplier;
 
 public final class LEDConstants {
   public static final int PORT = 9;
-  public static final int LENGTH = 60; // placeholder
+  public static final int LENGTH = 90; // placeholder
   public static final Distance SPACING = Meters.of(1.0 / 60);
 
   public final LEDPattern disabled = scrollingEye(0.3, 1, Color.kGreen, Color.kGold);

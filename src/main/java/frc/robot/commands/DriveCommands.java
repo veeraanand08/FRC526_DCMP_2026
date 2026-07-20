@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.led.LED;
 import frc.robot.util.RobotUtil;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -171,9 +172,11 @@ public class DriveCommands {
                   true);
             },
             drive)
-
         // Reset PID controller when command starts
-        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()))
+        // Update LEDs when aligned
+        .alongWith(
+            Commands.waitUntil(angleController::atGoal).andThen(LED.getInstance()::shooterReady));
   }
 
   /**
