@@ -261,9 +261,9 @@ public class RobotContainer {
     Command shootDefault = shooter.shootDefault(feeder);
 
     // Default command, normal field-relative drive
-    drive.setDefaultCommand(getDefaultDriveCommand());
+    useDefaultDrive();
 
-    if (Constants.currentMode == Constants.Mode.SIM) {
+    if (currentMode == Constants.Mode.SIM) {
       CommandGenericHID keyboard = new CommandGenericHID(3);
       keyboard.button(1).whileTrue(holdIntake);
       keyboard.button(2).whileTrue(shoot);
@@ -321,15 +321,13 @@ public class RobotContainer {
       case SAXONS:
       case SAXON_SPARKS:
         if (controlScheme == ControlScheme.GUITAR_HERO_FULL) {
-          drive.setDefaultCommand(getDefaultDriveCommand());
-          drive.getCurrentCommand().cancel();
+          useDefaultDrive();
         }
         break;
       case GUITAR_HERO_OP:
         configureGuitarHeroController(false);
         if (controlScheme == ControlScheme.GUITAR_HERO_FULL) {
-          drive.setDefaultCommand(getDefaultDriveCommand());
-          drive.getCurrentCommand().cancel();
+          useDefaultDrive();
         }
         break;
       case GUITAR_HERO_FULL:
@@ -369,19 +367,22 @@ public class RobotContainer {
                     drive.setSpeedLimiter(false);
                   });
       Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
+      Command shoot = shooter.shoot(feeder);
+      if (currentMode == Constants.Mode.SIM) {
+        shoot = shoot.alongWith(superstructureSim.shootCommand());
+      }
 
       // controls are only active during the correct mode
       BooleanSupplier guitarHeroControls = () -> controlScheme.isGuitarHero;
       BooleanSupplier guitarHeroDrive = () -> controlScheme == ControlScheme.GUITAR_HERO_FULL;
       guitarHeroController.green().and(guitarHeroControls).whileTrue(intake.intake());
-      guitarHeroController.red().and(guitarHeroControls).whileTrue(shooter.shoot(feeder));
+      guitarHeroController.red().and(guitarHeroControls).whileTrue(shoot);
       guitarHeroController.yellow().and(guitarHeroDrive).whileTrue(autoAlign);
       guitarHeroController.blue().and(guitarHeroDrive).whileTrue(lockWheels);
     }
 
     if (fullControl) {
-      drive.setDefaultCommand(getGuitarHeroDriveCommand());
-      drive.getCurrentCommand().cancel();
+      useGuitarHeroDrive();
     }
   }
 
@@ -408,7 +409,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot", shooter.shoot(feeder));
   }
 
-  private Command getDefaultDriveCommand() {
+  private void useDefaultDrive() {
     if (defaultDriveCommand == null) {
       defaultDriveCommand =
           DriveCommands.joystickDrive(
@@ -417,10 +418,12 @@ public class RobotContainer {
               () -> -driverController.getLeftX(),
               () -> -driverController.getRightX());
     }
-    return defaultDriveCommand;
+    drive.setDefaultCommand(defaultDriveCommand);
+    Command currentDriveCommand = drive.getCurrentCommand();
+    if (currentDriveCommand != null) currentDriveCommand.cancel();
   }
 
-  private Command getGuitarHeroDriveCommand() {
+  private void useGuitarHeroDrive() {
     if (guitarHeroDriveCommand == null) {
       guitarHeroDriveCommand =
           DriveCommands.joystickDrive(
@@ -429,7 +432,9 @@ public class RobotContainer {
               () -> -guitarHeroController.getJoystickX(),
               () -> -guitarHeroController.getStrumBarAxis());
     }
-    return guitarHeroDriveCommand;
+    drive.setDefaultCommand(guitarHeroDriveCommand);
+    Command currentDriveCommand = drive.getCurrentCommand();
+    if (currentDriveCommand != null) currentDriveCommand.cancel();
   }
 
   /**
