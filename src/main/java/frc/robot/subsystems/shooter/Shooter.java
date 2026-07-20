@@ -150,10 +150,10 @@ public class Shooter extends SubsystemBase {
             Commands.runEnd(
                 () -> {
                   if (!ShiftTimer.instance.isHubActive()) {
-                    RobotUtil.setOperatorRumble(0.0, 0.8);
+                    RobotUtil.requestOperatorRumble(rumble);
                   }
                 },
-                () -> RobotUtil.setOperatorRumble(0.0, 0.0)));
+                () -> RobotUtil.stopOperatorRumble(rumble)));
   }
 
   public Command shootDefault(Feeder feeder) {
