@@ -48,7 +48,7 @@ public class DriveCommands {
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
     // Square magnitude for more precise control
-    linearMagnitude = Math.pow(linearMagnitude, 2);
+    linearMagnitude = linearMagnitude * linearMagnitude;
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
@@ -113,10 +113,12 @@ public class DriveCommands {
           omega = Math.copySign(omega * omega, omega);
 
           // Send command
-          drive.runVelocity(new ChassisSpeeds(
+          drive.runVelocity(
+              new ChassisSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                  omega * drive.getMaxAngularSpeedRadPerSec()), true);
+                  omega * drive.getMaxAngularSpeedRadPerSec()),
+              true);
         },
         drive);
   }
