@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.util.io.motors.Motor;
 import frc.robot.util.io.motors.MotorIO;
-import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -21,9 +20,7 @@ public class Pivot extends Motor<PivotIO, PivotIOInputsAutoLogged> {
 
   public Pivot(String name, PivotIO io, BooleanSupplier brakeMode, double currentLimit) {
     super(name, io, new PivotIOInputsAutoLogged(), brakeMode, currentLimit);
-    if (io instanceof MotorIOTalonFX) {
-      ((MotorIOTalonFX) io).withPositionControl();
-    }
+    io.configure(true, false);
     Logger.recordOutput(name + "/SetpointDeg", 0.0);
   }
 

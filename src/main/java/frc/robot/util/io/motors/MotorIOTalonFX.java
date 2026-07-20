@@ -22,7 +22,7 @@ import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.sensors.EncoderIOCANcoder;
 import java.util.function.Consumer;
 
-public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemIO {
+public class MotorIOTalonFX implements AutoCloseable, RollerIO, PivotIO, LinearSystemIO {
   protected final TalonFX leader;
   protected final TalonFX[] followers;
 
@@ -95,23 +95,31 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemI
     }
   }
 
-  public MotorIOTalonFX withPositionControl() {
-    if (positionConfigured) return this;
+  @Override
+  public void configure(boolean positionControl, boolean velocityControl) {
+    if (positionControl) {
+      configurePositionControl();
+    }
+    if (velocityControl) {
+      configureVelocityControl();
+    }
+  }
+
+  private void configurePositionControl() {
+    if (positionConfigured) return;
     withControlRequest(new PositionVoltage(0));
     position.setUpdateFrequency(100.0);
     PhoenixUtil.registerSignals(leader.getNetwork(), position);
     resetPosition = new Notifier(() -> leader.setPosition(angleResetVal));
     positionConfigured = true;
-    return this;
   }
 
-  public MotorIOTalonFX withVelocityControl() {
-    if (velocityConfigured) return this;
+  private void configureVelocityControl() {
+    if (velocityConfigured) return;
     velocityRequest = new VelocityVoltage(0);
     velocity.setUpdateFrequency(100.0);
     PhoenixUtil.registerSignals(leader.getNetwork(), velocity);
     velocityConfigured = true;
-    return this;
   }
 
   public MotorIOTalonFX withControlRequest(PositionVoltage request) {
@@ -181,12 +189,12 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemI
 
   @Override
   public void setPosition(Angle angle) {
-    if (positionConfigured) positionRequest.accept(angle);
+    positionRequest.accept(angle);
   }
 
   @Override
   public void setVelocity(double rps) {
-    if (velocityConfigured) leader.setControl(velocityRequest.withVelocity(rps));
+    leader.setControl(velocityRequest.withVelocity(rps));
   }
 
   @Override
@@ -209,5 +217,13 @@ public class MotorIOTalonFX implements MotorIO, RollerIO, PivotIO, LinearSystemI
   @Override
   public int getNumFollowers() {
     return followers.length;
+  }
+
+  @Override
+  public void close() {
+    if (resetPosition != null) {
+      resetPosition.stop();
+      resetPosition.close();
+    }
   }
 }

@@ -35,6 +35,8 @@ public interface MotorIO {
       double minHeightMeters,
       double maxHeightMeters) {}
 
+  default void configure(boolean positionControl, boolean velocityControl) {}
+
   default void setVoltage(double volts) {}
 
   default void coast() {}

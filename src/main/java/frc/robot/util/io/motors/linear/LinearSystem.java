@@ -6,7 +6,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.util.io.motors.Motor;
 import frc.robot.util.io.motors.MotorIO;
-import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.subsystems.RobotStateHandler;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -41,10 +40,7 @@ public class LinearSystem extends Motor<LinearSystemIO, LinearSystemIOInputsAuto
       double currentLimit,
       Function<Distance, Angle> distanceToAngle) {
     super(name, io, new LinearSystemIOInputsAutoLogged(), brakeMode, currentLimit);
-    if (io instanceof MotorIOTalonFX) {
-      ((MotorIOTalonFX) io).withPositionControl();
-      ((MotorIOTalonFX) io).withVelocityControl();
-    }
+    io.configure(true, true);
     this.distanceToAngle = distanceToAngle;
     Logger.recordOutput(name + "/SetpointRad", 0.0);
   }

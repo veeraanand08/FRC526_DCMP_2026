@@ -9,7 +9,7 @@ import java.util.function.BooleanSupplier;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
-public class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInputs> {
+public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInputs> {
   protected final String name;
   protected final IOType io;
   protected final InputsType inputs;
@@ -78,10 +78,12 @@ public class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInp
       tempCritical = true;
       stop();
       tempFault.set(true);
+      RobotUtil.requestOperatorRumble(tempWarnRumble);
     } else {
       tempCritical = false;
       tempFault.set(false);
       tempWarning.set(highestTemp > 60.0);
+      RobotUtil.stopOperatorRumble(tempWarnRumble);
     }
   }
 
