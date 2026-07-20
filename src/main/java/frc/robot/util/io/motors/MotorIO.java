@@ -20,13 +20,22 @@ public interface MotorIO {
     VELOCITY_CONTROL,
   }
 
-  record MechanismConstraints(
+  record RotationalMechanismConstraints(
       double reduction,
       double moi,
       double radiusMeters,
       double minAngleRads,
       double maxAngleRads,
       double startingAngleRads) {}
+
+  record LinearMechanismConstraints(
+      double reduction,
+      double carriageMassKg,
+      double drumRadiusMeters,
+      double minHeightMeters,
+      double maxHeightMeters) {}
+
+  default void configure(boolean positionControl, boolean velocityControl) {}
 
   default void setVoltage(double volts) {}
 

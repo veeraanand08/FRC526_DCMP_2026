@@ -9,10 +9,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
-import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import lombok.Getter;
 
 public class Feeder extends SubsystemBase {
@@ -24,13 +24,14 @@ public class Feeder extends SubsystemBase {
   public Feeder() {
     RollerIO indexerIO =
         switch (Constants.currentMode) {
-          case REAL -> new RollerIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
               Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
               Constants.CANConstants.INDEXER,
               FeederConstants.INDEXER_CONFIG);
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(1, FeederConstants.INDEXER_MOI, 0.2, 0, 0, 0),
+              new MotorIO.RotationalMechanismConstraints(
+                  1, FeederConstants.INDEXER_MOI, 0.2, 0, 0, 0),
               FeederConstants.INDEXER_KP,
               FeederConstants.INDEXER_KD,
               0);
@@ -38,13 +39,14 @@ public class Feeder extends SubsystemBase {
         };
     RollerIO kickerIO =
         switch (Constants.currentMode) {
-          case REAL -> new RollerIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
               Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
               Constants.CANConstants.KICKER,
               FeederConstants.KICKER_CONFIG);
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(1, FeederConstants.KICKER_MOI, 0.2, 0, 0, 0),
+              new MotorIO.RotationalMechanismConstraints(
+                  1, FeederConstants.KICKER_MOI, 0.2, 0, 0, 0),
               FeederConstants.KICKER_KP,
               FeederConstants.KICKER_KD,
               0);

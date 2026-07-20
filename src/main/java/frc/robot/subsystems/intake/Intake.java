@@ -14,14 +14,13 @@ import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.led.LED;
 import frc.robot.util.RobotUtil;
 import frc.robot.util.io.motors.MotorIO;
+import frc.robot.util.io.motors.MotorIOTalonFX;
 import frc.robot.util.io.motors.pivot.Pivot;
 import frc.robot.util.io.motors.pivot.PivotIO;
 import frc.robot.util.io.motors.pivot.PivotIOSim;
-import frc.robot.util.io.motors.pivot.PivotIOTalonFX;
 import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
-import frc.robot.util.io.motors.roller.RollerIOTalonFX;
 import frc.robot.util.subsystems.ExtendedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
@@ -51,14 +50,14 @@ public class Intake extends ExtendedSubsystem {
   public Intake() {
     PivotIO pivotIO =
         switch (Constants.currentMode) {
-          case REAL -> new PivotIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
                   Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
                   Constants.CANConstants.INTAKE_PIVOT,
                   IntakeConstants.PIVOT_CONFIG)
-              .useControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
+              .withControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
           case SIM -> new PivotIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(
+              new MotorIO.RotationalMechanismConstraints(
                   IntakeConstants.PIVOT_GEAR_RATIO,
                   SingleJointedArmSim.estimateMOI(0.5, 2),
                   0.5,
@@ -72,13 +71,13 @@ public class Intake extends ExtendedSubsystem {
         };
     RollerIO rollerIO =
         switch (Constants.currentMode) {
-          case REAL -> new RollerIOTalonFX(
+          case REAL -> new MotorIOTalonFX(
               Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
               Constants.CANConstants.INTAKE_ROLLER,
               IntakeConstants.ROLLER_CONFIG);
           case SIM -> new RollerIOSim(
               DCMotor.getKrakenX60(1),
-              new MotorIO.MechanismConstraints(
+              new MotorIO.RotationalMechanismConstraints(
                   IntakeConstants.ROLLER_GEAR_RATIO, IntakeConstants.ROLLER_MOI, 0.2, 0, 0, 0),
               IntakeConstants.ROLLER_KP * 20,
               IntakeConstants.ROLLER_KD,
@@ -233,15 +232,16 @@ public class Intake extends ExtendedSubsystem {
   }
 
   public Command markIntakeLowered() {
+    RobotUtil.RumbleRequest rumble = new RobotUtil.RumbleRequest(0.75, -1);
     return startEnd(
         () -> {
-          RobotUtil.setDriverRumble(0.75, 0.75);
-          RobotUtil.setOperatorRumble(0.75, 0.75);
+          RobotUtil.requestDriverRumble(rumble);
+          RobotUtil.requestOperatorRumble(rumble);
           pivot.resetPosition(Degrees.of(IntakeConstants.MAX_ANGLE));
         },
         () -> {
-          RobotUtil.setDriverRumble(0, 0);
-          RobotUtil.setOperatorRumble(0, 0);
+          RobotUtil.stopDriverRumble(rumble);
+          RobotUtil.stopOperatorRumble(rumble);
         });
   }
 

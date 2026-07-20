@@ -13,7 +13,7 @@ public class RollerIOSim extends MotorIOSim implements RollerIO {
 
   public RollerIOSim(
       DCMotor motorModel,
-      MechanismConstraints constraints,
+      RotationalMechanismConstraints constraints,
       double kP,
       double kD,
       int numFollowers) {

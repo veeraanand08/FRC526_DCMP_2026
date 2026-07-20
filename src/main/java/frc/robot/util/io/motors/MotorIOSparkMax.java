@@ -1,6 +1,6 @@
 package frc.robot.util.io.motors;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.util.SparkUtil.tryUntilOk;
 
 import com.revrobotics.AbsoluteEncoder;
@@ -14,12 +14,14 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.measure.Angle;
+import frc.robot.util.io.motors.linear.LinearSystemIO;
 import frc.robot.util.io.motors.pivot.PivotIO;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.sensors.EncoderIO;
 
-public class MotorIOSparkMax implements PivotIO, RollerIO {
+public class MotorIOSparkMax implements RollerIO, PivotIO, LinearSystemIO {
   private static final SparkBaseConfig coastConfig =
       new SparkMaxConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
   private static final SparkBaseConfig brakeConfig =
@@ -29,7 +31,8 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
   private final SparkMax[] followers;
 
   // the unit used for the motor's conversion factor
-  private final AngleUnit angleUnit;
+  private final AngleUnit positionUnit;
+  private final AngularVelocityUnit velocityUnit;
 
   private final SparkClosedLoopController controller;
   private SparkBase.ControlType positionControlType = SparkBase.ControlType.kPosition;
@@ -43,7 +46,8 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
       int[] followerIds,
       SparkMaxConfig config,
       boolean[] followersOpposed,
-      AngleUnit angleUnit) {
+      AngleUnit positionUnit,
+      AngularVelocityUnit velocityUnit) {
     leader = new SparkMax(id, SparkLowLevel.MotorType.kBrushless);
     followers = new SparkMax[followerIds.length];
     for (int i = 0; i < followers.length; i++) {
@@ -61,12 +65,15 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
           config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    this.angleUnit = angleUnit;
+    this.positionUnit = positionUnit;
+    this.velocityUnit = velocityUnit;
 
     controller = leader.getClosedLoopController();
 
     leaderEncoder = leader.getEncoder();
     leaderEncoder.setPosition(0);
+
+    this.brakeMode = leader.configAccessor.getIdleMode() == SparkBaseConfig.IdleMode.kBrake;
   }
 
   public MotorIOSparkMax withPositionControlType(SparkBase.ControlType controlType) {
@@ -94,14 +101,22 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
   }
 
   @Override
-  public void updateInputs(PivotIOInputs inputs) {
-    inputs.positionDeg = Degrees.convertFrom(leaderEncoder.getPosition(), angleUnit);
+  public void updateInputs(RollerIOInputs inputs) {
+    inputs.velocityRPS = RotationsPerSecond.convertFrom(leaderEncoder.getVelocity(), velocityUnit);
     updateMotorInputs(inputs);
   }
 
   @Override
-  public void updateInputs(RollerIOInputs inputs) {
-    inputs.velocityRPS = leaderEncoder.getVelocity();
+  public void updateInputs(PivotIOInputs inputs) {
+    inputs.positionDeg = Degrees.convertFrom(leaderEncoder.getPosition(), positionUnit);
+    updateMotorInputs(inputs);
+  }
+
+  @Override
+  public void updateInputs(LinearSystemIOInputs inputs) {
+    inputs.positionRad = Radians.convertFrom(leaderEncoder.getPosition(), positionUnit);
+    inputs.velocityRadPerSec =
+        RadiansPerSecond.convertFrom(leaderEncoder.getVelocity(), velocityUnit);
     updateMotorInputs(inputs);
   }
 
@@ -112,7 +127,7 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
 
   @Override
   public void setPosition(Angle angle) {
-    controller.setSetpoint(angle.in(angleUnit), positionControlType);
+    controller.setSetpoint(angle.in(positionUnit), positionControlType);
   }
 
   @Override
@@ -150,7 +165,7 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
 
   @Override
   public void resetPosition(Angle angle) {
-    leaderEncoder.setPosition(angle.in(Degrees));
+    leaderEncoder.setPosition(angle.in(positionUnit));
   }
 
   @Override
@@ -158,11 +173,11 @@ public class MotorIOSparkMax implements PivotIO, RollerIO {
     return followers.length;
   }
 
-  public EncoderIO getAbsoluteEncoder() {
+  public EncoderIO getAbsoluteEncoder(AngleUnit encoderUnit) {
     AbsoluteEncoder encoder = leader.getAbsoluteEncoder();
     return (inputs) -> {
       inputs.connected = !leader.hasActiveFault();
-      inputs.position = Degrees.of(encoder.getPosition());
+      inputs.position = encoderUnit.of(encoder.getPosition());
     };
   }
 }

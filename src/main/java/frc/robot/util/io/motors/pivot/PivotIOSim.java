@@ -1,5 +1,6 @@
 package frc.robot.util.io.motors.pivot;
 
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.MathUtil;
@@ -14,7 +15,7 @@ public class PivotIOSim extends MotorIOSim implements PivotIO {
 
   public PivotIOSim(
       DCMotor motorModel,
-      MechanismConstraints constraints,
+      RotationalMechanismConstraints constraints,
       double kP,
       double kD,
       int numFollowers) {
@@ -49,5 +50,10 @@ public class PivotIOSim extends MotorIOSim implements PivotIO {
   public void setPosition(Angle angle) {
     pid.setSetpoint(angle.in(Rotations));
     isClosedLoop = true;
+  }
+
+  @Override
+  public void resetPosition(Angle angle) {
+    sim.setState(angle.in(Radians), 0.0);
   }
 }
