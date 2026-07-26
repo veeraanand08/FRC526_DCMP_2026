@@ -59,12 +59,13 @@ public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.M
                 }))
         .onFalse(
             Commands.runOnce(
-                () -> {
-                  stalled = false;
-                  torqueLimitWarning.set(false);
-                  RobotUtil.stopDriverRumble(stallRumble);
-                  RobotUtil.stopOperatorRumble(stallRumble);
-                }));
+                    () -> {
+                      stalled = false;
+                      torqueLimitWarning.set(false);
+                      RobotUtil.stopDriverRumble(stallRumble);
+                      RobotUtil.stopOperatorRumble(stallRumble);
+                    })
+                .ignoringDisable(true));
 
     Logger.recordOutput(name + "/MotorMode", mode);
   }
