@@ -85,7 +85,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   public ModuleIOTalonFX(
       SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
-          constants) {
+          constants,
+      boolean coast) {
     this.constants = constants;
     driveTalon = new TalonFX(constants.DriveMotorId, TunerConstants.kCANBus);
     turnTalon = new TalonFX(constants.SteerMotorId, TunerConstants.kCANBus);
@@ -93,7 +94,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Configure drive motor
     var driveConfig = constants.DriveMotorInitialConfigs;
-    driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    if (coast) driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    else driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     driveConfig.Slot0 = constants.DriveMotorGains;
     driveConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
     driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = constants.SlipCurrent;

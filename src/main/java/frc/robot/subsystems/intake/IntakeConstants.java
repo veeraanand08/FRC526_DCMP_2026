@@ -26,7 +26,7 @@ public final class IntakeConstants {
   public static final double PIVOT_KA = 0;
   public static final double PIVOT_KG = 0.0;
   public static final double PIVOT_CRUISE_VELOCITY = 10;
-  public static final double PIVOT_CRUISE_ACCELERATION = 15;
+  public static final double PIVOT_CRUISE_ACCELERATION = 12;
 
   public static final double ROLLER_MOI = 0.002;
   public static final double ROLLER_GEAR_RATIO = 1.0;
@@ -70,8 +70,8 @@ public final class IntakeConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(60)
-                  .withSupplyCurrentLimit(40)
+                  .withStatorCurrentLimit(80)
+                  .withSupplyCurrentLimit(50)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
@@ -92,7 +92,7 @@ public final class IntakeConstants {
 
   static {
     SETPOINTS.put(RAISING, Degrees.of(0.0));
-    SETPOINTS.put(LOWERING, Degrees.of(130.0));
+    SETPOINTS.put(LOWERING, Degrees.of(135.0));
     SETPOINTS.put(AGITATING_UPPER, Degrees.of(10.0));
     SETPOINTS.put(AGITATING_LOWER, Degrees.of(80.0));
   }
@@ -102,7 +102,7 @@ public final class IntakeConstants {
   public static final double ROLLER_RPS_SLOW = 4000 / 60.0;
 
   // physical max
-  public static final double MAX_ANGLE = 146;
+  public static final double MAX_ANGLE = 137;
 
   public static final double AGITATION_PERIOD = 4; // Period is in seconds
 

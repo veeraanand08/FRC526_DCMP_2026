@@ -85,10 +85,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
-                new ModuleIOTalonFXReal(TunerConstants.FrontRight),
-                new ModuleIOTalonFXReal(TunerConstants.BackLeft),
-                new ModuleIOTalonFXReal(TunerConstants.BackRight),
+                new ModuleIOTalonFXReal(TunerConstants.FrontLeft, false),
+                new ModuleIOTalonFXReal(TunerConstants.FrontRight, false),
+                new ModuleIOTalonFXReal(TunerConstants.BackLeft, false),
+                new ModuleIOTalonFXReal(TunerConstants.BackRight, false),
                 (pose) -> {});
         vision =
             new Vision(
@@ -178,6 +178,7 @@ public class RobotContainer {
     controlProfiles.addOption("611 (Josie & Harun)", ControlScheme.SAXONS);
     controlProfiles.addOption("Guitar Hero Operator", ControlScheme.GUITAR_HERO_OP);
     controlProfiles.addOption("Guitar Hero Full Control", ControlScheme.GUITAR_HERO_FULL);
+    controlProfiles.addOption("Testing", ControlScheme.TEST);
     controlProfiles.onChange(this::setControlScheme);
 
     // Set up commands for PathPlanner
@@ -293,7 +294,7 @@ public class RobotContainer {
     } else {
       /* driver controls */
       driverController.a().whileTrue(autoAlign);
-      driverController.leftBumper().whileTrue(lockWheels);
+      driverController.x().whileTrue(lockWheels);
       driverController.povLeft().onTrue(zeroGyro);
 
       /* operator controls */
@@ -302,6 +303,19 @@ public class RobotContainer {
       operatorController
           .povRight()
           .debounce(2, Debouncer.DebounceType.kRising)
+          .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
+      // test mode (single controller)
+      BooleanSupplier testMode = () -> controlScheme == ControlScheme.TEST;
+      driverController.leftBumper().and(testMode).whileTrue(holdIntake);
+      driverController.rightBumper().and(testMode).whileTrue(shoot);
+      driverController.rightTrigger(0.7).and(testMode).whileTrue(shootDefault);
+      driverController.y().and(testMode).toggleOnTrue(agitate);
+      driverController.b().and(testMode).whileTrue(dump);
+      driverController.povUp().and(testMode).onTrue(resetIntake);
+      driverController
+          .povRight()
+          .and(testMode)
+          .debounce(1, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
       // 526 profile
       BooleanSupplier saxonSparksProfile = () -> controlScheme == ControlScheme.SAXON_SPARKS;
@@ -322,6 +336,7 @@ public class RobotContainer {
     switch (newScheme) {
       case SAXONS:
       case SAXON_SPARKS:
+      case TEST:
         if (controlScheme == ControlScheme.GUITAR_HERO_FULL) {
           useDefaultDrive();
         }

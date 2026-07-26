@@ -235,14 +235,10 @@ public class Intake extends ExtendedSubsystem {
     RobotUtil.RumbleRequest rumble = new RobotUtil.RumbleRequest(0.75, -1);
     return startEnd(
         () -> {
-          RobotUtil.requestDriverRumble(rumble);
           RobotUtil.requestOperatorRumble(rumble);
           pivot.resetPosition(Degrees.of(IntakeConstants.MAX_ANGLE));
         },
-        () -> {
-          RobotUtil.stopDriverRumble(rumble);
-          RobotUtil.stopOperatorRumble(rumble);
-        });
+        () -> RobotUtil.stopOperatorRumble(rumble));
   }
 
   public Command markIntakeRaised() {

@@ -33,7 +33,7 @@ public class ModuleIOTalonFXSim extends ModuleIOTalonFX {
       SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
           constants,
       SwerveModuleSimulation simulation) {
-    super(PhoenixUtil.regulateModuleConstantForSimulation(constants));
+    super(PhoenixUtil.regulateModuleConstantForSimulation(constants), false);
 
     this.simulation = simulation;
     this.simulation.useDriveMotorController(new PhoenixUtil.TalonFXMotorControllerSim(driveTalon));

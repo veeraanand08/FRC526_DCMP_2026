@@ -38,6 +38,7 @@ public final class Constants {
   public enum ControlScheme {
     SAXONS(false),
     SAXON_SPARKS(false),
+    TEST(false),
     GUITAR_HERO_OP(true),
     GUITAR_HERO_FULL(true);
 
