@@ -93,9 +93,16 @@ public final class IntakeConstants {
   static {
     SETPOINTS.put(RAISING, Degrees.of(0.0));
     SETPOINTS.put(LOWERING, Degrees.of(135.0));
-    SETPOINTS.put(AGITATING_UPPER, Degrees.of(10.0));
-    SETPOINTS.put(AGITATING_LOWER, Degrees.of(80.0));
+    SETPOINTS.put(AGITATING, Degrees.of(45.0));
   }
+
+  public static final double PIVOT_AGITATION_UPPER_ANGLE = 10; // where the upper bound starts
+  public static final double PIVOT_AGITATION_UPPER_ANGLE_MIN = 25; // where the upper bound ends
+  public static final double PIVOT_AGITATION_LOWER_ANGLE = 100;
+  public static final double PIVOT_UPPER_AGITATION_DECAY_TIME =
+      12.0; // time it takes to decay in seconds
+
+  public static final double AGITATION_PERIOD = 2; // Period is in seconds
 
   public static final double ROLLER_RPS = 5000 / 60.0;
   public static final double ROLLER_RPS_REVERSED = -4500 / 60.0;
@@ -103,8 +110,6 @@ public final class IntakeConstants {
 
   // physical max
   public static final double MAX_ANGLE = 137;
-
-  public static final double AGITATION_PERIOD = 4; // Period is in seconds
 
   // sim
   public static final int INTAKE_CAPACITY = 100;

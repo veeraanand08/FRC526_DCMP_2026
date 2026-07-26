@@ -6,6 +6,7 @@ import static frc.robot.subsystems.intake.IntakeConstants.SETPOINTS;
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -27,18 +28,7 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends ExtendedSubsystem {
   public enum PivotState {
     RAISING,
-    AGITATING_UPPER {
-      @Override
-      public String toString() {
-        return "AGITATING";
-      }
-    },
-    AGITATING_LOWER {
-      @Override
-      public String toString() {
-        return "AGITATING";
-      }
-    },
+    AGITATING,
     LOWERING
   }
 
@@ -46,6 +36,8 @@ public class Intake extends ExtendedSubsystem {
 
   private final Roller roller;
   private final Pivot pivot;
+
+  private final Timer agitationTimer = new Timer();
 
   public Intake() {
     PivotIO pivotIO =
@@ -113,7 +105,9 @@ public class Intake extends ExtendedSubsystem {
   }
 
   public void setPivotState(PivotState newState) {
-    pivot.runClosedLoop(SETPOINTS.get(newState));
+    if (newState != PivotState.AGITATING) {
+      pivot.runClosedLoop(SETPOINTS.get(newState));
+    }
     pivotState = newState;
     Logger.recordOutput("Intake/PivotState", pivotState.toString());
   }
@@ -190,22 +184,26 @@ public class Intake extends ExtendedSubsystem {
             feeder.agitate();
           }
           slowRoller();
-          setPivotState(PivotState.AGITATING_UPPER);
+          setPivotState(PivotState.AGITATING);
+          agitationTimer.restart();
         },
         () -> {
-          if (pivotState == PivotState.AGITATING_UPPER
-              && Math.abs(
-                      pivot.getPositionDeg()
-                          - SETPOINTS.get(PivotState.AGITATING_UPPER).in(Degrees))
-                  < 3.5) {
-            setPivotState(PivotState.AGITATING_LOWER);
-          } else if (pivotState == PivotState.AGITATING_LOWER
-              && Math.abs(
-                      pivot.getPositionDeg()
-                          - SETPOINTS.get(PivotState.AGITATING_LOWER).in(Degrees))
-                  < 3.5) {
-            setPivotState(PivotState.AGITATING_UPPER);
-          }
+          double time = agitationTimer.get();
+
+          double pos = Math.sin(time * 2 * Math.PI / IntakeConstants.AGITATION_PERIOD) * 0.5 + 0.5;
+
+          double upperAngle =
+              IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
+                  - (IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
+                          - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN)
+                      * (time / IntakeConstants.PIVOT_UPPER_AGITATION_DECAY_TIME);
+
+          // Clamp so it never goes past the lower angle
+          upperAngle = Math.max(upperAngle, IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN);
+
+          double targetAngle =
+              upperAngle + (IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE - upperAngle) * pos;
+          pivot.runClosedLoop(Degrees.of(targetAngle));
         },
         interrupted -> {
           if (!feeder.isEnabledForShooting()) {
@@ -213,6 +211,7 @@ public class Intake extends ExtendedSubsystem {
           }
           setPivotState(PivotState.LOWERING);
           stopRoller();
+          agitationTimer.stop();
         },
         () -> false,
         this);
