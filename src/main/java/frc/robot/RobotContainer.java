@@ -94,11 +94,11 @@ public class RobotContainer {
             new Vision(
                 drive,
                 new VisionIOPhotonVision(
-                    VisionConstants.CAMERA_0_NAME, VisionConstants.CAMERA_0_OFFSET));
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_1_NAME, VisionConstants.CAMERA_1_OFFSET),
-        //                new VisionIOPhotonVision(
-        //                    VisionConstants.CAMERA_2_NAME, VisionConstants.CAMERA_2_OFFSET));
+                    VisionConstants.CAMERA_0_NAME, VisionConstants.CAMERA_0_OFFSET),
+                new VisionIOPhotonVision(
+                    VisionConstants.CAMERA_1_NAME, VisionConstants.CAMERA_1_OFFSET),
+                new VisionIOPhotonVision(
+                    VisionConstants.CAMERA_2_NAME, VisionConstants.CAMERA_2_OFFSET));
         shooter = new Shooter(drive::getPose, drive::getChassisSpeeds);
         feeder = new Feeder();
         intake = new Intake();

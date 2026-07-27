@@ -80,7 +80,7 @@ public class Drive extends ExtendedSubsystem implements Vision.VisionConsumer {
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
   private static final double SLOW_SPEED_LIMIT =
       0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-  private static final double ANGULAR_VELOCITY_COEFFICIENT = 0.1;
+  private static final double ANGULAR_VELOCITY_COEFFICIENT = 0.15;
   static final double ANTI_JITTER_THRESHOLD = Constants.currentMode == Mode.REAL ? 4.0 * 0.01 : -1;
 
   // PathPlanner config constants

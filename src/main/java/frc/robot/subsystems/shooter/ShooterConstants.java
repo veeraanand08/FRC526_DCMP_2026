@@ -78,7 +78,7 @@ public final class ShooterConstants {
 
   public static final ShotCalculator SHOT_CALC = new ShotCalculator(SHOT_CALC_CONFIG);
 
-  public static final double SIM_BPS = 15.0;
+  public static final double SIM_BPS = 12.5;
 
   public static void generateLookupTable() {
     System.out.println("\nGenerating lookup table...");

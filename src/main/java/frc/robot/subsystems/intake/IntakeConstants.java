@@ -112,5 +112,5 @@ public final class IntakeConstants {
   public static final double MAX_ANGLE = 137;
 
   // sim
-  public static final int INTAKE_CAPACITY = 100;
+  public static final int INTAKE_CAPACITY = 50;
 }
