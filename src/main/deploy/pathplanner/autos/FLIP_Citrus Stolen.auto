@@ -15,7 +15,7 @@
           "data": {
             "commands": [
               {
-                "type": "parallel",
+                "type": "sequential",
                 "data": {
                   "commands": [
                     {
@@ -25,19 +25,32 @@
                       }
                     },
                     {
-                      "type": "sequential",
+                      "type": "parallel",
                       "data": {
                         "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 0.5
-                            }
-                          },
                           {
                             "type": "named",
                             "data": {
                               "name": "Shoot"
+                            }
+                          },
+                          {
+                            "type": "sequential",
+                            "data": {
+                              "commands": [
+                                {
+                                  "type": "wait",
+                                  "data": {
+                                    "waitTime": 1.0
+                                  }
+                                },
+                                {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Agitate"
+                                  }
+                                }
+                              ]
                             }
                           }
                         ]
@@ -49,7 +62,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
+                  "waitTime": 5.0
                 }
               }
             ]
@@ -66,7 +79,7 @@
           "data": {
             "commands": [
               {
-                "type": "parallel",
+                "type": "sequential",
                 "data": {
                   "commands": [
                     {
@@ -76,19 +89,32 @@
                       }
                     },
                     {
-                      "type": "sequential",
+                      "type": "parallel",
                       "data": {
                         "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 0.5
-                            }
-                          },
                           {
                             "type": "named",
                             "data": {
                               "name": "Shoot"
+                            }
+                          },
+                          {
+                            "type": "sequential",
+                            "data": {
+                              "commands": [
+                                {
+                                  "type": "wait",
+                                  "data": {
+                                    "waitTime": 1.0
+                                  }
+                                },
+                                {
+                                  "type": "named",
+                                  "data": {
+                                    "name": "Agitate"
+                                  }
+                                }
+                              ]
                             }
                           }
                         ]
@@ -100,10 +126,16 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
+                  "waitTime": 5.0
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Citrus Cycle 2"
           }
         }
       ]

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ControlScheme;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveCommands;
@@ -392,6 +393,7 @@ public class RobotContainer {
     new EventTrigger("Intake").whileTrue(intake.intake());
     NamedCommands.registerCommand("Auto Align", autoAlign);
     NamedCommands.registerCommand("Shoot", shooter.shoot(feeder));
+    NamedCommands.registerCommand("Agitate", intake.agitate(feeder));
   }
 
   private void useDefaultDrive() {
