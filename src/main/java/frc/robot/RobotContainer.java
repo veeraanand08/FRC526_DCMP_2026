@@ -38,6 +38,7 @@ import frc.robot.util.RobotUtil;
 import frc.robot.util.io.GuitarHeroController;
 import frc.robot.util.sotm.ShootingTasks;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
@@ -233,26 +234,7 @@ public class RobotContainer {
     // Reset gyro to 0°
     Command zeroGyro = Commands.runOnce(() -> drive.zeroGyro(true), drive).ignoringDisable(true);
     Command autoAlign =
-        DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> {
-                  if (!shooter.isShooting()) shooter.computeShot();
-                  return shooter.getShot().driveAngle();
-                },
-                () -> shooter.getShot().driveAngularVelocityRadPerSec())
-            .beforeStarting(
-                () -> {
-                  ShootingTasks.isAutoAlignRunning = true;
-                  drive.setSpeedLimiter(true);
-                })
-            .finallyDo(
-                () -> {
-                  ShootingTasks.clearTarget();
-                  ShootingTasks.isAutoAlignRunning = false;
-                  drive.setSpeedLimiter(false);
-                });
+        getAutoAlignCommand(() -> -driverController.getLeftY(), () -> -driverController.getLeftX());
     Command holdIntake = intake.intake();
     Command agitate = intake.agitate(feeder);
     Command dump = Commands.parallel(intake.reverse(), feeder.reverseCommand());
@@ -363,26 +345,9 @@ public class RobotContainer {
 
       // configure triggers only once
       Command autoAlign =
-          DriveCommands.joystickDriveAtAngle(
-                  drive,
-                  () -> -guitarHeroController.getJoystickY(),
-                  () -> -guitarHeroController.getJoystickX(),
-                  () -> {
-                    if (!shooter.isShooting()) shooter.computeShot();
-                    return shooter.getShot().driveAngle();
-                  },
-                  () -> shooter.getShot().driveAngularVelocityRadPerSec())
-              .beforeStarting(
-                  () -> {
-                    ShootingTasks.isAutoAlignRunning = true;
-                    drive.setSpeedLimiter(true);
-                  })
-              .finallyDo(
-                  () -> {
-                    ShootingTasks.clearTarget();
-                    ShootingTasks.isAutoAlignRunning = false;
-                    drive.setSpeedLimiter(false);
-                  });
+          getAutoAlignCommand(
+              () -> -guitarHeroController.getJoystickY(),
+              () -> -guitarHeroController.getJoystickX());
       Command lockWheels = Commands.startEnd(drive::stopWithX, () -> {}, drive);
       Command shoot = shooter.shoot(feeder);
       if (currentMode == Constants.Mode.SIM) {
@@ -452,6 +417,29 @@ public class RobotContainer {
     drive.setDefaultCommand(guitarHeroDriveCommand);
     Command currentDriveCommand = drive.getCurrentCommand();
     if (currentDriveCommand != null) currentDriveCommand.cancel();
+  }
+
+  private Command getAutoAlignCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    return DriveCommands.joystickDriveAtAngle(
+            drive,
+            xSupplier,
+            ySupplier,
+            () -> {
+              if (!shooter.isShooting()) shooter.computeShot();
+              return shooter.getShot().driveAngle();
+            },
+            () -> shooter.getShot().driveAngularVelocityRadPerSec())
+        .beforeStarting(
+            () -> {
+              ShootingTasks.isAutoAlignRunning = true;
+              drive.setSpeedLimiter(true);
+            })
+        .finallyDo(
+            () -> {
+              ShootingTasks.clearTarget();
+              ShootingTasks.isAutoAlignRunning = false;
+              drive.setSpeedLimiter(false);
+            });
   }
 
   /**

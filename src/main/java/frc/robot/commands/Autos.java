@@ -3,6 +3,7 @@ package frc.robot.commands;
 import static frc.robot.Constants.FieldConstants.*;
 import static frc.robot.util.RobotUtil.isRedAlliance;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,7 +15,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.util.sotm.ShootingTasks;
 import org.littletonrobotics.junction.Logger;
 
 public class Autos {
@@ -83,19 +83,7 @@ public class Autos {
       Intake intake,
       Pose2d preIntake,
       Pose2d scoring) {
-    Command autoAlign =
-        DriveCommands.aimAtAngle(
-                drive,
-                () -> {
-                  shooter.computeShot();
-                  return shooter.getShot().driveAngle();
-                })
-            .beforeStarting(() -> ShootingTasks.isAutoAlignRunning = true)
-            .finallyDo(
-                () -> {
-                  ShootingTasks.clearTarget();
-                  ShootingTasks.isAutoAlignRunning = false;
-                });
+    Command autoAlign = NamedCommands.getCommand("Auto Align");
 
     return Commands.repeatingSequence(
         intake.deploy(),
