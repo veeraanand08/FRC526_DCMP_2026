@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -83,7 +84,7 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     roller.periodic();
 
-    if (!ShootingTasks.isAutoAlignRunning) {
+    if (!isShooting && !ShootingTasks.isAutoAlignRunning) {
       Logger.recordOutput("Shooter/DistanceToTarget", 0.0);
     }
     Logger.recordOutput(
@@ -124,7 +125,6 @@ public class Shooter extends SubsystemBase {
     roller.stop();
     setpointRPS = 0.0;
     ShootingTasks.clearTarget();
-    isShooting = false;
     LED.getInstance().stopShoot();
   }
 
@@ -138,13 +138,8 @@ public class Shooter extends SubsystemBase {
 
   public Command shoot(Feeder feeder) {
     RobotUtil.RumbleRequest rumble = new RobotUtil.RumbleRequest(0.0, 0.8, 1);
-    return runEnd(
-            () -> {
-              isShooting = true;
-              computeShot();
-              runVelocity(shot.rpm() / 60.0);
-            },
-            this::stop)
+    return spinUp()
+        .beforeStarting(() -> isShooting = true)
         .alongWith(Commands.waitUntil(this::hasSpunUp).andThen(feeder.feed()))
         .alongWith(
             Commands.runEnd(
@@ -153,11 +148,39 @@ public class Shooter extends SubsystemBase {
                     RobotUtil.requestOperatorRumble(rumble);
                   }
                 },
-                () -> RobotUtil.stopOperatorRumble(rumble)));
+                () -> RobotUtil.stopOperatorRumble(rumble)))
+        .finallyDo(
+            () -> {
+              stop();
+              isShooting = false;
+            })
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
   public Command shootDefault(Feeder feeder) {
-    return startEnd(() -> runVelocity(ShooterConstants.DEFAULT_RPM.get() / 60.0), this::stop)
-        .alongWith(Commands.waitUntil(this::hasSpunUp).andThen(feeder.feed()));
+    return startEnd(
+            () -> {
+              isShooting = true;
+              runVelocity(ShooterConstants.DEFAULT_RPM.get() / 60.0);
+            },
+            () -> {
+              stop();
+              isShooting = false;
+            })
+        .alongWith(Commands.waitUntil(this::hasSpunUp).andThen(feeder.feed()))
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  public Command spinUp() {
+    return runEnd(
+        () -> {
+          computeShot();
+          runVelocity(shot.rpm() / 60.0);
+        },
+        () -> {
+          if (!isShooting) {
+            stop();
+          }
+        });
   }
 }

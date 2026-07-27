@@ -245,6 +245,9 @@ public class RobotContainer {
     }
     Command shootDefault = shooter.shootDefault(feeder);
 
+    new Trigger(() -> ShootingTasks.isAutoAlignRunning && !shooter.isShooting())
+        .whileTrue(shooter.spinUp());
+
     // Default command, normal field-relative drive
     useDefaultDrive();
 
