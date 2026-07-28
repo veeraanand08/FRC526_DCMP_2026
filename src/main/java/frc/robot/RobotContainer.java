@@ -209,10 +209,10 @@ public class RobotContainer {
 
     // Set up custom autos (non-PathPlanner)
     autoChooser.addOption("Full System Check", Autos.systemCheck(drive, shooter, feeder, intake));
-    autoChooser.addOption(
-        "Dynamic Left Cycle", Autos.leftCycle(drive, vision, shooter, feeder, intake));
-    autoChooser.addOption(
-        "Dynamic Right Cycle", Autos.rightCycle(drive, vision, shooter, feeder, intake));
+    //    autoChooser.addOption(
+    //        "Dynamic Left Cycle", Autos.leftCycle(drive, vision, shooter, feeder, intake));
+    //    autoChooser.addOption(
+    //        "Dynamic Right Cycle", Autos.rightCycle(drive, vision, shooter, feeder, intake));
 
     DriverStation.silenceJoystickConnectionWarning(true);
   }

@@ -4,7 +4,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.util.RobotUtil;
 import java.util.function.BooleanSupplier;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -12,8 +11,8 @@ import org.littletonrobotics.junction.Logger;
 public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.MotorIOInputs> {
   protected final String name;
   protected final IOType io;
-  protected final InputsType inputs;
-  protected MotorIO.MotorIOMode mode;
+  public final InputsType inputs;
+  @Getter protected MotorIO.MotorIOMode mode;
 
   private final BooleanSupplier brakeDurNeutral;
 
@@ -22,8 +21,6 @@ public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.M
   private final Alert tempFault;
   @Getter protected boolean stalled;
   @Getter protected boolean tempCritical;
-
-  private final RobotUtil.RumbleRequest tempWarnRumble = new RobotUtil.RumbleRequest(0.85, 20);
 
   protected Motor(
       String name, IOType io, InputsType inputs, BooleanSupplier brakeMode, double currentLimit) {
@@ -45,7 +42,6 @@ public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.M
     tempFault =
         new Alert(name, "Motor disabled due to temperature above 75°C", Alert.AlertType.kError);
 
-    final RobotUtil.RumbleRequest stallRumble = new RobotUtil.RumbleRequest(0.85, 10);
     new Trigger(() -> inputs.statorCurrentAmps >= currentLimit)
         .debounce(0.3, Debouncer.DebounceType.kBoth)
         .onTrue(
@@ -54,16 +50,12 @@ public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.M
                   stalled = true;
                   stop();
                   torqueLimitWarning.set(true);
-                  RobotUtil.requestDriverRumble(stallRumble);
-                  RobotUtil.requestOperatorRumble(stallRumble);
                 }))
         .onFalse(
             Commands.runOnce(
                     () -> {
                       stalled = false;
                       torqueLimitWarning.set(false);
-                      RobotUtil.stopDriverRumble(stallRumble);
-                      RobotUtil.stopOperatorRumble(stallRumble);
                     })
                 .ignoringDisable(true));
 
@@ -79,12 +71,10 @@ public abstract class Motor<IOType extends MotorIO, InputsType extends MotorIO.M
       tempCritical = true;
       stop();
       tempFault.set(true);
-      RobotUtil.requestOperatorRumble(tempWarnRumble);
     } else {
       tempCritical = false;
       tempFault.set(false);
       tempWarning.set(highestTemp > 60.0);
-      RobotUtil.stopOperatorRumble(tempWarnRumble);
     }
   }
 

@@ -91,7 +91,7 @@ public class Autos {
         drive
             .driveToPose(vision::getObjectPose) // vision method not impl yet
             .withTimeout(INTAKE_TIME),
-        intake.runOnce(intake::stopRoller),
+        intake.runOnce(intake::stop),
         drive.driveToPose(scoring),
         autoAlign,
         shooter

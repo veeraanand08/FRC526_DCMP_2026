@@ -1,10 +1,10 @@
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.intake.IntakeConstants.SETPOINTS;
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
@@ -37,6 +37,7 @@ public class Intake extends ExtendedSubsystem {
   private final Roller roller;
   private final Pivot pivot;
 
+  private final Debouncer stallDebounce = new Debouncer(0.5, Debouncer.DebounceType.kRising);
   private final Timer agitationTimer = new Timer();
 
   public Intake() {
@@ -54,7 +55,7 @@ public class Intake extends ExtendedSubsystem {
                   SingleJointedArmSim.estimateMOI(0.5, 2),
                   0.5,
                   0,
-                  IntakeConstants.MAX_ANGLE,
+                  IntakeConstants.MAX_ANGLE.in(Radians),
                   0),
               IntakeConstants.PIVOT_KP,
               IntakeConstants.PIVOT_KD,
@@ -102,6 +103,15 @@ public class Intake extends ExtendedSubsystem {
   public void periodic() {
     pivot.periodic();
     roller.periodic();
+
+    //    if (stallDebounce.calculate(
+    //        pivotState == PivotState.LOWERING
+    //            && pivot.inputs.appliedVoltage > 2.0
+    //            && pivot.inputs.velocityDegPerSec < 1
+    //            && pivot.inputs.statorCurrentAmps > 25
+    //            && pivot.getPositionDeg() > 100)) {
+    //      pivot.resetPosition(IntakeConstants.MAX_ANGLE);
+    //    }
   }
 
   public void setPivotState(PivotState newState) {
@@ -115,10 +125,21 @@ public class Intake extends ExtendedSubsystem {
   public void start() {
     if (pivotState != PivotState.LOWERING) {
       setPivotState(PivotState.LOWERING);
+    } else if (pivot.getPositionDeg() > 100.0) {
+      pivot.runOpenLoop(0.2);
     }
     roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
     LED.getInstance().intake();
     Logger.recordOutput("Intake/Running", true);
+  }
+
+  public void stop() {
+    roller.stop();
+    if (pivot.getMode() == MotorIO.MotorIOMode.VOLTAGE_CONTROL) {
+      pivot.stop();
+    }
+    LED.getInstance().stopIntake();
+    Logger.recordOutput("Intake/Running", false);
   }
 
   public void slowRoller() {
@@ -128,12 +149,6 @@ public class Intake extends ExtendedSubsystem {
 
   public void reverseRoller() {
     roller.runClosedLoop(IntakeConstants.ROLLER_RPS_REVERSED);
-    Logger.recordOutput("Intake/Running", false);
-  }
-
-  public void stopRoller() {
-    roller.stop();
-    LED.getInstance().stopIntake();
     Logger.recordOutput("Intake/Running", false);
   }
 
@@ -151,7 +166,7 @@ public class Intake extends ExtendedSubsystem {
    * @return a command to run the intake
    */
   public Command intake() {
-    return startEnd(this::start, this::stopRoller);
+    return startEnd(this::start, this::stop);
   }
 
   /**
@@ -169,7 +184,7 @@ public class Intake extends ExtendedSubsystem {
    * @return a command to reverse the intake
    */
   public Command reverse() {
-    return startEnd(this::reverseRoller, this::stopRoller);
+    return startEnd(this::reverseRoller, this::stop);
   }
 
   /**
@@ -210,7 +225,7 @@ public class Intake extends ExtendedSubsystem {
             feeder.stop();
           }
           setPivotState(PivotState.LOWERING);
-          stopRoller();
+          stop();
           agitationTimer.stop();
         },
         () -> false,
@@ -226,7 +241,7 @@ public class Intake extends ExtendedSubsystem {
     return runOnce(
         () -> {
           setPivotState(PivotState.RAISING);
-          stopRoller();
+          stop();
         });
   }
 
@@ -235,7 +250,7 @@ public class Intake extends ExtendedSubsystem {
     return startEnd(
         () -> {
           RobotUtil.requestOperatorRumble(rumble);
-          pivot.resetPosition(Degrees.of(IntakeConstants.MAX_ANGLE));
+          pivot.resetPosition(IntakeConstants.MAX_ANGLE);
         },
         () -> RobotUtil.stopOperatorRumble(rumble));
   }

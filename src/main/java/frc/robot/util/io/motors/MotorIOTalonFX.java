@@ -172,6 +172,7 @@ public class MotorIOTalonFX implements AutoCloseable, RollerIO, PivotIO, LinearS
   @Override
   public void updateInputs(PivotIOInputs inputs) {
     inputs.positionDeg = position.getValue().in(Degrees);
+    inputs.velocityDegPerSec = velocity.getValue().in(DegreesPerSecond);
     updateMotorInputs(inputs);
   }
 
