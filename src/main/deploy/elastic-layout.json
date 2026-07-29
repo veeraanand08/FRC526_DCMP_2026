@@ -53,7 +53,7 @@
                 }
               },
               {
-                "title": "Desired RPS",
+                "title": "Setpoint RPS",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
@@ -360,19 +360,6 @@
               "time_display_mode": "Seconds Only",
               "red_start_time": 10,
               "yellow_start_time": 5
-            }
-          },
-          {
-            "title": "PDH Current",
-            "x": 896.0,
-            "y": 640.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Large Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/PowerDistribution/TotalCurrent",
-              "period": 0.06,
-              "data_type": "double"
             }
           }
         ]
