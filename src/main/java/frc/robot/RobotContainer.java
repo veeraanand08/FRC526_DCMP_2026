@@ -314,7 +314,7 @@ public class RobotContainer {
       operatorController.rightTrigger(0.7).and(saxonsProfile).whileTrue(shoot);
       operatorController.rightBumper().and(saxonsProfile).whileTrue(shootDefault);
       operatorController.a().and(saxonsProfile).whileTrue(dump);
-      operatorController.b().and(saxonsProfile).toggleOnTrue(agitate);
+      operatorController.b().and(saxonsProfile).whileTrue(agitate);
     }
   }
 
