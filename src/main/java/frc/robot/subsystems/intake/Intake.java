@@ -1,9 +1,11 @@
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.intake.IntakeConstants.AGITATION_MID_ANGLE;
 import static frc.robot.subsystems.intake.IntakeConstants.SETPOINTS;
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
@@ -47,7 +49,8 @@ public class Intake extends ExtendedSubsystem {
                   Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
                   Constants.CANConstants.INTAKE_PIVOT,
                   IntakeConstants.PIVOT_CONFIG)
-              .withControlRequest(new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true));
+              .withControlRequest(new MotionMagicVoltage(0), false)
+              .withControlRequest(new PositionVoltage(0), true);
           case SIM -> new PivotIOSim(
               DCMotor.getKrakenX60(1),
               new MotorIO.RotationalMechanismConstraints(
@@ -203,22 +206,11 @@ public class Intake extends ExtendedSubsystem {
           agitationTimer.restart();
         },
         () -> {
-          double time = agitationTimer.get();
-
-          double pos = Math.sin(time * 2 * Math.PI / IntakeConstants.AGITATION_PERIOD) * 0.5 + 0.5;
-
-          double upperAngle =
-              IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
-                  - (IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE
-                          - IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN)
-                      * (time / IntakeConstants.PIVOT_UPPER_AGITATION_DECAY_TIME);
-
-          // Clamp so it never goes past the lower angle
-          upperAngle = Math.max(upperAngle, IntakeConstants.PIVOT_AGITATION_UPPER_ANGLE_MIN);
-
           double targetAngle =
-              upperAngle + (IntakeConstants.PIVOT_AGITATION_LOWER_ANGLE - upperAngle) * pos;
-          pivot.runClosedLoop(Degrees.of(targetAngle));
+              IntakeConstants.AGITATION_HALF_AMPLITUDE
+                      * -Math.cos(IntakeConstants.AGITATION_RAD_PER_SEC * agitationTimer.get())
+                  + AGITATION_MID_ANGLE;
+          pivot.runClosedLoop(Degrees.of(targetAngle), true);
         },
         interrupted -> {
           if (!feeder.isEnabledForShooting()) {

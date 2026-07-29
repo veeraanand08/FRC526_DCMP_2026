@@ -47,7 +47,7 @@ public final class IntakeConstants {
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withInverted(InvertedValue.CounterClockwise_Positive)
-                  .withNeutralMode(NeutralModeValue.Coast))
+                  .withNeutralMode(NeutralModeValue.Brake))
           .withFeedback(
               new FeedbackConfigs()
                   .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
@@ -96,13 +96,15 @@ public final class IntakeConstants {
     SETPOINTS.put(AGITATING, Degrees.of(45.0));
   }
 
-  public static final double PIVOT_AGITATION_UPPER_ANGLE = 10; // where the upper bound starts
-  public static final double PIVOT_AGITATION_UPPER_ANGLE_MIN = 25; // where the upper bound ends
-  public static final double PIVOT_AGITATION_LOWER_ANGLE = 100;
-  public static final double PIVOT_UPPER_AGITATION_DECAY_TIME =
-      12.0; // time it takes to decay in seconds
+  public static final double AGITATION_UPPER_ANGLE = 10;
+  public static final double AGITATION_LOWER_ANGLE = 100;
+  public static final double AGITATION_PERIOD = 2; // seconds
 
-  public static final double AGITATION_PERIOD = 2; // Period is in seconds
+  public static final double AGITATION_RAD_PER_SEC = 2.0 * Math.PI / AGITATION_PERIOD;
+  public static final double AGITATION_HALF_AMPLITUDE =
+      (AGITATION_LOWER_ANGLE - AGITATION_UPPER_ANGLE) / 2.0;
+  public static final double AGITATION_MID_ANGLE =
+      (AGITATION_LOWER_ANGLE + AGITATION_UPPER_ANGLE) / 2.0;
 
   public static final double ROLLER_RPS = 5000 / 60.0;
   public static final double ROLLER_RPS_REVERSED = -4500 / 60.0;

@@ -39,6 +39,15 @@ public class Pivot extends Motor<PivotIO, PivotIOInputsAutoLogged> {
     Logger.recordOutput(name + "/MotorMode", mode);
   }
 
+  public void runClosedLoop(Angle angle, boolean alternate) {
+    if (tempCritical) return;
+
+    io.setPosition(angle, alternate);
+    mode = MotorIO.MotorIOMode.POSITION_CONTROL;
+    Logger.recordOutput(name + "/SetpointDeg", angle.in(Degrees));
+    Logger.recordOutput(name + "/MotorMode", mode);
+  }
+
   public void resetPosition(Angle newPosition) {
     io.resetPosition(newPosition);
   }

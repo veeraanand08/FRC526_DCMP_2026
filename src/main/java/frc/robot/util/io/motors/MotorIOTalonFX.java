@@ -27,6 +27,7 @@ public class MotorIOTalonFX implements AutoCloseable, RollerIO, PivotIO, LinearS
   protected final TalonFX[] followers;
 
   private Consumer<Angle> positionRequest;
+  private Consumer<Angle> positionRequestAlt;
   private VelocityVoltage velocityRequest;
   private final VoltageOut voltageRequest = new VoltageOut(0);
   private final CoastOut coastRequest = new CoastOut();
@@ -107,7 +108,7 @@ public class MotorIOTalonFX implements AutoCloseable, RollerIO, PivotIO, LinearS
 
   private void configurePositionControl() {
     if (positionConfigured) return;
-    withControlRequest(new PositionVoltage(0));
+    withControlRequest(new PositionVoltage(0), false);
     position.setUpdateFrequency(100.0);
     PhoenixUtil.registerSignals(leader.getNetwork(), position);
     resetPosition = new Notifier(() -> leader.setPosition(angleResetVal));
@@ -122,18 +123,30 @@ public class MotorIOTalonFX implements AutoCloseable, RollerIO, PivotIO, LinearS
     velocityConfigured = true;
   }
 
-  public MotorIOTalonFX withControlRequest(PositionVoltage request) {
-    this.positionRequest = (angle) -> leader.setControl(request.withPosition(angle));
+  public MotorIOTalonFX withControlRequest(PositionVoltage request, boolean isAlternate) {
+    if (isAlternate) {
+      this.positionRequestAlt = angle -> leader.setControl(request.withPosition(angle));
+    } else {
+      this.positionRequest = angle -> leader.setControl(request.withPosition(angle));
+    }
     return this;
   }
 
-  public MotorIOTalonFX withControlRequest(MotionMagicVoltage request) {
-    this.positionRequest = (angle) -> leader.setControl(request.withPosition(angle));
+  public MotorIOTalonFX withControlRequest(MotionMagicVoltage request, boolean isAlternate) {
+    if (isAlternate) {
+      this.positionRequestAlt = angle -> leader.setControl(request.withPosition(angle));
+    } else {
+      this.positionRequest = angle -> leader.setControl(request.withPosition(angle));
+    }
     return this;
   }
 
-  public MotorIOTalonFX withControlRequest(MotionMagicExpoVoltage request) {
-    this.positionRequest = (angle) -> leader.setControl(request.withPosition(angle));
+  public MotorIOTalonFX withControlRequest(MotionMagicExpoVoltage request, boolean isAlternate) {
+    if (isAlternate) {
+      this.positionRequestAlt = angle -> leader.setControl(request.withPosition(angle));
+    } else {
+      this.positionRequest = angle -> leader.setControl(request.withPosition(angle));
+    }
     return this;
   }
 
@@ -191,6 +204,11 @@ public class MotorIOTalonFX implements AutoCloseable, RollerIO, PivotIO, LinearS
   @Override
   public void setPosition(Angle angle) {
     positionRequest.accept(angle);
+  }
+
+  @Override
+  public void setPosition(Angle angle, boolean alternate) {
+    positionRequestAlt.accept(angle);
   }
 
   @Override

@@ -15,5 +15,7 @@ public interface PivotIO extends MotorIO {
 
   default void setPosition(Angle angle) {}
 
+  default void setPosition(Angle angle, boolean alternate) {}
+
   default void resetPosition(Angle angle) {}
 }
