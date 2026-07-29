@@ -288,7 +288,7 @@ public class RobotContainer {
       operatorController.povUp().onTrue(resetIntake);
       operatorController
           .povRight()
-          .debounce(2, Debouncer.DebounceType.kRising)
+          .debounce(0.3, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
       // test mode (single controller)
       BooleanSupplier testMode = () -> controlScheme == ControlScheme.TEST;
@@ -301,7 +301,7 @@ public class RobotContainer {
       driverController
           .povRight()
           .and(testMode)
-          .debounce(1, Debouncer.DebounceType.kRising)
+          .debounce(0.3, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
       // 526 profile
       BooleanSupplier saxonSparksProfile = () -> controlScheme == ControlScheme.SAXON_SPARKS;
