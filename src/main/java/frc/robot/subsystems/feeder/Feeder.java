@@ -95,10 +95,6 @@ public class Feeder extends SubsystemBase {
         .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
   }
 
-  public Command burst() {
-    return startEnd(this::start, this::stop);
-  }
-
   public Command reverseCommand() {
     return startEnd(this::reverse, this::stop);
   }
