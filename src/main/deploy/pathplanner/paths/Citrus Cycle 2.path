@@ -52,12 +52,12 @@
         "y": 3.581500000000001
       },
       "prevControl": {
-        "x": 5.009287899670076,
-        "y": 5.532160148529072
+        "x": 5.2036298932384355,
+        "y": 5.578944246737841
       },
       "nextControl": {
-        "x": 6.511602215964561,
-        "y": 3.0902189323503313
+        "x": 6.468761035119131,
+        "y": 3.066312094876756
       },
       "isLocked": false,
       "linkedName": null
@@ -153,7 +153,12 @@
       "name": "Intake",
       "waypointRelativePos": 1.7995264404104163,
       "endWaypointRelativePos": 5.3,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
     }
   ],
   "globalConstraints": {

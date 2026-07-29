@@ -4,11 +4,9 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.ControlScheme;
 import static frc.robot.Constants.currentMode;
 
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -145,6 +143,7 @@ public class RobotContainer {
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getSetpointRPS);
         robotBumpSim = new RobotBumpSim(Drive.getModuleTranslations());
+        LED.createInstance(shooter);
       }
       default -> {
         /* REPLAY */
@@ -166,6 +165,7 @@ public class RobotContainer {
         superstructureSim =
             new SuperstructureSim(
                 intake, driveSimulation, drive::getChassisSpeeds, shooter::getVelocityRPS);
+        LED.createInstance(shooter);
       }
     }
 
@@ -377,23 +377,24 @@ public class RobotContainer {
         DriveCommands.aimAtAngle(
                 drive,
                 () -> {
-                  shooter.computeShot();
+                  if (!shooter.isShooting()) shooter.computeShot();
                   return shooter.getShot().driveAngle();
                 })
-            .beforeStarting(
-                () -> {
-                  ShootingTasks.isAutoAlignRunning = true;
-                })
-            .finallyDo(
-                () -> {
-                  ShootingTasks.clearTarget();
-                  ShootingTasks.isAutoAlignRunning = false;
-                });
+            .finallyDo(ShootingTasks::clearTarget);
+    Command shoot = shooter.shoot(feeder);
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      shoot = shoot.alongWith(superstructureSim.shootCommand());
+    }
 
-    new EventTrigger("Intake").whileTrue(intake.intake());
-    NamedCommands.registerCommand("Auto Align", autoAlign);
-    NamedCommands.registerCommand("Shoot", shooter.shoot(feeder));
-    NamedCommands.registerCommand("Agitate", intake.agitate(feeder));
+    Command alignShootAgitate =
+        autoAlign.alongWith(
+            shooter
+                .spinUp()
+                .withTimeout(1)
+                .andThen(shoot.alongWith(Commands.waitSeconds(1).andThen(intake.agitate(feeder)))));
+
+    NamedCommands.registerCommand("Intake", intake.intake());
+    NamedCommands.registerCommand("Dump", alignShootAgitate);
   }
 
   private void useDefaultDrive() {

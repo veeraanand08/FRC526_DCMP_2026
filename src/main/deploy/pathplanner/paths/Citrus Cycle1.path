@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.321376037959669,
-        "y": 7.354211150652431
+        "x": 4.278339264531436,
+        "y": 7.526358244365362
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.282560741831955,
-        "y": 7.148660684734163
+        "x": 5.149833926453144,
+        "y": 7.515599051008305
       },
       "isLocked": false,
       "linkedName": null
@@ -101,7 +101,12 @@
       "name": "Intake",
       "waypointRelativePos": 0.4,
       "endWaypointRelativePos": 3.0,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
     }
   ],
   "globalConstraints": {
