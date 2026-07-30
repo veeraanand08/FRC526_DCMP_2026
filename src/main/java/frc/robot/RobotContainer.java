@@ -245,6 +245,7 @@ public class RobotContainer {
       shoot = shoot.alongWith(superstructureSim.shootCommand());
     }
     Command shootDefault = shooter.shootDefault(feeder);
+    Command toggleLED = Commands.runOnce(LED.getInstance()::toggle).ignoringDisable(true);
 
     new Trigger(() -> ShootingTasks.isAutoAlignRunning && !shooter.isShooting())
         .whileTrue(shooter.spinUp());
@@ -275,13 +276,15 @@ public class RobotContainer {
       driverController.povUp().onTrue(resetIntake);
       driverController
           .povRight()
-          .debounce(2, Debouncer.DebounceType.kRising)
+          .debounce(0.3, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
+      driverController.start().debounce(1, Debouncer.DebounceType.kRising).onTrue(toggleLED);
     } else {
       /* driver controls */
       driverController.a().whileTrue(autoAlign);
       driverController.x().whileTrue(lockWheels);
       driverController.povLeft().onTrue(zeroGyro);
+      driverController.start().debounce(1, Debouncer.DebounceType.kRising).onTrue(toggleLED);
 
       /* operator controls */
       operatorController.leftBumper().whileTrue(holdIntake);
@@ -290,6 +293,7 @@ public class RobotContainer {
           .povRight()
           .debounce(0.3, Debouncer.DebounceType.kRising)
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
+      operatorController.start().debounce(1, Debouncer.DebounceType.kRising).onTrue(toggleLED);
       // test mode (single controller)
       BooleanSupplier testMode = () -> controlScheme == ControlScheme.TEST;
       driverController.leftBumper().and(testMode).whileTrue(holdIntake);

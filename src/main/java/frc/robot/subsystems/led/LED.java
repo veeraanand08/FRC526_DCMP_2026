@@ -2,6 +2,7 @@ package frc.robot.subsystems.led;
 
 import edu.wpi.first.wpilibj.*;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.util.RobotUtil;
 import frc.robot.util.ShiftTimer;
 import frc.robot.util.subsystems.ExtendedSubsystem;
 import frc.robot.util.subsystems.RobotStateHandler;
@@ -39,6 +40,7 @@ public class LED extends ExtendedSubsystem {
   private final LEDConstants patterns;
 
   private LEDState state = LEDState.DISABLED;
+  private boolean deactivated;
   private boolean intake;
   private boolean shoot;
 
@@ -81,20 +83,40 @@ public class LED extends ExtendedSubsystem {
       state = LEDState.SHOOT;
     }
 
-    if (!RobotStateHandler.isEnabled() && state == LEDState.WARN && timer.hasElapsed(3.0)) {
+    if (!RobotStateHandler.isEnabled() && state == LEDState.WARN && timer.hasElapsed(1.5)) {
       timer.stop();
       state = LEDState.DISABLED;
+    }
+
+    // ignore LED state when deactivated
+    if (deactivated) {
+      applyPattern(patterns.off);
+      return;
     }
 
     switch (state) {
       case DISABLED -> applyPattern(patterns.disabled);
       case WARN -> applyPattern(patterns.warning);
-      case ACTIVE -> applyPattern(patterns.idle);
+      case ACTIVE -> applyPattern(RobotUtil.isRedAlliance() ? patterns.redIdle : patterns.blueIdle);
       case INTAKE -> applyPattern(patterns.intake);
       case READY_SHOOT -> applyPattern(patterns.shooterReady);
-      case SHOOT -> applyPattern(patterns.shoot);
-      case HUB_OFF -> applyPattern(patterns.hubWarning);
+      case SHOOT, HUB_OFF -> applyPattern(
+          RobotUtil.isRedAlliance() ? patterns.redShoot : patterns.blueShoot);
     }
+  }
+
+  public void toggle() {
+    if (deactivated) on();
+    else off();
+  }
+
+  public void off() {
+    deactivated = true;
+    applyPattern(patterns.off);
+  }
+
+  public void on() {
+    deactivated = false;
   }
 
   public void warn() {
@@ -108,7 +130,7 @@ public class LED extends ExtendedSubsystem {
   }
 
   public void shooterReady() {
-    if (state == LEDState.SHOOT || state == LEDState.HUB_OFF) return;
+    if (state == LEDState.SHOOT) return;
     state = LEDState.READY_SHOOT;
   }
 

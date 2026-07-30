@@ -49,8 +49,9 @@ public class Intake extends ExtendedSubsystem {
                   Constants.CANConstants.SUPERSTRUCTURE_CAN_BUS,
                   Constants.CANConstants.INTAKE_PIVOT,
                   IntakeConstants.PIVOT_CONFIG)
-              .withControlRequest(new MotionMagicVoltage(0), false)
-              .withControlRequest(new PositionVoltage(0), true);
+              .withControlRequest(
+                  new MotionMagicVoltage(0).withOverrideBrakeDurNeutral(true), false)
+              .withControlRequest(new PositionVoltage(0).withOverrideBrakeDurNeutral(true), true);
           case SIM -> new PivotIOSim(
               DCMotor.getKrakenX60(1),
               new MotorIO.RotationalMechanismConstraints(
