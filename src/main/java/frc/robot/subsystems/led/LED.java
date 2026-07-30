@@ -99,7 +99,7 @@ public class LED extends ExtendedSubsystem {
       case WARN -> applyPattern(patterns.warning);
       case ACTIVE -> applyPattern(RobotUtil.isRedAlliance() ? patterns.redIdle : patterns.blueIdle);
       case INTAKE -> applyPattern(patterns.intake);
-      case READY_SHOOT -> applyPattern(patterns.shooterReady);
+        //      case READY_SHOOT -> applyPattern(patterns.shooterReady);
       case SHOOT, HUB_OFF -> applyPattern(
           RobotUtil.isRedAlliance() ? patterns.redShoot : patterns.blueShoot);
     }
@@ -113,10 +113,12 @@ public class LED extends ExtendedSubsystem {
   public void off() {
     deactivated = true;
     applyPattern(patterns.off);
+    Logger.recordOutput("LED/IsDeactivated", true);
   }
 
   public void on() {
     deactivated = false;
+    Logger.recordOutput("LED/IsDeactivated", false);
   }
 
   public void warn() {
