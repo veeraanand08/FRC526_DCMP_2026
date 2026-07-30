@@ -22,6 +22,15 @@ public class ShiftTimer {
   @Getter private boolean isHubActive;
   @Getter private double timeRemaining;
 
+  // rumble
+  private static final RobotUtil.RumbleRequest COUNTDOWN_RUMBLE =
+      new RobotUtil.RumbleRequest(0.65, 0);
+  private static final RobotUtil.RumbleRequest ENDGAME_COUNTDOWN_RUMBLE =
+      new RobotUtil.RumbleRequest(0.85, 0);
+  private int lastPulseSecond = -1;
+  private boolean isPulseActive = false;
+  private double pulseStartTime = 0.0;
+
   private ShiftTimer() {
     timer = new Timer();
     Logger.recordOutput("Match/HubActive", false);
@@ -36,6 +45,8 @@ public class ShiftTimer {
     isHubActive = true;
     Logger.recordOutput("Match/HubActive", true);
     Logger.recordOutput("Match/CurrentShift", currentSegment.toString());
+    lastPulseSecond = -1;
+    isPulseActive = false;
   }
 
   public void update() {
@@ -43,6 +54,7 @@ public class ShiftTimer {
       case TRANSITION:
         if (timer.hasElapsed(10.0)) {
           timer.restart();
+          resetCountdownState();
           String gameData = DriverStation.getGameSpecificMessage();
           char firstInactiveHub;
           if (!gameData.isEmpty()) firstInactiveHub = gameData.charAt(0);
@@ -63,6 +75,7 @@ public class ShiftTimer {
       case ALLIANCE:
         if (timer.hasElapsed(25.0)) {
           timer.restart();
+          resetCountdownState();
           allianceShiftNum++;
           isHubActive = !isHubActive;
           if (allianceShiftNum > 4) {
@@ -83,15 +96,48 @@ public class ShiftTimer {
         }
         break;
     }
+    updateRumble();
     Logger.recordOutput("Match/HubActive", isHubActive);
     Logger.recordOutput("Match/ShiftTimer", timeRemaining + 1);
   }
 
   public void end() {
+    resetCountdownState();
     timer.stop();
     isHubActive = false;
     Logger.recordOutput("Match/HubActive", false);
     Logger.recordOutput("Match/CurrentShift", "N/A");
     Logger.recordOutput("Match/ShiftTimer", 0.0);
+  }
+
+  private void resetCountdownState() {
+    if (isPulseActive) {
+      RobotUtil.stopDriverRumble(COUNTDOWN_RUMBLE);
+      RobotUtil.stopDriverRumble(ENDGAME_COUNTDOWN_RUMBLE);
+      isPulseActive = false;
+    }
+    lastPulseSecond = -1;
+  }
+
+  private void updateRumble() {
+    if (!timer.isRunning()) return;
+
+    if (timeRemaining <= 5.0) {
+      int currentSecond = (int) Math.ceil(timeRemaining);
+      if (currentSecond != lastPulseSecond && !isPulseActive) {
+        RobotUtil.RumbleRequest rumble =
+            currentSegment == ShiftSegment.ENDGAME ? ENDGAME_COUNTDOWN_RUMBLE : COUNTDOWN_RUMBLE;
+        RobotUtil.requestDriverRumble(rumble);
+        isPulseActive = true;
+        lastPulseSecond = currentSecond;
+        pulseStartTime = timer.get();
+      }
+    }
+
+    if (isPulseActive && timer.get() - pulseStartTime >= 0.25) {
+      RobotUtil.stopDriverRumble(COUNTDOWN_RUMBLE);
+      RobotUtil.stopDriverRumble(ENDGAME_COUNTDOWN_RUMBLE);
+      isPulseActive = false;
+    }
   }
 }
