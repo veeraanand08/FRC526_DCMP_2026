@@ -25,8 +25,8 @@ public final class IntakeConstants {
   public static final double PIVOT_KV = 0.12;
   public static final double PIVOT_KA = 0;
   public static final double PIVOT_KG = 0.0;
-  public static final double PIVOT_CRUISE_VELOCITY = 10;
-  public static final double PIVOT_CRUISE_ACCELERATION = 12;
+  public static final double PIVOT_CRUISE_VELOCITY = 6;
+  public static final double PIVOT_CRUISE_ACCELERATION = 10;
 
   public static final double ROLLER_MOI = 0.002;
   public static final double ROLLER_GEAR_RATIO = 1.0;
