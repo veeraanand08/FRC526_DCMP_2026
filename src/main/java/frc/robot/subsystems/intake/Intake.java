@@ -90,6 +90,9 @@ public class Intake extends ExtendedSubsystem {
             "Intake/Pivot", pivotIO, IntakeConstants.PIVOT_CONFIG.CurrentLimits.StatorCurrentLimit);
     roller = new Roller("Intake/Roller", rollerIO);
 
+    // make pivot go to coast
+    pivot.stop();
+
     Logger.recordOutput("Intake/PivotState", pivotState.toString());
     Logger.recordOutput("Intake/Running", false);
   }
