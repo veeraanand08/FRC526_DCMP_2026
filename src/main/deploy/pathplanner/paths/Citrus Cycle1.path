@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.34055900621118,
-        "y": 7.467435669920142
+        "x": 5.342192003115792,
+        "y": 7.526358244365362
       },
       "isLocked": false,
       "linkedName": null
@@ -99,7 +99,7 @@
   "eventMarkers": [
     {
       "name": "Intake",
-      "waypointRelativePos": 0.4589426321709831,
+      "waypointRelativePos": 0.0,
       "endWaypointRelativePos": 3.0,
       "command": {
         "type": "named",
@@ -125,7 +125,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
