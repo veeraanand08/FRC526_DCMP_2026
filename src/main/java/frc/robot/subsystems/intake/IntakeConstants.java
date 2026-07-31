@@ -71,7 +71,7 @@ public final class IntakeConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(70)
-                  .withSupplyCurrentLimit(40)
+                  .withSupplyCurrentLimit(30)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
