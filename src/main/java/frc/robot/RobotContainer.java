@@ -308,7 +308,6 @@ public class RobotContainer {
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
       // 526 profile
       BooleanSupplier saxonSparksProfile = () -> controlScheme == ControlScheme.SAXON_SPARKS;
-      driverController.leftBumper().and(saxonSparksProfile).whileTrue(intakeCommand.unless(intake::isIntakeRunning));
       operatorController.leftBumper().and(saxonSparksProfile).toggleOnTrue(intakeCommand);
       operatorController.rightBumper().and(saxonSparksProfile).whileTrue(shoot);
       operatorController.rightTrigger(0.7).and(saxonSparksProfile).whileTrue(shootDefault);
