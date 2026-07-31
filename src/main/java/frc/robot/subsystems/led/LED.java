@@ -2,10 +2,7 @@ package frc.robot.subsystems.led;
 
 import edu.wpi.first.wpilibj.*;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.util.RobotUtil;
-import frc.robot.util.ShiftTimer;
 import frc.robot.util.subsystems.ExtendedSubsystem;
-import frc.robot.util.subsystems.RobotStateHandler;
 import org.littletonrobotics.junction.Logger;
 
 public class LED extends ExtendedSubsystem {
@@ -75,34 +72,33 @@ public class LED extends ExtendedSubsystem {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("LED/CurrentState", state);
-
-    if (state == LEDState.SHOOT && !ShiftTimer.instance.isHubActive()) {
-      state = LEDState.HUB_OFF;
-    } else if (state == LEDState.HUB_OFF && ShiftTimer.instance.isHubActive()) {
-      state = LEDState.SHOOT;
-    }
-
-    if (!RobotStateHandler.isEnabled() && state == LEDState.WARN && timer.hasElapsed(1.5)) {
-      timer.stop();
-      state = LEDState.DISABLED;
-    }
-
-    // ignore LED state when deactivated
-    if (deactivated) {
-      applyPattern(patterns.off);
-      return;
-    }
-
-    switch (state) {
-      case DISABLED -> applyPattern(patterns.disabled);
-      case WARN -> applyPattern(patterns.warning);
-      case ACTIVE -> applyPattern(RobotUtil.isRedAlliance() ? patterns.redIdle : patterns.blueIdle);
-      case INTAKE -> applyPattern(patterns.intake);
-        //      case READY_SHOOT -> applyPattern(patterns.shooterReady);
-      case SHOOT, HUB_OFF -> applyPattern(
-          RobotUtil.isRedAlliance() ? patterns.redShoot : patterns.blueShoot);
-    }
+    //    if (state == LEDState.SHOOT && !ShiftTimer.instance.isHubActive()) {
+    //      state = LEDState.HUB_OFF;
+    //    } else if (state == LEDState.HUB_OFF && ShiftTimer.instance.isHubActive()) {
+    //      state = LEDState.SHOOT;
+    //    }
+    //
+    //    if (!RobotStateHandler.isEnabled() && state == LEDState.WARN && timer.hasElapsed(1.5)) {
+    //      timer.stop();
+    //      state = LEDState.DISABLED;
+    //    }
+    //
+    //    // ignore LED state when deactivated
+    //    if (deactivated) {
+    //      applyPattern(patterns.off);
+    //      return;
+    //    }
+    //
+    //    switch (state) {
+    //      case DISABLED -> applyPattern(patterns.disabled);
+    //      case WARN -> applyPattern(patterns.warning);
+    //      case ACTIVE -> applyPattern(RobotUtil.isRedAlliance() ? patterns.redIdle :
+    // patterns.blueIdle);
+    //      case INTAKE -> applyPattern(patterns.intake);
+    //        //      case READY_SHOOT -> applyPattern(patterns.shooterReady);
+    //      case SHOOT, HUB_OFF -> applyPattern(
+    //          RobotUtil.isRedAlliance() ? patterns.redShoot : patterns.blueShoot);
+    //    }
   }
 
   public void toggle() {
@@ -123,33 +119,39 @@ public class LED extends ExtendedSubsystem {
 
   public void warn() {
     state = LEDState.WARN;
+    Logger.recordOutput("LED/CurrentState", state);
   }
 
   public void intake() {
     intake = true;
     if (state != LEDState.ACTIVE) return;
     state = LEDState.INTAKE;
+    Logger.recordOutput("LED/CurrentState", state);
   }
 
   public void shooterReady() {
     if (state == LEDState.SHOOT) return;
     state = LEDState.READY_SHOOT;
+    Logger.recordOutput("LED/CurrentState", state);
   }
 
   public void shoot() {
     shoot = true;
     state = LEDState.SHOOT;
+    Logger.recordOutput("LED/CurrentState", state);
   }
 
   public void stopIntake() {
     intake = false;
     if (state == LEDState.INTAKE) state = LEDState.ACTIVE;
+    Logger.recordOutput("LED/CurrentState", state);
   }
 
   public void stopShoot() {
     shoot = false;
     if (intake) state = LEDState.INTAKE;
     else if (state != LEDState.READY_SHOOT) state = LEDState.ACTIVE;
+    Logger.recordOutput("LED/CurrentState", state);
   }
 
   private void applyPattern(LEDPattern pattern) {
