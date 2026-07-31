@@ -25,6 +25,7 @@ import frc.robot.util.io.motors.roller.Roller;
 import frc.robot.util.io.motors.roller.RollerIO;
 import frc.robot.util.io.motors.roller.RollerIOSim;
 import frc.robot.util.subsystems.ExtendedSubsystem;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends ExtendedSubsystem {
@@ -41,6 +42,8 @@ public class Intake extends ExtendedSubsystem {
 
   private final Debouncer stallDebounce = new Debouncer(0.5, Debouncer.DebounceType.kRising);
   private final Timer agitationTimer = new Timer();
+
+  @Getter private boolean intakeRunning;
 
   public Intake() {
     PivotIO pivotIO =
@@ -134,6 +137,7 @@ public class Intake extends ExtendedSubsystem {
     }
     roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
     LED.getInstance().intake();
+    intakeRunning = true;
     Logger.recordOutput("Intake/Running", true);
   }
 
@@ -143,6 +147,7 @@ public class Intake extends ExtendedSubsystem {
       pivot.stop();
     }
     LED.getInstance().stopIntake();
+    intakeRunning = false;
     Logger.recordOutput("Intake/Running", false);
   }
 

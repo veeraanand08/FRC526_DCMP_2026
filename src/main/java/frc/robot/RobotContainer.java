@@ -236,7 +236,7 @@ public class RobotContainer {
     Command zeroGyro = Commands.runOnce(() -> drive.zeroGyro(true), drive).ignoringDisable(true);
     Command autoAlign =
         getAutoAlignCommand(() -> -driverController.getLeftY(), () -> -driverController.getLeftX());
-    Command holdIntake = intake.intake();
+    Command intakeCommand = intake.intake();
     Command agitate = intake.agitate(feeder);
     Command dump = Commands.parallel(intake.reverse(), feeder.reverseCommand());
     Command resetIntake = intake.stow();
@@ -255,7 +255,7 @@ public class RobotContainer {
 
     if (currentMode == Constants.Mode.SIM) {
       CommandGenericHID keyboard = new CommandGenericHID(3);
-      keyboard.button(1).whileTrue(holdIntake);
+      keyboard.button(1).whileTrue(intakeCommand);
       keyboard.button(2).whileTrue(shoot);
       keyboard.button(3).whileTrue(autoAlign);
       keyboard.button(4).onTrue(resetIntake);
@@ -268,7 +268,7 @@ public class RobotContainer {
       driverController.x().whileTrue(lockWheels);
       driverController.povLeft().onTrue(zeroGyro);
 
-      driverController.leftBumper().whileTrue(holdIntake);
+      driverController.leftBumper().whileTrue(intakeCommand);
       driverController.rightBumper().whileTrue(shoot);
       driverController.rightTrigger(0.7).whileTrue(shootDefault);
       driverController.y().toggleOnTrue(agitate);
@@ -287,7 +287,6 @@ public class RobotContainer {
       driverController.start().debounce(1, Debouncer.DebounceType.kRising).onTrue(toggleLED);
 
       /* operator controls */
-      operatorController.leftBumper().whileTrue(holdIntake);
       operatorController.povUp().onTrue(resetIntake);
       operatorController
           .povRight()
@@ -296,7 +295,7 @@ public class RobotContainer {
       operatorController.start().debounce(1, Debouncer.DebounceType.kRising).onTrue(toggleLED);
       // test mode (single controller)
       BooleanSupplier testMode = () -> controlScheme == ControlScheme.TEST;
-      driverController.leftBumper().and(testMode).whileTrue(holdIntake);
+      driverController.leftBumper().and(testMode).whileTrue(intakeCommand);
       driverController.rightBumper().and(testMode).whileTrue(shoot);
       driverController.rightTrigger(0.7).and(testMode).whileTrue(shootDefault);
       driverController.y().and(testMode).toggleOnTrue(agitate);
@@ -309,12 +308,15 @@ public class RobotContainer {
           .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
       // 526 profile
       BooleanSupplier saxonSparksProfile = () -> controlScheme == ControlScheme.SAXON_SPARKS;
+      driverController.leftBumper().and(saxonSparksProfile).whileTrue(intakeCommand.unless(intake::isIntakeRunning));
+      operatorController.leftBumper().and(saxonSparksProfile).toggleOnTrue(intakeCommand);
       operatorController.rightBumper().and(saxonSparksProfile).whileTrue(shoot);
       operatorController.rightTrigger(0.7).and(saxonSparksProfile).whileTrue(shootDefault);
       operatorController.a().and(saxonSparksProfile).toggleOnTrue(agitate);
       operatorController.b().and(saxonSparksProfile).whileTrue(dump);
       // 611 profile
       BooleanSupplier saxonsProfile = () -> controlScheme == ControlScheme.SAXONS;
+      operatorController.leftBumper().and(saxonsProfile).whileTrue(intakeCommand);
       operatorController.rightTrigger(0.7).and(saxonsProfile).whileTrue(shoot);
       operatorController.rightBumper().and(saxonsProfile).whileTrue(shootDefault);
       operatorController.a().and(saxonsProfile).whileTrue(dump);
