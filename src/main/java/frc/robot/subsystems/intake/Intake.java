@@ -133,7 +133,7 @@ public class Intake extends ExtendedSubsystem {
     if (pivotState != PivotState.LOWERING) {
       setPivotState(PivotState.LOWERING);
     } else if (pivot.getPositionDeg() > 100.0) {
-      pivot.runOpenLoop(0.2);
+      pivot.runOpenLoop(0.3);
     }
     roller.runClosedLoop(IntakeConstants.ROLLER_RPS);
     LED.getInstance().intake();
