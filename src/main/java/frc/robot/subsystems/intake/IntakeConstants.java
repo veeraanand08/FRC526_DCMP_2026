@@ -30,7 +30,7 @@ public final class IntakeConstants {
 
   public static final double ROLLER_MOI = 0.002;
   public static final double ROLLER_GEAR_RATIO = 1.0;
-  public static final double ROLLER_KP = 0.1;
+  public static final double ROLLER_KP = 0.2;
   public static final double ROLLER_KI = 0;
   public static final double ROLLER_KD = 0;
   public static final double ROLLER_KS = 0;
