@@ -46,9 +46,9 @@ public class Shooter extends SubsystemBase {
         switch (Constants.currentMode) {
           case REAL -> new MotorIOTalonFX(
               CANConstants.SUPERSTRUCTURE_CAN_BUS,
-              CANConstants.SHOOTER_TOP_LEFT,
+              CANConstants.SHOOTER_BOTTOM_LEFT,
               new int[] {
-                CANConstants.SHOOTER_BOTTOM_LEFT,
+                CANConstants.SHOOTER_TOP_LEFT,
                 CANConstants.SHOOTER_TOP_RIGHT,
                 CANConstants.SHOOTER_BOTTOM_RIGHT
               },
