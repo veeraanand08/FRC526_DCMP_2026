@@ -52,11 +52,11 @@ public class ShootingTasks {
         Translation2d leftBump, rightBump;
 
         if (isRedAlliance) {
-          leftBump = FieldConstants.RED_LEFT_BUMP;
-          rightBump = FieldConstants.RED_RIGHT_BUMP;
+          leftBump = FieldConstants.RED_LEFT_PASS;
+          rightBump = FieldConstants.RED_RIGHT_PASS;
         } else {
-          leftBump = FieldConstants.BLUE_LEFT_BUMP;
-          rightBump = FieldConstants.BLUE_RIGHT_BUMP;
+          leftBump = FieldConstants.BLUE_LEFT_PASS;
+          rightBump = FieldConstants.BLUE_RIGHT_PASS;
         }
         double leftBumpDistance = robotTranslation.getDistance(leftBump);
         double rightBumpDistance = robotTranslation.getDistance(rightBump);
