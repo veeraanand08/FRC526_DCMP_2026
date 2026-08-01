@@ -75,21 +75,18 @@ public final class Constants {
     public static final Translation2d RED_HUB = new Translation2d(11.938, 4.0);
     public static final Translation2d BLUE_HUB = new Translation2d(4.597, 4.0);
 
-
     public static final Translation2d RED_LEFT_BUMP = new Translation2d(11.928, 2.408);
     public static final Translation2d RED_RIGHT_BUMP = new Translation2d(11.928, 5.598);
     public static final Translation2d BLUE_LEFT_BUMP = new Translation2d(4.617, 5.598);
     public static final Translation2d BLUE_RIGHT_BUMP = new Translation2d(4.617, 2.408);
 
-    public static final Translation2d RED_PASS_OFFSET = new Translation2d(-2.0, 0);
-    public static final Translation2d BLUE_PASS_OFFSET = new Translation2d(2.0, 0);
+    public static final Translation2d RED_PASS_OFFSET = new Translation2d(2.0, 0);
+    public static final Translation2d BLUE_PASS_OFFSET = new Translation2d(-2.0, 0);
 
     public static final Translation2d RED_LEFT_PASS = RED_LEFT_BUMP.plus(RED_PASS_OFFSET);
     public static final Translation2d RED_RIGHT_PASS = RED_RIGHT_BUMP.plus(RED_PASS_OFFSET);
     public static final Translation2d BLUE_LEFT_PASS = BLUE_LEFT_BUMP.plus(BLUE_PASS_OFFSET);
     public static final Translation2d BLUE_RIGHT_PASS = BLUE_RIGHT_BUMP.plus(BLUE_PASS_OFFSET);
-
-
 
     public static final Translation2d RED_LEFT_TRENCH = new Translation2d(11.928, 0.586);
     public static final Translation2d RED_RIGHT_TRENCH = new Translation2d(11.928, 7.423);
