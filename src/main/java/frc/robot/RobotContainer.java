@@ -288,10 +288,7 @@ public class RobotContainer {
 
       /* operator controls */
       operatorController.povUp().onTrue(resetIntake);
-      operatorController
-          .povRight()
-          .debounce(0.3, Debouncer.DebounceType.kRising)
-          .whileTrue(intake.markIntakeLowered().ignoringDisable(true));
+      operatorController.povRight().whileTrue(intake.markIntakeLowered().ignoringDisable(true));
       operatorController.start().debounce(1, Debouncer.DebounceType.kRising).onTrue(toggleLED);
       // test mode (single controller)
       BooleanSupplier testMode = () -> controlScheme == ControlScheme.TEST;
