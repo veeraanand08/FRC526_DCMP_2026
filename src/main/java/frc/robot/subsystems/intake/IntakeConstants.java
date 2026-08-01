@@ -70,8 +70,8 @@ public final class IntakeConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(70)
-                  .withSupplyCurrentLimit(30)
+                  .withStatorCurrentLimit(80)
+                  .withSupplyCurrentLimit(40)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
