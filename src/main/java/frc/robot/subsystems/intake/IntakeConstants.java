@@ -92,7 +92,7 @@ public final class IntakeConstants {
 
   static {
     SETPOINTS.put(RAISING, Degrees.of(0.0));
-    SETPOINTS.put(LOWERING, Degrees.of(137.0));
+    SETPOINTS.put(LOWERING, Degrees.of(129.0));
     SETPOINTS.put(AGITATING, Degrees.of(45.0));
   }
 
@@ -111,7 +111,7 @@ public final class IntakeConstants {
   public static final double ROLLER_RPS_SLOW = 4000 / 60.0;
 
   // physical max
-  public static final Angle MAX_ANGLE = Degrees.of(137);
+  public static final Angle MAX_ANGLE = Degrees.of(129);
 
   // sim
   public static final int INTAKE_CAPACITY = 50;
