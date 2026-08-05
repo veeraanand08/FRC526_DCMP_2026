@@ -37,7 +37,7 @@ public final class ShooterConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(80)
+                  .withStatorCurrentLimit(60)
                   .withSupplyCurrentLimit(40)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))

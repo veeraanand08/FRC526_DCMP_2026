@@ -25,12 +25,12 @@ public final class IntakeConstants {
   public static final double PIVOT_KV = 0.12;
   public static final double PIVOT_KA = 0;
   public static final double PIVOT_KG = 0.0;
-  public static final double PIVOT_CRUISE_VELOCITY = 10;
-  public static final double PIVOT_CRUISE_ACCELERATION = 12;
+  public static final double PIVOT_CRUISE_VELOCITY = 6;
+  public static final double PIVOT_CRUISE_ACCELERATION = 10;
 
   public static final double ROLLER_MOI = 0.002;
   public static final double ROLLER_GEAR_RATIO = 1.0;
-  public static final double ROLLER_KP = 0.1;
+  public static final double ROLLER_KP = 0.2;
   public static final double ROLLER_KI = 0;
   public static final double ROLLER_KD = 0;
   public static final double ROLLER_KS = 0;
@@ -41,13 +41,13 @@ public final class IntakeConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(80)
-                  .withSupplyCurrentLimit(40)
+                  .withSupplyCurrentLimit(60)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
               new MotorOutputConfigs()
                   .withInverted(InvertedValue.CounterClockwise_Positive)
-                  .withNeutralMode(NeutralModeValue.Coast))
+                  .withNeutralMode(NeutralModeValue.Brake))
           .withFeedback(
               new FeedbackConfigs()
                   .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
@@ -71,7 +71,7 @@ public final class IntakeConstants {
           .withCurrentLimits(
               new CurrentLimitsConfigs()
                   .withStatorCurrentLimit(80)
-                  .withSupplyCurrentLimit(50)
+                  .withSupplyCurrentLimit(40)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(
@@ -92,7 +92,7 @@ public final class IntakeConstants {
 
   static {
     SETPOINTS.put(RAISING, Degrees.of(0.0));
-    SETPOINTS.put(LOWERING, Degrees.of(137.0));
+    SETPOINTS.put(LOWERING, Degrees.of(129.0));
     SETPOINTS.put(AGITATING, Degrees.of(45.0));
   }
 
@@ -111,7 +111,7 @@ public final class IntakeConstants {
   public static final double ROLLER_RPS_SLOW = 4000 / 60.0;
 
   // physical max
-  public static final Angle MAX_ANGLE = Degrees.of(137);
+  public static final Angle MAX_ANGLE = Degrees.of(129);
 
   // sim
   public static final int INTAKE_CAPACITY = 50;

@@ -37,7 +37,7 @@ import frc.robot.util.PhoenixUtil;
  */
 public class ModuleIOTalonFX implements ModuleIO {
   // Current limits
-  private static final double DRIVE_SUPPLY_LIMIT = 70.0;
+  private static final double DRIVE_SUPPLY_LIMIT = 50.0;
   private static final double TURN_SUPPLY_LIMIT = 40.0;
 
   private final SwerveModuleConstants<

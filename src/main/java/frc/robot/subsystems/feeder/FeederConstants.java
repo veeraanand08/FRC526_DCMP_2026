@@ -47,8 +47,8 @@ public final class FeederConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(100)
-                  .withSupplyCurrentLimit(60)
+                  .withStatorCurrentLimit(80)
+                  .withSupplyCurrentLimit(40)
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimitEnable(true))
           .withMotorOutput(

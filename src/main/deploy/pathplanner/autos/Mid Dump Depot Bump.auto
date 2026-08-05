@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Center to Dump"
+          }
+        },
+        {
           "type": "race",
           "data": {
             "commands": [

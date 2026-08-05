@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Center to Dump"
+            "pathName": "Trench Cycle 1"
           }
         },
         {
@@ -15,15 +15,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "wait",
                 "data": {
-                  "name": "Dump"
+                  "waitTime": 4.0
                 }
               },
               {
-                "type": "wait",
+                "type": "named",
                 "data": {
-                  "waitTime": 3.0
+                  "name": "Dump"
                 }
               }
             ]
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Depot"
+            "pathName": "Trench Cycle 2"
           }
         },
         {
@@ -40,15 +40,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "wait",
                 "data": {
-                  "name": "Dump"
+                  "waitTime": 5.0
                 }
               },
               {
-                "type": "wait",
+                "type": "named",
                 "data": {
-                  "waitTime": 10.0
+                  "name": "Dump"
                 }
               }
             ]
