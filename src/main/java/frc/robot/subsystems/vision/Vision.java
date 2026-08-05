@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
-import frc.robot.util.RobotUtil;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -147,8 +146,6 @@ public class Vision extends SubsystemBase {
             observation.pose().toPose2d(),
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
-
-        RobotUtil.isPoseEstimatorReady = true;
       }
 
       // Log camera metadata
@@ -177,7 +174,6 @@ public class Vision extends SubsystemBase {
         "Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
     Logger.recordOutput(
         "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
-    Logger.recordOutput("Vision/Pose Estimator Ready", RobotUtil.isPoseEstimatorReady);
   }
 
   @FunctionalInterface
