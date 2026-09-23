@@ -15,10 +15,9 @@ public class GuitarHeroController extends CommandGenericHID {
   public enum Button {
     GREEN_FRET(1),
     RED_FRET(2),
-    YELLOW_FRET(3),
-    BLUE_FRET(4),
-    ORANGE_FRET(5),
-    JOYSTICK(6);
+    YELLOW_FRET(4),
+    BLUE_FRET(3),
+    ORANGE_FRET(5);
 
     /** Button value. */
     public final int value;
@@ -105,16 +104,6 @@ public class GuitarHeroController extends CommandGenericHID {
    */
   public Trigger orange() {
     return button(Button.ORANGE_FRET.value);
-  }
-
-  /**
-   * Constructs a Trigger instance around the analog stick button's digital signal.
-   *
-   * @return a Trigger instance representing the analog stick button's digital signal attached to
-   *     the {@link CommandScheduler#getDefaultButtonLoop() default scheduler button loop}.
-   */
-  public Trigger joystick() {
-    return button(Button.JOYSTICK.value);
   }
 
   /**

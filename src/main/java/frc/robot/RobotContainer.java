@@ -365,8 +365,7 @@ public class RobotContainer {
       BooleanSupplier guitarHeroDrive = () -> controlScheme == ControlScheme.GUITAR_HERO_FULL;
       guitarHeroController.green().and(guitarHeroControls).whileTrue(intake.intake());
       guitarHeroController.red().and(guitarHeroControls).whileTrue(shoot);
-      guitarHeroController.yellow().and(guitarHeroDrive).whileTrue(autoAlign);
-      guitarHeroController.blue().and(guitarHeroDrive).whileTrue(lockWheels);
+      guitarHeroController.yellow().and(guitarHeroControls).whileTrue(intake.agitate(feeder));
     }
 
     if (fullControl) {
